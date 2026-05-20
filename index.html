@@ -46,6 +46,11 @@ body.dark #sidebar{background:rgba(8,8,14,0.75);border-right:1px solid rgba(255,
 @keyframes bnRipple{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
 #fab-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300}
 #fab-overlay.show{display:block;animation:fadeInQ .2s ease both}
+#update-pill{display:none;position:fixed;bottom:110px;left:50%;transform:translateX(-50%);z-index:2000;background:linear-gradient(135deg,#4361ee,#7c3aed);color:#fff;padding:11px 18px;border-radius:28px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 28px rgba(67,97,238,.55),0 0 0 1px rgba(255,255,255,0.15);align-items:center;gap:12px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;animation:pillPop .35s cubic-bezier(.34,1.56,.64,1) both}
+#update-pill.visible{display:flex}
+#update-pill-btn{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@keyframes pillPop{from{opacity:0;transform:translateX(-50%) scale(.85) translateY(12px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+@media(min-width:769px){#update-pill{bottom:40px}}
 #fab-menu{display:none;position:fixed;bottom:108px;left:50%;transform:translateX(-50%);z-index:310;flex-direction:column;gap:10px;align-items:stretch;min-width:240px}
 #fab-menu.show{display:flex}
 .fab-menu-item{background:rgba(18,18,26,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,0.08);border:1px solid var(--border);font-size:15px;font-weight:600;color:var(--text);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation;pointer-events:auto}
@@ -390,6 +395,10 @@ setTimeout(function(){
 
 <!-- FAB action overlay & menu -->
 <div id="fab-overlay" onclick="closeFabMenu()"></div>
+<div id="update-pill">
+  <span>Nova verzija dostupna</span>
+  <button id="update-pill-btn" ontouchend="event.preventDefault();doDeepRefresh()" onclick="doDeepRefresh()">Osvježi</button>
+</div>
 <div id="fab-menu">
   <div class="fab-menu-item" ontouchend="event.preventDefault();event.stopPropagation();closeFabMenu();setTimeout(()=>openAddSheet(),50)" onclick="event.stopPropagation();closeFabMenu();openAddSheet()">
     <div class="fab-menu-icon" style="background:#eef0fd;color:#4361ee"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
@@ -473,7 +482,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 6;
+const APP_VERSION = 7;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -818,18 +827,18 @@ async function checkForUpdate(){
     const r=await fetch('https://boskokankaras.github.io/moniq/version.json?t='+Date.now());
     const d=await r.json();
     if(!d?.v||d.v<=APP_VERSION)return;
-    {
-      const isLocal=location.protocol==='file:';
-      const msg=isLocal
-        ?'Nova verzija dostupna! Otvori: boskokankaras.github.io/moniq'
-        :'Nova verzija dostupna! Klikni za osvježavanje.';
-      const banner=document.createElement('div');
-      banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:5000;background:#4361ee;color:#fff;padding:12px 16px;text-align:center;font-size:14px;font-weight:600;cursor:pointer';
-      banner.textContent=msg;
-      if(!isLocal)banner.onclick=()=>location.reload(true);
-      document.body.appendChild(banner);
+    const pill=document.getElementById('update-pill');
+    if(!pill)return;
+    const isLocal=location.protocol==='file:';
+    if(isLocal){
+      const btn=document.getElementById('update-pill-btn');
+      if(btn)btn.textContent='boskokankaras.github.io/moniq';
     }
+    pill.classList.add('visible');
   }catch(e){}
+}
+function doDeepRefresh(){
+  window.location.href=location.origin+location.pathname+'?_v='+Date.now();
 }
 async function syncAndRefresh(){
   const icon=document.getElementById('sync-btn-icon');
