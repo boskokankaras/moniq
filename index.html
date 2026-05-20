@@ -390,19 +390,19 @@ setTimeout(function(){
 <!-- FAB action overlay & menu -->
 <div id="fab-overlay" onclick="closeFabMenu()"></div>
 <div id="fab-menu">
-  <div class="fab-menu-item" onclick="event.stopPropagation();closeFabMenu();openAddSheet()">
+  <div class="fab-menu-item" ontouchend="event.preventDefault();event.stopPropagation();closeFabMenu();setTimeout(()=>openAddSheet(),50)" onclick="event.stopPropagation();closeFabMenu();openAddSheet()">
     <div class="fab-menu-icon" style="background:#eef0fd;color:#4361ee"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
     <span>Dodaj trošak</span>
   </div>
-  <div class="fab-menu-item" onclick="event.stopPropagation();closeFabMenu();openAddMethodInline()">
+  <div class="fab-menu-item" ontouchend="event.preventDefault();event.stopPropagation();closeFabMenu();setTimeout(()=>openAddMethodInline(),50)" onclick="event.stopPropagation();closeFabMenu();openAddMethodInline()">
     <div class="fab-menu-icon" style="background:#fef3c7;color:#f59e0b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
     <span>Dodaj način plaćanja</span>
   </div>
-  <div class="fab-menu-item" onclick="event.stopPropagation();closeFabMenu();alert('Uskoro — platne kartice 💳')">
+  <div class="fab-menu-item" ontouchend="event.preventDefault();event.stopPropagation();closeFabMenu();setTimeout(()=>alert('Uskoro — platne kartice 💳'),50)" onclick="event.stopPropagation();closeFabMenu();alert('Uskoro — platne kartice 💳')">
     <div class="fab-menu-icon" style="background:#f3e8ff;color:#8b5cf6"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="22" height="14" rx="3"/><path d="M1 10h22"/><path d="M6 15h4"/></svg></div>
     <span>Dodaj platnu karticu</span>
   </div>
-  <div class="fab-menu-item" onclick="event.stopPropagation();closeFabMenu();openAddIncome()">
+  <div class="fab-menu-item" ontouchend="event.preventDefault();event.stopPropagation();closeFabMenu();setTimeout(()=>openAddIncome(),50)" onclick="event.stopPropagation();closeFabMenu();openAddIncome()">
     <div class="fab-menu-icon" style="background:#d1fae5;color:#10b981"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
     <span>Dodaj primanje</span>
   </div>
@@ -472,7 +472,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 3;
+const APP_VERSION = 4;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
