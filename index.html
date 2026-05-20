@@ -398,8 +398,8 @@ setTimeout(function(){
 </button>
 
 <!-- Mobile floating action buttons -->
-<button class="mob-sync-fab" id="mob-sync-fab" onclick="syncAndRefresh()" title="Osvježi">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+<button class="mob-sync-fab" id="mob-sync-fab" onclick="mobHardRefresh()" title="Osvježi">
+  <svg id="mob-refresh-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
 </button>
 <button class="mob-search-fab" id="mob-search-fab" onclick="openFilterSheet()" title="Pretraži/Filtriraj">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -742,6 +742,7 @@ function showErrorBanner(msg){
 }
 
 async function init(){
+  mobRefreshCheckOnLoad();
   if(APP.dark)document.body.classList.add('dark');
   document.querySelectorAll('[data-view]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.view)));
   window.addEventListener('hashchange',()=>{const v=location.hash.replace('#','')||'dashboard';if(['dashboard','expenses','settings','profile'].includes(v))renderView(v)});
@@ -872,6 +873,35 @@ async function syncAndRefresh(){
   }finally{
     setSpinning(false);
   }
+}
+
+function mobHardRefresh(){
+  const btn=document.getElementById('mob-sync-fab');
+  if(btn){
+    btn.style.animation='spin .7s linear infinite';
+    btn.style.background='linear-gradient(135deg,#4361ee,#7c3aed)';
+  }
+  sessionStorage.setItem('mob_hard_refreshed','1');
+  setTimeout(()=>location.reload(true),350);
+}
+
+function mobRefreshCheckOnLoad(){
+  if(!sessionStorage.getItem('mob_hard_refreshed'))return;
+  sessionStorage.removeItem('mob_hard_refreshed');
+  const btn=document.getElementById('mob-sync-fab');
+  if(!btn)return;
+  const refreshSVG=`<svg id="mob-refresh-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+  const checkSVG=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  btn.innerHTML=checkSVG;
+  btn.style.animation='';
+  btn.style.background='linear-gradient(135deg,#10b981,#059669)';
+  btn.style.boxShadow='0 4px 16px rgba(16,185,129,.5),0 0 24px rgba(16,185,129,.2)';
+  btn.style.transition='background .4s,box-shadow .4s';
+  setTimeout(()=>{
+    btn.style.background='';
+    btn.style.boxShadow='';
+    btn.innerHTML=refreshSVG;
+  },1800);
 }
 
 function handleRT({eventType,new:nr,old:or}){
