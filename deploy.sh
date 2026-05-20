@@ -1,7 +1,7 @@
 #!/bin/bash
 TOKEN="nfp_Gfhst22NazQ4N5s4pCEojuGSM7XtuPtre7e8"
 SITE_ID="59bd04fe-587b-4ca6-b6bc-ccd707a28fd0"
-FILE="/Users/boskokankaras/moniq/index.html"
+FILE="/Users/boskokankaras/moniq/moniq.html"
 
 HASH=$(shasum "$FILE" | awk '{print $1}')
 DEPLOY=$(curl -s -X POST "https://api.netlify.com/api/v1/sites/$SITE_ID/deploys" \
