@@ -262,6 +262,7 @@ body:not(.dark) .sheet-header{background:rgba(255,255,255,0.85)}
 body:not(.dark) .form-control{background:var(--bg)}
 body:not(.dark) .form-control:focus{box-shadow:none}
 textarea.form-control{resize:vertical;min-height:60px}
+input[type="date"].form-control{-webkit-appearance:none;appearance:none;}
 .method-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 @media(max-width:400px){.method-grid{grid-template-columns:repeat(3,1fr)}}
 .method-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:12px;cursor:pointer;border:2px solid var(--border);background:var(--bg);font-size:12px;color:var(--sub);transition:all .15s;font-family:inherit;text-align:center}
@@ -484,7 +485,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 8;
+const APP_VERSION = 9;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
