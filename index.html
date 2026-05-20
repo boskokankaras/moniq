@@ -485,7 +485,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 9;
+const APP_VERSION = 10;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -2480,6 +2480,15 @@ async function migrateUserExpenses(){
 }
 
 document.addEventListener('DOMContentLoaded',init);
+
+new MutationObserver(muts=>{
+  muts.forEach(m=>m.addedNodes.forEach(n=>{
+    if(n.nodeType!==1)return;
+    const patch=el=>{if(el.tagName==='INPUT'&&el.type==='number'&&!el.inputMode)el.inputMode=el.step==='1'?'numeric':'decimal';};
+    patch(n);
+    n.querySelectorAll('input[type="number"]').forEach(patch);
+  }));
+}).observe(document.body,{childList:true,subtree:true});
 </script>
 <script>/**
  * Minified by jsDelivr using Terser v5.39.0.
