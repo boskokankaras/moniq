@@ -485,7 +485,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 10;
+const APP_VERSION = 11;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -1417,14 +1417,14 @@ function renderSettings(){
     <div class="card settings-section">
       <div class="section-title">Početno stanje — Kartica</div>
       <div style="font-size:13px;color:var(--sub);margin-bottom:14px">Upiši stanje kartice na određeni datum. Od tog datuma app oduzima troškove i dodaje prihode.</div>
-      <div class="form-group"><label class="form-label">Stanje na dan (€)</label><input type="number" class="form-control" id="init-kartica-amount" value="${parseFloat(localStorage.getItem('savings_offset_kartica')||'77268.93').toFixed(2)}" step="0.01" placeholder="npr. 5000.00"></div>
+      <div class="form-group"><label class="form-label">Stanje na dan (€)</label><input type="number" inputmode="decimal" class="form-control" id="init-kartica-amount" value="${parseFloat(localStorage.getItem('savings_offset_kartica')||'77268.93').toFixed(2)}" step="0.01" placeholder="npr. 5000.00"></div>
       <div class="form-group"><label class="form-label">Datum od kojeg se prati</label><input type="date" class="form-control" id="init-kartica-date" value="${localStorage.getItem('savings_start_kartica')||'2026-05-18'}"></div>
       <button class="btn btn-primary btn-full" onclick="saveInitialBalance('kartica')">Sačuvaj početno stanje</button>
     </div>
     <div class="card settings-section">
       <div class="section-title">Početno stanje — Keš</div>
       <div style="font-size:13px;color:var(--sub);margin-bottom:14px">Upiši koliko keša imaš na određeni datum.</div>
-      <div class="form-group"><label class="form-label">Stanje keša (€)</label><input type="number" class="form-control" id="init-kes-amount" value="${parseFloat(localStorage.getItem('savings_offset_kes')||'0').toFixed(2)}" step="0.01" placeholder="npr. 500.00"></div>
+      <div class="form-group"><label class="form-label">Stanje keša (€)</label><input type="number" inputmode="decimal" class="form-control" id="init-kes-amount" value="${parseFloat(localStorage.getItem('savings_offset_kes')||'0').toFixed(2)}" step="0.01" placeholder="npr. 500.00"></div>
       <div class="form-group"><label class="form-label">Datum od kojeg se prati</label><input type="date" class="form-control" id="init-kes-date" value="${localStorage.getItem('savings_start_kes')||new Date().toISOString().split('T')[0]}"></div>
       <button class="btn btn-primary btn-full" onclick="saveInitialBalance('kes')">Sačuvaj početno stanje</button>
     </div>
@@ -1535,15 +1535,15 @@ function openAddRateSheet(){
     <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica, banka...</span></label><input type="text" class="form-control" id="rate-povjerioc" placeholder="npr. Telemach, ProCredit, m:tel..."></div>
     <div class="form-group"><label class="form-label">Opis (šta si kupio)</label><input type="text" class="form-control" id="rate-desc" placeholder="npr. Laptop, TV, Bijela tehnika..."></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="number" class="form-control" id="rate-iznos" placeholder="50.00" step="0.01" min="0" oninput="autoCalcRateUkupno()"></div>
-      <div class="form-group"><label class="form-label">Broj rata</label><input type="number" class="form-control" id="rate-broj" placeholder="12" min="1" step="1" oninput="autoCalcRateUkupno()"></div>
+      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="number" inputmode="decimal" class="form-control" id="rate-iznos" placeholder="50.00" step="0.01" min="0" oninput="autoCalcRateUkupno()"></div>
+      <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="rate-broj" placeholder="12" min="1" step="1" oninput="autoCalcRateUkupno()"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Ukupna cijena (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="number" class="form-control" id="rate-ukupno" placeholder="600.00" step="0.01" min="0"></div>
+      <div class="form-group"><label class="form-label">Ukupna cijena (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="number" inputmode="decimal" class="form-control" id="rate-ukupno" placeholder="600.00" step="0.01" min="0"></div>
       <div class="form-group"><label class="form-label">Metoda plaćanja</label><select class="form-control" id="rate-method">${methodOpts}</select></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" class="form-control" id="rate-vec-placeno" placeholder="0" min="0" step="1" value="0"></div>
+      <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="rate-vec-placeno" placeholder="0" min="0" step="1" value="0"></div>
       <div class="form-group"><label class="form-label">Datum prve rate</label><input type="date" class="form-control" id="rate-datum" value="${today}"></div>
     </div>
     <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="submitAddRate()">Dodaj ratu</button>
@@ -1720,15 +1720,15 @@ function buildForm(e,isEdit){
       <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.18);border-radius:16px;padding:14px 14px 4px;margin-bottom:16px">
         <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica ili banka</span></label><input type="text" class="form-control" id="f-rate-povjerioc" placeholder="npr. Multicom, ProCredit..." value="${esc(initPovjerioc)}"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="form-group"><label class="form-label">Broj rata</label><input type="number" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" oninput="autoCalcFormRateUkupno()"></div>
-          <div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="number" class="form-control" id="f-rate-ukupno" placeholder="898.08" step="0.01" min="0"></div>
+          <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" oninput="autoCalcFormRateUkupno()"></div>
+          <div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="number" inputmode="decimal" class="form-control" id="f-rate-ukupno" placeholder="898.08" step="0.01" min="0"></div>
         </div>
-        <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" class="form-control" id="f-rate-vec" placeholder="0" min="0" step="1" value="0"></div>
+        <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-vec" placeholder="0" min="0" step="1" value="0"></div>
       </div>
     </div>
     <div class="form-group"><label class="form-label" id="f-desc-label">${isRate?'Opis kupovine':'Opis'}</label><div class="autocomplete-wrap"><input type="text" class="form-control" id="f-desc" placeholder="${isRate?'npr. Xiaomi usisivač, TV...':'Upiši opis...'}" value="${esc(e?e.desc:'')}" oninput="onDesc(this)"><div class="ac-list" id="ac-list"></div></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group" style="min-width:0"><label class="form-label" id="f-amount-label">${isRate?'Iznos rate (€)':'Iznos (€)'}</label><input type="number" class="form-control" id="f-amount" step="0.01" min="0" value="${e?e.amount:''}" placeholder="0.00" oninput="autoCalcFormRateUkupno()"></div>
+      <div class="form-group" style="min-width:0"><label class="form-label" id="f-amount-label">${isRate?'Iznos rate (€)':'Iznos (€)'}</label><input type="number" inputmode="decimal" class="form-control" id="f-amount" step="0.01" min="0" value="${e?e.amount:''}" placeholder="0.00" oninput="autoCalcFormRateUkupno()"></div>
       <div class="form-group" style="min-width:0"><label class="form-label" id="f-date-label">${isRate?'Datum prve rate':'Datum'}</label><input type="date" class="form-control" id="f-date" value="${e?e.date:today}" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>
     </div>
     <div class="form-group"><label class="form-label">Metoda plaćanja</label><div class="method-grid">${mGrid}</div><input type="hidden" id="f-method" value="${dm}"></div>
@@ -2194,7 +2194,7 @@ function renderProfile(){
           <div class="section-title">Mjesečni budžet</div>
           <div style="font-size:13px;color:var(--sub);margin-bottom:12px">Prati potrošnju u tekućem mjesecu</div>
           <div style="display:flex;gap:10px">
-            <input type="number" class="form-control" id="budget-input" value="${APP.budget||''}" placeholder="npr. 3000" style="flex:1">
+            <input type="number" inputmode="decimal" class="form-control" id="budget-input" value="${APP.budget||''}" placeholder="npr. 3000" style="flex:1">
             <button class="btn btn-primary" onclick="saveBudget()">Sačuvaj</button>
           </div>
         </div>
@@ -2359,7 +2359,7 @@ function buildIncomeForm(entry){
   const today=new Date().toISOString().split('T')[0];
   const v=entry||{};
   return`
-    <div class="form-group"><label class="form-label">Iznos (€)</label><input type="number" class="form-control" id="inc-amount" value="${v.amount||''}" placeholder="0.00" min="0" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Iznos (€)</label><input type="number" inputmode="decimal" class="form-control" id="inc-amount" value="${v.amount||''}" placeholder="0.00" min="0" step="0.01"></div>
     <div class="form-group"><label class="form-label">Vrsta</label><select class="form-control" id="inc-type"><option value="Plata"${(v.type||'Plata')==='Plata'?' selected':''}>💼 Plata</option><option value="Kirija"${v.type==='Kirija'?' selected':''}>🏠 Kirija</option></select></div>
     <div class="form-group"><label class="form-label">Način primanja</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px"><button type="button" id="inc-method-cash" onclick="selectIncMethod('Keš')" class="inc-method-btn${(v.method||'Keš')==='Keš'?' inc-method-on':''}">💵 Keš</button><button type="button" id="inc-method-card" onclick="selectIncMethod('Kartica')" class="inc-method-btn${v.method==='Kartica'?' inc-method-on':''}">💳 Kartica</button></div></div>
     <div class="form-group"><label class="form-label">Datum primanja</label><input type="date" class="form-control" id="inc-date" value="${v.date||today}" autocomplete="off" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>`;
@@ -2481,14 +2481,6 @@ async function migrateUserExpenses(){
 
 document.addEventListener('DOMContentLoaded',init);
 
-new MutationObserver(muts=>{
-  muts.forEach(m=>m.addedNodes.forEach(n=>{
-    if(n.nodeType!==1)return;
-    const patch=el=>{if(el.tagName==='INPUT'&&el.type==='number'&&!el.inputMode)el.inputMode=el.step==='1'?'numeric':'decimal';};
-    patch(n);
-    n.querySelectorAll('input[type="number"]').forEach(patch);
-  }));
-}).observe(document.body,{childList:true,subtree:true});
 </script>
 <script>/**
  * Minified by jsDelivr using Terser v5.39.0.
