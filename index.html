@@ -2050,6 +2050,7 @@ async function authSubmit(){
       if(event==='SIGNED_IN'&&sess)APP.user=sess.user;
     });
     setSyncStatus('syncing','Povežujem...');
+    await loadUserSettings();
     await connectSupabase();
     ol.style.display='none';
     updateUserUI();
