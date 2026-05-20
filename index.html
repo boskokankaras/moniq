@@ -82,9 +82,11 @@ body:not(.dark) #success-toast{background:rgba(255,255,255,0.75)}
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 @keyframes fadeInQ{from{opacity:0}to{opacity:1}}
 .sidebar-logo{display:block;width:calc(100% + 32px);margin:-24px -16px 28px -16px;padding:16px 16px 14px;background:transparent;border-bottom:none}
-.sidebar-logo img{height:34px;width:auto;display:block}
-.logo-light{display:block}.logo-dark{display:none}
-body.dark .logo-light{display:none}body.dark .logo-dark{display:block}
+.sidebar-logo img{height:34px;width:auto}
+.sidebar-logo .logo-dark{display:none}
+.sidebar-logo .logo-light{display:block}
+body.dark .sidebar-logo .logo-light{display:none}
+body.dark .sidebar-logo .logo-dark{display:block}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--sub);font-size:14px;font-weight:500;transition:all .15s;margin-bottom:4px}
 .nav-item:hover{background:var(--bg);color:var(--text)}
 .nav-item.active{background:rgba(67,97,238,0.18);color:var(--primary);box-shadow:inset 0 0 0 1px rgba(67,97,238,0.35),0 0 20px rgba(67,97,238,0.2),0 2px 8px rgba(67,97,238,0.15);text-shadow:0 0 20px rgba(67,97,238,0.5)}
@@ -120,8 +122,12 @@ body:not(.dark) .card{background:rgba(255,255,255,0.55);box-shadow:0 4px 24px rg
 .inc-pill{padding:6px 14px;border-radius:99px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
 .inc-pill.on{border-color:var(--primary);background:rgba(67,97,238,0.15);color:var(--primary);font-weight:600;box-shadow:0 0 10px rgba(67,97,238,.2)}
 body:not(.dark) .inc-pill.on{background:#eef0fd;box-shadow:none}
-.dash-logo{display:none}
-@media(max-width:768px){.dash-logo{display:block;width:auto;height:30px;margin-bottom:28px}}
+.dash-logo{display:none!important}
+@media(max-width:768px){
+  .dash-logo.logo-light{display:block!important;height:30px;width:auto;margin-bottom:28px}
+  body.dark .dash-logo.logo-light{display:none!important}
+  body.dark .dash-logo.logo-dark{display:block!important;height:30px;width:auto;margin-bottom:28px}
+}
 .hero-dots{display:flex;justify-content:center;gap:6px;margin-bottom:20px}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;cursor:pointer}
 .hero-dot.on{background:var(--primary);width:18px;border-radius:3px}
