@@ -81,7 +81,10 @@ body:not(.dark) #success-toast{background:rgba(255,255,255,0.75)}
 @keyframes toastAnim{0%{transform:translate(-50%,-50%) scale(0);opacity:0}12%{transform:translate(-50%,-50%) scale(1.08);opacity:1}20%{transform:translate(-50%,-50%) scale(.98);opacity:1}70%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(.9);opacity:0}}
 @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 @keyframes fadeInQ{from{opacity:0}to{opacity:1}}
-.sidebar-logo{display:block;width:calc(100% + 32px);margin:-24px -16px 28px -16px;padding:16px 6px 14px;color:var(--text);background:transparent;border-bottom:none}
+.sidebar-logo{display:block;width:calc(100% + 32px);margin:-24px -16px 28px -16px;padding:16px 16px 14px;background:transparent;border-bottom:none}
+.sidebar-logo img{height:34px;width:auto;display:block}
+.logo-light{display:block}.logo-dark{display:none}
+body.dark .logo-light{display:none}body.dark .logo-dark{display:block}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--sub);font-size:14px;font-weight:500;transition:all .15s;margin-bottom:4px}
 .nav-item:hover{background:var(--bg);color:var(--text)}
 .nav-item.active{background:rgba(67,97,238,0.18);color:var(--primary);box-shadow:inset 0 0 0 1px rgba(67,97,238,0.35),0 0 20px rgba(67,97,238,0.2),0 2px 8px rgba(67,97,238,0.15);text-shadow:0 0 20px rgba(67,97,238,0.5)}
@@ -118,7 +121,7 @@ body:not(.dark) .card{background:rgba(255,255,255,0.55);box-shadow:0 4px 24px rg
 .inc-pill.on{border-color:var(--primary);background:rgba(67,97,238,0.15);color:var(--primary);font-weight:600;box-shadow:0 0 10px rgba(67,97,238,.2)}
 body:not(.dark) .inc-pill.on{background:#eef0fd;box-shadow:none}
 .dash-logo{display:none}
-@media(max-width:768px){.dash-logo{display:block;width:140px;margin-bottom:28px;color:var(--text)}}
+@media(max-width:768px){.dash-logo{display:block;width:auto;height:30px;margin-bottom:28px}}
 .hero-dots{display:flex;justify-content:center;gap:6px;margin-bottom:20px}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;cursor:pointer}
 .hero-dot.on{background:var(--primary);width:18px;border-radius:3px}
@@ -345,10 +348,10 @@ setTimeout(function(){
 
 <div id="app">
   <nav id="sidebar">
-    <svg class="sidebar-logo" xmlns="http://www.w3.org/2000/svg" viewBox="4 8 322 84">
-      <circle cx="40" cy="50" r="18" fill="#E62727"/>
-      <text x="70" y="65" font-family="'Satoshi','Inter','Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="900" font-size="46" fill="currentColor" letter-spacing="-1.5">moniq</text>
-    </svg>
+    <div class="sidebar-logo">
+      <img src="logo-crni.png" class="logo-light" alt="moniq">
+      <img src="logo-bijeli.png" class="logo-dark" alt="moniq">
+    </div>
     <div class="nav-item active" data-view="dashboard"><svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
     <div class="nav-item" data-view="expenses"><svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Liste</div>
     <div class="nav-item" data-view="profile"><svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
@@ -1050,7 +1053,7 @@ const _rItem=`<div class="expense-item${isExp?' ei-open':''}" onclick="toggleRec
   const _wallet=_meta.gender==='zenski'?'tvoj':'tvoj';
   document.getElementById('view-dashboard').innerHTML=`
     <div style="margin-bottom:24px">
-      <svg class="dash-logo" xmlns="http://www.w3.org/2000/svg" viewBox="4 8 322 84"><circle cx="42" cy="50" r="34" fill="#C0392B"/><text x="90" y="71" font-family="'Satoshi','Inter','Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="900" font-size="66" fill="currentColor" letter-spacing="-2">moniq</text></svg>
+      <img src="logo-crni.png" class="dash-logo logo-light" alt="moniq"><img src="logo-bijeli.png" class="dash-logo logo-dark" alt="moniq">
       <h2 style="font-size:30px;font-weight:800;color:var(--text);letter-spacing:-.3px">${_greeting}</h2>
       <p style="color:var(--sub);font-size:15px;margin-top:5px">Ovo je tvoj Digitalni novčanik.</p>
     </div>
