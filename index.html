@@ -469,6 +469,7 @@ setTimeout(function(){
 </div>
 
 <script>
+const APP_BUILD_TIME = '2026-05-20T12:00:00Z';
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -808,6 +809,25 @@ async function loadAll(){
   saveCache();
 }
 
+async function checkForUpdate(){
+  try{
+    const r=await fetch('https://api.github.com/repos/boskokankaras/moniq/commits/main',{headers:{Accept:'application/vnd.github.v3+json'}});
+    const d=await r.json();
+    const commitDate=d?.commit?.committer?.date;
+    if(!commitDate)return;
+    if(new Date(commitDate)>new Date(APP_BUILD_TIME)){
+      const isLocal=location.protocol==='file:';
+      const msg=isLocal
+        ?'Nova verzija dostupna! Otvori: boskokankaras.github.io/moniq'
+        :'Nova verzija dostupna! Klikni za osvježavanje.';
+      const banner=document.createElement('div');
+      banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:5000;background:#4361ee;color:#fff;padding:12px 16px;text-align:center;font-size:14px;font-weight:600;cursor:pointer';
+      banner.textContent=msg;
+      if(!isLocal)banner.onclick=()=>location.reload(true);
+      document.body.appendChild(banner);
+    }
+  }catch(e){}
+}
 async function syncAndRefresh(){
   const icon=document.getElementById('sync-btn-icon');
   const iconMob=document.getElementById('sync-btn-mob-icon');
@@ -820,7 +840,7 @@ async function syncAndRefresh(){
   setSpinning(true);
   setSyncStatus('syncing','Osvježavam...');
   try{
-    await loadAll();
+    await Promise.all([loadAll(),loadIncome(),checkForUpdate()]);
     setSyncStatus('online','Sinkronizovano');
     renderView(APP.view);
   }catch(e){
