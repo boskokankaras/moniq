@@ -469,7 +469,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_BUILD_TIME = '2026-05-20T12:02:06Z';
+const APP_VERSION = 1;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -811,11 +811,10 @@ async function loadAll(){
 
 async function checkForUpdate(){
   try{
-    const r=await fetch('https://api.github.com/repos/boskokankaras/moniq/commits/main',{headers:{Accept:'application/vnd.github.v3+json'}});
+    const r=await fetch('https://boskokankaras.github.io/moniq/version.json?t='+Date.now());
     const d=await r.json();
-    const commitDate=d?.commit?.committer?.date;
-    if(!commitDate)return;
-    if(new Date(commitDate)>new Date(APP_BUILD_TIME)){
+    if(!d?.v||d.v<=APP_VERSION)return;
+    {
       const isLocal=location.protocol==='file:';
       const msg=isLocal
         ?'Nova verzija dostupna! Otvori: boskokankaras.github.io/moniq'
