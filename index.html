@@ -44,14 +44,14 @@ body.dark #sidebar{background:rgba(8,8,14,0.75);border-right:1px solid rgba(255,
 .bn-fab.menu-open::before{animation:bnRipple 1.2s ease-out infinite}
 .bn-fab.menu-open::after{animation:bnRipple 1.2s ease-out .4s infinite}
 @keyframes bnRipple{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
-#fab-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300}
+#fab-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:960}
 #fab-overlay.show{display:block;animation:fadeInQ .2s ease both}
 #update-pill{display:none;position:fixed;bottom:110px;left:50%;transform:translateX(-50%);z-index:2000;background:linear-gradient(135deg,#4361ee,#7c3aed);color:#fff;padding:11px 18px;border-radius:28px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 28px rgba(67,97,238,.55),0 0 0 1px rgba(255,255,255,0.15);align-items:center;gap:12px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;animation:pillPop .35s cubic-bezier(.34,1.56,.64,1) both}
 #update-pill.visible{display:flex}
 #update-pill-btn{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @keyframes pillPop{from{opacity:0;transform:translateX(-50%) scale(.85) translateY(12px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
 @media(min-width:769px){#update-pill{bottom:40px}}
-#fab-menu{display:none;position:fixed;bottom:108px;left:50%;transform:translateX(-50%);z-index:310;flex-direction:column;gap:10px;align-items:stretch;min-width:240px}
+#fab-menu{display:none;position:fixed;bottom:108px;left:50%;transform:translateX(-50%);z-index:970;flex-direction:column;gap:10px;align-items:stretch;min-width:240px}
 #fab-menu.show{display:flex}
 .fab-menu-item{background:#1c1c26;border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,0.08);border:1px solid var(--border);font-size:15px;font-weight:600;color:var(--text);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation;pointer-events:auto}
 .fab-menu-item *{user-select:none;-webkit-user-select:none;pointer-events:none}
