@@ -44,7 +44,7 @@ body.dark #sidebar{background:rgba(8,8,14,0.75);border-right:1px solid rgba(255,
 .bn-fab.menu-open::before{animation:bnRipple 1.2s ease-out infinite}
 .bn-fab.menu-open::after{animation:bnRipple 1.2s ease-out .4s infinite}
 @keyframes bnRipple{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
-#fab-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#fab-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300}
 #fab-overlay.show{display:block;animation:fadeInQ .2s ease both}
 #fab-menu{display:none;position:fixed;bottom:108px;left:50%;transform:translateX(-50%);z-index:310;flex-direction:column;gap:10px;align-items:stretch;min-width:240px}
 #fab-menu.show{display:flex}
@@ -473,7 +473,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 5;
+const APP_VERSION = 6;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
