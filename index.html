@@ -1503,11 +1503,17 @@ function saveInitialBalance(type){
     </div>`;
   openSheet('sheet-confirm');
 }
-function confirmSaveInitialBalance(type,amt,date){
+async function confirmSaveInitialBalance(type,amt,date){
   if(amt!==undefined&&amt!=='')localStorage.setItem(`savings_offset_${type}`,parseFloat(amt));
   if(date)localStorage.setItem(`savings_start_${type}`,date);
   closeAllSheets();
-  renderDashboard();
+  // Renderuj trenutni view (najčešće Postavke) da se input vrijednosti odmah ažuriraju.
+  // Dashboard se rebilduje kad korisnik switchne tab.
+  renderView(APP.view);
+  // Force-flush pending debounced push pa odmah upiši u Supabase —
+  // bez ovoga refresh prije 600ms vraća staru vrijednost iz clouda.
+  if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
+  try{await pushUserSettings();}catch(e){console.warn('save initial balance push failed',e);}
 }
 
 // ── Rate (Installments) Widget ────────────────────────────────────────────
