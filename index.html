@@ -1273,34 +1273,44 @@ function initMonthSwipe(containerId, mode){
   const el=document.getElementById(containerId);
   if(!el||el._mswipe)return;
   el._mswipe=true;
-  let sx=0,sy=0,dragging=false,moved=false;
+  let sx=0,sy=0,cx=0,cy=0,dragging=false,moved=false,axis=null;
   const getMonths=()=>[...new Set((mode==='income'?getIncomeEntries():APP.expenses).map(e=>e.date.substring(0,7)))].sort();
   const getCur=()=>mode==='income'?_incFilters.month:APP.filters.month;
   const setCur=(m)=>{if(mode==='income'){_incFilters.month=m;}else{APP.filters.month=m;}renderExpenses();}
-  const onDown=(x,y)=>{sx=x;sy=y;dragging=true;moved=false;};
-  const onMove=(x,y)=>{if(!dragging)return;if(Math.abs(x-sx)>8)moved=true;};
-  const onUp=(x)=>{
-    if(!dragging||!moved){dragging=false;return;}
-    dragging=false;
-    const diff=sx-x;
-    if(Math.abs(diff)<40)return;
+  const onDown=(x,y)=>{sx=x;sy=y;cx=x;cy=y;dragging=true;moved=false;axis=null;};
+  const onMove=(x,y)=>{
+    if(!dragging)return;
+    cx=x;cy=y;
+    const adx=Math.abs(x-sx),ady=Math.abs(y-sy);
+    if(!axis&&(adx>8||ady>8))axis=adx>ady?'x':'y';
+    if(axis==='x')moved=true;
+  };
+  const onUp=()=>{
+    if(!dragging){return;}
+    const wasMoved=moved,wasAxis=axis;
+    dragging=false;moved=false;axis=null;
+    if(!wasMoved||wasAxis!=='x')return;
+    const dx=sx-cx, dy=sy-cy;
+    if(Math.abs(dx)<40)return;
+    if(Math.abs(dy)>Math.abs(dx))return;
     const months=getMonths();
     const cur=getCur();
     if(!months.length)return;
-    if(!cur){setCur(diff>0?months[months.length-1]:months[0]);return;}
+    if(!cur){setCur(dx>0?months[months.length-1]:months[0]);return;}
     const idx=months.indexOf(cur);
-    if(diff>0&&idx>0)setCur(months[idx-1]);
-    else if(diff<0&&idx<months.length-1)setCur(months[idx+1]);
-    else if(diff<0&&idx===-1)setCur(months[months.length-1]);
-    else if(diff>0&&idx===0){setCur('');}
+    if(dx>0&&idx>0)setCur(months[idx-1]);
+    else if(dx<0&&idx<months.length-1)setCur(months[idx+1]);
+    else if(dx<0&&idx===-1)setCur(months[months.length-1]);
+    else if(dx>0&&idx===0){setCur('');}
   };
   el.addEventListener('mousedown',e=>{onDown(e.clientX,e.clientY);},{passive:true});
   el.addEventListener('mousemove',e=>{onMove(e.clientX,e.clientY);},{passive:true});
-  el.addEventListener('mouseup',e=>{onUp(e.clientX);},{passive:true});
-  el.addEventListener('mouseleave',e=>{if(dragging)onUp(e.clientX);},{passive:true});
+  el.addEventListener('mouseup',e=>{onMove(e.clientX,e.clientY);onUp();},{passive:true});
+  el.addEventListener('mouseleave',e=>{if(dragging){onMove(e.clientX,e.clientY);onUp();}},{passive:true});
   el.addEventListener('touchstart',e=>{onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
   el.addEventListener('touchmove',e=>{onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-  el.addEventListener('touchend',e=>{onUp(e.changedTouches[0].clientX);},{passive:true});
+  el.addEventListener('touchend',e=>{const t=e.changedTouches[0];onMove(t.clientX,t.clientY);onUp();},{passive:true});
+  el.addEventListener('touchcancel',()=>{onUp();},{passive:true});
 }
 function toggleF(k,v){const a=APP.filters[k];const i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);renderExpenses()}
 
@@ -2099,11 +2109,10 @@ setTimeout(()=>{
     if((window.scrollY||window.pageYOffset||0)>0){bailed=true;reset(true);return;}
     if(dy<=0){if(ptr.style.opacity!=='0')reset(false);return;}
     if(e.cancelable)e.preventDefault();
-    const cap=Math.min(dy,MAX*1.8);
-    const eased=cap<THRESH?cap*0.6:THRESH*0.6+(cap-THRESH)*0.28;
+    const cap=Math.min(dy,MAX);
     ptr.style.transition='none';
-    ptr.style.opacity=String(Math.min(1,dy/THRESH));
-    ptr.style.transform=`translate(-50%,${Math.max(-60,eased-60)}px)`;
+    ptr.style.opacity=String(Math.min(1,dy/30));
+    ptr.style.transform=`translate(-50%,${cap-60}px)`;
     if(ICON)ICON.style.transform=`rotate(${Math.min(180,dy*180/THRESH)}deg)`;
   },{passive:false});
   const finish=()=>{
