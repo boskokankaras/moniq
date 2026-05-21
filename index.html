@@ -233,7 +233,11 @@ body:not(.dark) .exp-logo{mix-blend-mode:multiply}
 body:not(.dark) .amount-pill{background:rgba(255,255,255,0.7)!important;color:var(--text)!important;border-color:rgba(255,255,255,0.9);box-shadow:0 1px 4px rgba(67,97,238,0.08)}
 .dup-btn{background:none;border:none;cursor:pointer;color:var(--sub);font-size:16px;padding:3px;border-radius:8px;transition:color .15s;flex-shrink:0;line-height:1}
 .dup-btn:hover{color:var(--primary)}
-.swipe-delete-zone{position:absolute;right:0;top:0;bottom:0;width:0;background:#ef4444;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#fff;font-size:20px;border-radius:0 14px 14px 0}
+#ptr{position:fixed;top:0;left:50%;transform:translate(-50%,-60px);width:44px;height:44px;border-radius:50%;background:rgba(18,18,26,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:200;color:var(--text);opacity:0;pointer-events:none;will-change:transform,opacity}
+body:not(.dark) #ptr{background:rgba(255,255,255,0.92);color:#1f2937}
+#ptr svg{transition:transform .15s ease}
+#ptr.refreshing{transition:transform .3s ease,opacity .3s ease;transform:translate(-50%,16px);opacity:1}
+#ptr.refreshing svg{animation:spin .7s linear infinite}
 .fab{position:fixed;bottom:90px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#4361ee,#7c3aed);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(67,97,238,.6),0 0 40px rgba(67,97,238,.25);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .15s,box-shadow .2s;line-height:1}
 .fab:hover{transform:scale(1.05)}
 @media(min-width:769px){.fab{bottom:32px}.fab.menu-open{transform:rotate(45deg) scale(.93)!important}}
@@ -335,7 +339,7 @@ body:not(.dark) #ctx-menu{background:rgba(255,255,255,0.85);box-shadow:0 8px 40p
 .ctx-btn:last-child{border-bottom:none}
 .ctx-btn:active{background:var(--bg)}
 .ctx-danger{color:#ef4444!important}
-@media print{#sidebar,#bottom-nav,.fab,#overlay,.bottom-sheet,.filters-bar,.pills-row,.dup-btn,.swipe-delete-zone{display:none!important}#main{margin:0!important;padding:16px!important}.card{box-shadow:none!important;border:1px solid #ddd!important}body{background:#fff!important}}
+@media print{#sidebar,#bottom-nav,.fab,#overlay,.bottom-sheet,.filters-bar,.pills-row,.dup-btn,#ptr{display:none!important}#main{margin:0!important;padding:16px!important}.card{box-shadow:none!important;border:1px solid #ddd!important}body{background:#fff!important}}
 </style>
 </head>
 <body>
@@ -438,6 +442,7 @@ setTimeout(function(){
 </div>
 
 <div id="overlay" onclick="closeAllSheets()"></div>
+<div id="ptr" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/></svg></div>
 
 <div class="bottom-sheet" id="sheet-add">
   <div class="sheet-handle"></div>
@@ -1229,7 +1234,7 @@ function renderExpenses(){
         const isExpanded=expandedExpItems.has(e.id);
         const hasNote=!!(cleanNote||freqBadge);
         const expandDetail=isExpanded?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${e.method}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
-        const _eItem=`<div class="expense-item${isExpanded?' ei-open':''}" id="exp-${e.id}" onclick="toggleExpItem(${e.id})">${getExpEmoji(e,cat)}<div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)}${cleanNote&&!isExpanded?' · '+esc(cleanNote):''}</div></div><div class="expense-right"><button class="dup-btn" onclick="event.stopPropagation();dupExp(${e.id})" title="Kopiraj"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="dup-btn" onclick="event.stopPropagation();openEditSheet(${e.id})" title="Uredi" style="color:var(--primary)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div><div class="swipe-delete-zone" id="sdz-${e.id}">🗑️</div></div>`;
+        const _eItem=`<div class="expense-item${isExpanded?' ei-open':''}" id="exp-${e.id}" onclick="toggleExpItem(${e.id})">${getExpEmoji(e,cat)}<div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)}${cleanNote&&!isExpanded?' · '+esc(cleanNote):''}</div></div><div class="expense-right"><button class="dup-btn" onclick="event.stopPropagation();dupExp(${e.id})" title="Kopiraj"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="dup-btn" onclick="event.stopPropagation();openEditSheet(${e.id})" title="Uredi" style="color:var(--primary)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div></div>`;
         listHTML+=isExpanded?`<div class="exp-wrap">${_eItem}${expandDetail}</div>`:_eItem;
       });
     }
@@ -1254,7 +1259,6 @@ function renderExpenses(){
       <div id="exp-list">${listHTML}</div>
     </div>
   `;
-  filtered.forEach(e=>initSwipe(e.id));
   updateFilterFab();
   initMonthSwipe('exp-list','expenses');
   if(_focusId==='exp-search-input'||_focusId==='inc-search-input'){
@@ -1957,27 +1961,6 @@ function initSheetSwipe(el){
   el.addEventListener('touchend',onEnd,{passive:true});
 }
 
-function initSwipe(id){
-  const el=document.getElementById('exp-'+id);
-  const sdz=document.getElementById('sdz-'+id);
-  if(!el||!sdz)return;
-  let sx,sy,moving=false;
-  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;moving=false},{passive:true});
-  el.addEventListener('touchmove',e=>{
-    if(sx==null)return;
-    const dx=sx-e.touches[0].clientX,dy=Math.abs(sy-e.touches[0].clientY);
-    if(!moving&&dy>Math.abs(dx))return;
-    moving=true;
-    if(dx>0){const w=Math.min(dx,260);el.style.transform=`translateX(-${w}px)`;sdz.style.width=w+'px'}
-  },{passive:true});
-  el.addEventListener('touchend',e=>{
-    if(!moving){sx=sy=null;return}
-    const dx=sx-e.changedTouches[0].clientX;
-    if(dx>200){openConfirmDelete(id)}else{el.style.transform='';sdz.style.width='0'}
-    moving=false;sx=sy=null;
-  });
-}
-
 function initIncLongPress(id){
   const el=document.getElementById('inc-'+id);
   if(!el)return;
@@ -2083,6 +2066,70 @@ setTimeout(()=>{
     ol.innerHTML=`<div style="max-width:480px;padding:32px;text-align:center;color:var(--text)"><div style="font-size:40px;margin-bottom:16px">⏱️</div><div style="font-size:18px;font-weight:600;margin-bottom:12px">Sporo učitavanje</div><div style="background:#fee2e2;color:#991b1b;padding:12px 16px;border-radius:12px;font-size:13px;margin-bottom:20px">Nije moguće spojiti se na bazu podataka. Provjeri internet konekciju.</div><button onclick="location.reload()" style="padding:12px 24px;background:#4361ee;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">Pokušaj ponovo</button></div>`;
   }
 },12000);
+
+(function initPullToRefresh(){
+  if(!('ontouchstart' in window))return;
+  const ptr=document.getElementById('ptr');
+  if(!ptr)return;
+  const ICON=ptr.querySelector('svg');
+  const THRESH=70,MAX=130;
+  let startY=0,dy=0,tracking=false,refreshing=false,bailed=false;
+  const interferes=(el)=>!!(el&&el.closest&&el.closest('.bottom-sheet,.hero-scroll,.ac-list,input,textarea,select,#ctx-menu,#fab-menu,#sidebar,#bottom-nav'));
+  const reset=(animate)=>{
+    if(animate){ptr.style.transition='transform .25s ease,opacity .25s ease';}
+    else{ptr.style.transition='none';}
+    ptr.style.opacity='0';
+    ptr.style.transform='translate(-50%,-60px)';
+    if(ICON)ICON.style.transform='';
+  };
+  document.addEventListener('touchstart',(e)=>{
+    if(refreshing){tracking=false;return;}
+    bailed=false;
+    if((window.scrollY||window.pageYOffset||0)>0){tracking=false;return;}
+    if(document.body.style.overflow==='hidden'){tracking=false;return;}
+    if(interferes(e.target)){tracking=false;return;}
+    startY=e.touches[0].clientY;
+    dy=0;
+    tracking=true;
+  },{passive:true});
+  document.addEventListener('touchmove',(e)=>{
+    if(!tracking||refreshing||bailed)return;
+    const y=e.touches[0].clientY;
+    dy=y-startY;
+    if((window.scrollY||window.pageYOffset||0)>0){bailed=true;reset(true);return;}
+    if(dy<=0){if(ptr.style.opacity!=='0')reset(false);return;}
+    if(e.cancelable)e.preventDefault();
+    const cap=Math.min(dy,MAX*1.8);
+    const eased=cap<THRESH?cap*0.6:THRESH*0.6+(cap-THRESH)*0.28;
+    ptr.style.transition='none';
+    ptr.style.opacity=String(Math.min(1,dy/THRESH));
+    ptr.style.transform=`translate(-50%,${Math.max(-60,eased-60)}px)`;
+    if(ICON)ICON.style.transform=`rotate(${Math.min(180,dy*180/THRESH)}deg)`;
+  },{passive:false});
+  const finish=()=>{
+    if(!tracking){return;}
+    const triggered=dy>=THRESH&&!bailed;
+    tracking=false;
+    if(triggered&&!refreshing){
+      refreshing=true;
+      ptr.classList.add('refreshing');
+      try{if(navigator.vibrate)navigator.vibrate(15);}catch(_){}
+      const ret=(typeof syncAndRefresh==='function')?syncAndRefresh():null;
+      Promise.resolve(ret).finally(()=>{
+        setTimeout(()=>{
+          refreshing=false;
+          ptr.classList.remove('refreshing');
+          reset(true);
+        },350);
+      });
+    }else{
+      reset(true);
+    }
+    dy=0;
+  };
+  document.addEventListener('touchend',finish,{passive:true});
+  document.addEventListener('touchcancel',finish,{passive:true});
+})();
 
 function showLoginScreen(){
   closeAllSheets&&closeAllSheets();
