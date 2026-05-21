@@ -236,8 +236,9 @@ body:not(.dark) .amount-pill{background:rgba(255,255,255,0.7)!important;color:va
 #ptr{position:fixed;top:0;left:50%;transform:translate(-50%,-60px);width:44px;height:44px;border-radius:50%;background:rgba(18,18,26,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:200;color:var(--text);opacity:0;pointer-events:none;will-change:transform,opacity}
 body:not(.dark) #ptr{background:rgba(255,255,255,0.92);color:#1f2937}
 #ptr svg{transition:transform .15s ease}
-#ptr.refreshing{transition:transform .3s ease,opacity .3s ease;transform:translate(-50%,16px);opacity:1}
 #ptr.refreshing svg{animation:spin .7s linear infinite}
+html,body{overscroll-behavior-y:contain}
+#main{will-change:transform}
 .fab{position:fixed;bottom:90px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#4361ee,#7c3aed);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(67,97,238,.6),0 0 40px rgba(67,97,238,.25);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .15s,box-shadow .2s;line-height:1}
 .fab:hover{transform:scale(1.05)}
 @media(min-width:769px){.fab{bottom:32px}.fab.menu-open{transform:rotate(45deg) scale(.93)!important}}
@@ -748,12 +749,14 @@ function showErrorBanner(msg){
 
 async function init(){
   mobRefreshCheckOnLoad();
+  restoreUiState();
   if(APP.dark)document.body.classList.add('dark');
   document.querySelectorAll('[data-view]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.view)));
   window.addEventListener('hashchange',()=>{const v=location.hash.replace('#','')||'dashboard';if(['dashboard','expenses','settings','profile'].includes(v))renderView(v)});
   document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrap')){const l=document.getElementById('ac-list');if(l)l.style.display='none'}});
-  const hash=location.hash.replace('#','')||'dashboard';
-  const view=['dashboard','expenses','settings'].includes(hash)?hash:'dashboard';
+  const hash=location.hash.replace('#','');
+  const validHash=['dashboard','expenses','settings','profile'].includes(hash);
+  const view=validHash?hash:(APP.view||'dashboard');
   // Create Supabase client
   if(typeof supabase==='undefined'){showErrorBanner('JS biblioteka nije učitana.');return;}
   sb=supabase.createClient(SURL,SKEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
@@ -922,6 +925,7 @@ function navigate(v){closeFabMenu&&closeFabMenu();location.hash=v;renderView(v)}
 
 function renderView(v){
   APP.view=v;
+  if(typeof saveUiState==='function')saveUiState();
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelectorAll('[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
@@ -1164,6 +1168,7 @@ function renderCharts(){
 }
 
 function renderExpenses(){
+  if(typeof saveUiState==='function')saveUiState();
   const el=document.getElementById('view-expenses');
   const _af=document.activeElement;
   const _focusId=_af?.id;
@@ -2080,57 +2085,67 @@ setTimeout(()=>{
 (function initPullToRefresh(){
   if(!('ontouchstart' in window))return;
   const ptr=document.getElementById('ptr');
-  if(!ptr)return;
+  const main=document.getElementById('main');
+  if(!ptr||!main)return;
   const ICON=ptr.querySelector('svg');
-  const THRESH=70,MAX=130;
-  let startY=0,dy=0,tracking=false,refreshing=false,bailed=false;
+  const THRESH=80,MAX=140,HOLD=60;
+  let startY=0,startX=0,dy=0,tracking=false,refreshing=false,bailed=false,axis=null;
   const interferes=(el)=>!!(el&&el.closest&&el.closest('.bottom-sheet,.hero-scroll,.ac-list,input,textarea,select,#ctx-menu,#fab-menu,#sidebar,#bottom-nav'));
   const reset=(animate)=>{
-    if(animate){ptr.style.transition='transform .25s ease,opacity .25s ease';}
-    else{ptr.style.transition='none';}
+    const trans=animate?'transform .25s cubic-bezier(.2,.8,.3,1),opacity .25s ease':'none';
+    ptr.style.transition=trans;
+    main.style.transition=animate?'transform .25s cubic-bezier(.2,.8,.3,1)':'none';
     ptr.style.opacity='0';
     ptr.style.transform='translate(-50%,-60px)';
+    main.style.transform='';
     if(ICON)ICON.style.transform='';
   };
   document.addEventListener('touchstart',(e)=>{
     if(refreshing){tracking=false;return;}
-    bailed=false;
+    bailed=false;axis=null;
     if((window.scrollY||window.pageYOffset||0)>0){tracking=false;return;}
     if(document.body.style.overflow==='hidden'){tracking=false;return;}
     if(interferes(e.target)){tracking=false;return;}
     startY=e.touches[0].clientY;
+    startX=e.touches[0].clientX;
     dy=0;
     tracking=true;
   },{passive:true});
   document.addEventListener('touchmove',(e)=>{
     if(!tracking||refreshing||bailed)return;
     const y=e.touches[0].clientY;
+    const x=e.touches[0].clientX;
     dy=y-startY;
+    const adx=Math.abs(x-startX),ady=Math.abs(dy);
+    if(!axis&&(adx>8||ady>8))axis=ady>adx?'y':'x';
+    if(axis==='x'){bailed=true;reset(true);return;}
     if((window.scrollY||window.pageYOffset||0)>0){bailed=true;reset(true);return;}
     if(dy<=0){if(ptr.style.opacity!=='0')reset(false);return;}
     if(e.cancelable)e.preventDefault();
     const cap=Math.min(dy,MAX);
     ptr.style.transition='none';
+    main.style.transition='none';
     ptr.style.opacity=String(Math.min(1,dy/30));
     ptr.style.transform=`translate(-50%,${cap-60}px)`;
+    main.style.transform=`translate3d(0,${cap}px,0)`;
     if(ICON)ICON.style.transform=`rotate(${Math.min(180,dy*180/THRESH)}deg)`;
   },{passive:false});
   const finish=()=>{
-    if(!tracking){return;}
+    if(!tracking)return;
     const triggered=dy>=THRESH&&!bailed;
     tracking=false;
     if(triggered&&!refreshing){
       refreshing=true;
-      ptr.classList.add('refreshing');
       try{if(navigator.vibrate)navigator.vibrate(15);}catch(_){}
-      const ret=(typeof syncAndRefresh==='function')?syncAndRefresh():null;
-      Promise.resolve(ret).finally(()=>{
-        setTimeout(()=>{
-          refreshing=false;
-          ptr.classList.remove('refreshing');
-          reset(true);
-        },350);
-      });
+      try{if(typeof saveUiState==='function')saveUiState();}catch(_){}
+      ptr.classList.add('refreshing');
+      ptr.style.transition='transform .2s cubic-bezier(.2,.8,.3,1),opacity .2s ease';
+      main.style.transition='transform .2s cubic-bezier(.2,.8,.3,1)';
+      ptr.style.opacity='1';
+      ptr.style.transform=`translate(-50%,${HOLD-60}px)`;
+      main.style.transform=`translate3d(0,${HOLD}px,0)`;
+      if(ICON)ICON.style.transform='';
+      setTimeout(()=>{try{location.reload();}catch(_){window.location.href=location.pathname+'?_v='+Date.now();}},420);
     }else{
       reset(true);
     }
@@ -2445,7 +2460,30 @@ function removeMethod(idx){
 
 // ===== INCOME TRACKING =====
 let _listTab='expenses';
-function setListTab(tab){_listTab=tab;if(tab==='income')_incFilters={search:'',month:'',from:'',to:'',methods:[]};renderExpenses();}
+function setListTab(tab){_listTab=tab;if(tab==='income')_incFilters={search:'',month:'',from:'',to:'',methods:[]};saveUiState();renderExpenses();}
+
+function saveUiState(){
+  try{
+    localStorage.setItem('_ui',JSON.stringify({
+      view:APP.view,
+      tab:_listTab,
+      filters:APP.filters,
+      incFilters:_incFilters,
+      months:[...collapsedMonths]
+    }));
+  }catch(_){}
+}
+function restoreUiState(){
+  try{
+    const s=JSON.parse(localStorage.getItem('_ui')||'null');
+    if(!s)return;
+    if(s.view&&['dashboard','expenses','settings','profile'].includes(s.view))APP.view=s.view;
+    if(s.tab&&['expenses','income'].includes(s.tab))_listTab=s.tab;
+    if(s.filters&&typeof s.filters==='object')APP.filters=Object.assign({search:'',month:'',from:'',to:'',methods:[],cats:[]},s.filters);
+    if(s.incFilters&&typeof s.incFilters==='object')_incFilters=Object.assign({search:'',month:'',from:'',to:'',methods:[]},s.incFilters);
+    if(Array.isArray(s.months)){collapsedMonths.clear();s.months.forEach(m=>collapsedMonths.add(m));}
+  }catch(_){}
+}
 function getIncomeEntries(){return APP.income||[];}
 let _incMethod='Keš';
 function selectIncMethod(m){
