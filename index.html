@@ -598,6 +598,7 @@ const APP={
 let sb,barChart,acOptions=[];
 
 function getCat(d){return CATS.find(c=>c.test(d))||CATS[CATS.length-1]}
+function parseAmt(v){const n=parseFloat(String(v==null?'':v).replace(',','.').replace(/[^\d.\-]/g,''));return isFinite(n)?n:NaN;}
 function toRow(e){return{id:e.id,description:e.desc,expense_date:e.date,amount:e.amount,method:e.method,category:e.category||getCat(e.desc).id,note:e.note||''}}
 function fromRow(r){return{id:r.id,desc:r.description,date:r.expense_date,amount:parseFloat(r.amount),method:r.method,category:r.category||getCat(r.description).id,note:r.note||''}}
 const CURRENCIES=[
@@ -1475,14 +1476,14 @@ function renderSettings(){
     <div class="card settings-section">
       <div class="section-title">Početno stanje — Kartica</div>
       <div style="font-size:13px;color:var(--sub);margin-bottom:14px">Upiši stanje kartice na određeni datum. Od tog datuma app oduzima troškove i dodaje prihode.</div>
-      <div class="form-group"><label class="form-label">Stanje na dan (€)</label><input type="number" inputmode="decimal" class="form-control" id="init-kartica-amount" value="${parseFloat(localStorage.getItem('savings_offset_kartica')||'77268.93').toFixed(2)}" step="0.01" placeholder="npr. 5000.00"></div>
+      <div class="form-group"><label class="form-label">Stanje na dan (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="init-kartica-amount" value="${parseFloat(localStorage.getItem('savings_offset_kartica')||'77268.93').toFixed(2)}" placeholder="npr. 5000,00"></div>
       <div class="form-group"><label class="form-label">Datum od kojeg se prati</label><input type="date" class="form-control" id="init-kartica-date" value="${localStorage.getItem('savings_start_kartica')||'2026-05-18'}"></div>
       <button class="btn btn-primary btn-full" onclick="saveInitialBalance('kartica')">Sačuvaj početno stanje</button>
     </div>
     <div class="card settings-section">
       <div class="section-title">Početno stanje — Keš</div>
       <div style="font-size:13px;color:var(--sub);margin-bottom:14px">Upiši koliko keša imaš na određeni datum.</div>
-      <div class="form-group"><label class="form-label">Stanje keša (€)</label><input type="number" inputmode="decimal" class="form-control" id="init-kes-amount" value="${parseFloat(localStorage.getItem('savings_offset_kes')||'0').toFixed(2)}" step="0.01" placeholder="npr. 500.00"></div>
+      <div class="form-group"><label class="form-label">Stanje keša (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="init-kes-amount" value="${parseFloat(localStorage.getItem('savings_offset_kes')||'0').toFixed(2)}" placeholder="npr. 500,00"></div>
       <div class="form-group"><label class="form-label">Datum od kojeg se prati</label><input type="date" class="form-control" id="init-kes-date" value="${localStorage.getItem('savings_start_kes')||new Date().toISOString().split('T')[0]}"></div>
       <button class="btn btn-primary btn-full" onclick="saveInitialBalance('kes')">Sačuvaj početno stanje</button>
     </div>
@@ -1504,7 +1505,7 @@ function saveInitialBalance(type){
   const date=document.getElementById(`init-${type}-date`)?.value;
   if(!amt&&!date)return;
   const label=type==='kartica'?'Kartica':'Keš';
-  const fmtAmt=amt?`€ ${parseFloat(amt).toLocaleString('bs',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'—';
+  const fmtAmt=amt?`€ ${parseAmt(amt).toLocaleString('bs',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'—';
   const fmtDate=date?date.split('-').reverse().join('.'):'—';
   document.getElementById('sheet-confirm-body').innerHTML=`
     <div style="text-align:center;margin-bottom:18px">
@@ -1523,7 +1524,7 @@ function saveInitialBalance(type){
   openSheet('sheet-confirm');
 }
 async function confirmSaveInitialBalance(type,amt,date){
-  if(amt!==undefined&&amt!=='')localStorage.setItem(`savings_offset_${type}`,parseFloat(amt));
+  if(amt!==undefined&&amt!=='')localStorage.setItem(`savings_offset_${type}`,parseAmt(amt));
   if(date)localStorage.setItem(`savings_start_${type}`,date);
   closeAllSheets();
   // Renderuj trenutni view (najčešće Postavke) da se input vrijednosti odmah ažuriraju.
@@ -1599,11 +1600,11 @@ function openAddRateSheet(){
     <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica, banka...</span></label><input type="text" class="form-control" id="rate-povjerioc" placeholder="npr. Telemach, ProCredit, m:tel..."></div>
     <div class="form-group"><label class="form-label">Opis (šta si kupio)</label><input type="text" class="form-control" id="rate-desc" placeholder="npr. Laptop, TV, Bijela tehnika..."></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="number" inputmode="decimal" class="form-control" id="rate-iznos" placeholder="50.00" step="0.01" min="0" oninput="autoCalcRateUkupno()"></div>
+      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="rate-iznos" placeholder="50,00" oninput="autoCalcRateUkupno()"></div>
       <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="rate-broj" placeholder="12" min="1" step="1" oninput="autoCalcRateUkupno()"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Ukupna cijena (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="number" inputmode="decimal" class="form-control" id="rate-ukupno" placeholder="600.00" step="0.01" min="0"></div>
+      <div class="form-group"><label class="form-label">Ukupna cijena (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="rate-ukupno" placeholder="600,00"></div>
       <div class="form-group"><label class="form-label">Metoda plaćanja</label><select class="form-control" id="rate-method">${methodOpts}</select></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -1616,7 +1617,7 @@ function openAddRateSheet(){
 }
 
 function autoCalcRateUkupno(){
-  const iznos=parseFloat(document.getElementById('rate-iznos')?.value||'0');
+  const iznos=parseAmt(document.getElementById('rate-iznos')?.value||'0');
   const broj=parseInt(document.getElementById('rate-broj')?.value||'0');
   if(iznos>0&&broj>0){document.getElementById('rate-ukupno').value=(iznos*broj).toFixed(2);}
 }
@@ -1624,7 +1625,7 @@ function autoCalcRateUkupno(){
 function submitAddRate(){
   const desc=(document.getElementById('rate-desc')?.value||'').trim();
   const povjerioc=(document.getElementById('rate-povjerioc')?.value||'').trim();
-  const iznos=parseFloat(document.getElementById('rate-iznos')?.value||'0');
+  const iznos=parseAmt(document.getElementById('rate-iznos')?.value||'0');
   const broj=parseInt(document.getElementById('rate-broj')?.value||'0');
   const ukupnoRaw=document.getElementById('rate-ukupno')?.value;
   const method=document.getElementById('rate-method')?.value||'Kartica';
@@ -1634,7 +1635,7 @@ function submitAddRate(){
   if(!iznos||iznos<=0){alert('Upiši iznos rate');return;}
   if(!broj||broj<1){alert('Upiši broj rata');return;}
   if(vecPlaceno>broj){alert('Već plaćene rate ne mogu biti veće od ukupnog broja rata');return;}
-  const ukupno=ukupnoRaw&&parseFloat(ukupnoRaw)>0?parseFloat(ukupnoRaw):iznos*broj;
+  const ukupno=ukupnoRaw&&parseAmt(ukupnoRaw)>0?parseAmt(ukupnoRaw):iznos*broj;
   const entries=getRateEntries();
   entries.push({id:Date.now(),desc,povjerioc,method,iznos_rate:iznos,broj_rata:broj,ukupno,datum_pocetka:datum,placene_rate:vecPlaceno});
   saveRateEntries(entries);
@@ -1785,14 +1786,14 @@ function buildForm(e,isEdit){
         <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica ili banka</span></label><input type="text" class="form-control" id="f-rate-povjerioc" placeholder="npr. Multicom, ProCredit..." value="${esc(initPovjerioc)}"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" oninput="autoCalcFormRateUkupno()"></div>
-          <div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="number" inputmode="decimal" class="form-control" id="f-rate-ukupno" placeholder="898.08" step="0.01" min="0"></div>
+          <div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="f-rate-ukupno" placeholder="898,08"></div>
         </div>
         <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-vec" placeholder="0" min="0" step="1" value="0"></div>
       </div>
     </div>
     <div class="form-group"><label class="form-label" id="f-desc-label">${isRate?'Opis kupovine':'Opis'}</label><div class="autocomplete-wrap"><input type="text" class="form-control" id="f-desc" placeholder="${isRate?'npr. Xiaomi usisivač, TV...':'Upiši opis...'}" value="${esc(e?e.desc:'')}" oninput="onDesc(this)"><div class="ac-list" id="ac-list"></div></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group" style="min-width:0"><label class="form-label" id="f-amount-label">${isRate?'Iznos rate (€)':'Iznos (€)'}</label><input type="number" inputmode="decimal" class="form-control" id="f-amount" step="0.01" min="0" value="${e?e.amount:''}" placeholder="0.00" oninput="autoCalcFormRateUkupno()"></div>
+      <div class="form-group" style="min-width:0"><label class="form-label" id="f-amount-label">${isRate?'Iznos rate (€)':'Iznos (€)'}</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="f-amount" value="${e?e.amount:''}" placeholder="0,00" oninput="autoCalcFormRateUkupno()"></div>
       <div class="form-group" style="min-width:0"><label class="form-label" id="f-date-label">${isRate?'Datum prve rate':'Datum'}</label><input type="date" class="form-control" id="f-date" value="${e?e.date:today}" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>
     </div>
     <div class="form-group"><label class="form-label">Metoda plaćanja</label><div class="method-grid">${mGrid}</div><input type="hidden" id="f-method" value="${dm}"></div>
@@ -1836,14 +1837,14 @@ function onDesc(inp){
 function pickAC(i){const v=acOptions[i];if(!v)return;const inp=document.getElementById('f-desc');if(inp){inp.value=v;const l=document.getElementById('ac-list');if(l)l.style.display='none';const cat=getCat(v);const cb=document.getElementById('cbtn-'+cat.id);if(cb)selC(cat.id,cb)}}
 
 function autoCalcFormRateUkupno(){
-  const iznos=parseFloat(document.getElementById('f-amount')?.value||'0');
+  const iznos=parseAmt(document.getElementById('f-amount')?.value||'0');
   const broj=parseInt(document.getElementById('f-rate-broj')?.value||'0');
   const u=document.getElementById('f-rate-ukupno');
   if(iznos>0&&broj>0&&u)u.value=(iznos*broj).toFixed(2);
 }
 function getFormData(){
   const desc=(document.getElementById('f-desc')?.value||'').trim();
-  const amount=parseFloat(document.getElementById('f-amount')?.value||'');
+  const amount=parseAmt(document.getElementById('f-amount')?.value||'');
   const date=document.getElementById('f-date')?.value||'';
   const method=document.getElementById('f-method')?.value||'Kartica';
   const category=document.getElementById('f-cat')?.value||'ostalo';
@@ -2498,8 +2499,8 @@ function buildIncomeForm(entry){
   const today=new Date().toISOString().split('T')[0];
   const v=entry||{};
   return`
-    <div class="form-group"><label class="form-label">Iznos (€)</label><input type="number" inputmode="decimal" class="form-control" id="inc-amount" value="${v.amount||''}" placeholder="0.00" min="0" step="0.01"></div>
-    <div class="form-group"><label class="form-label">Vrsta</label><select class="form-control" id="inc-type"><option value="Plata"${(v.type||'Plata')==='Plata'?' selected':''}>💼 Plata</option><option value="Kirija"${v.type==='Kirija'?' selected':''}>🏠 Kirija</option></select></div>
+    <div class="form-group"><label class="form-label">Iznos (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="inc-amount" value="${v.amount||''}" placeholder="0,00"></div>
+    <div class="form-group"><label class="form-label">Vrsta</label><select class="form-control" id="inc-type"><option value="Plata"${(v.type||'Plata')==='Plata'?' selected':''}>💼 Plata</option><option value="Kirija"${v.type==='Kirija'?' selected':''}>🏠 Kirija</option><option value="Vanredno"${v.type==='Vanredno'?' selected':''}>🎁 Vanredno</option></select></div>
     <div class="form-group"><label class="form-label">Način primanja</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px"><button type="button" id="inc-method-cash" onclick="selectIncMethod('Keš')" class="inc-method-btn${(v.method||'Keš')==='Keš'?' inc-method-on':''}">💵 Keš</button><button type="button" id="inc-method-card" onclick="selectIncMethod('Kartica')" class="inc-method-btn${v.method==='Kartica'?' inc-method-on':''}">💳 Kartica</button></div></div>
     <div class="form-group"><label class="form-label">Datum primanja</label><input type="date" class="form-control" id="inc-date" value="${v.date||today}" autocomplete="off" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>`;
 }
@@ -2519,7 +2520,7 @@ function openEditIncomeSheet(id){
   openSheet('sheet-income');
 }
 async function submitAddIncome(){
-  const amount=parseFloat(document.getElementById('inc-amount')?.value||'');
+  const amount=parseAmt(document.getElementById('inc-amount')?.value||'');
   const type=document.getElementById('inc-type')?.value||'Plata';
   const date=document.getElementById('inc-date')?.value||'';
   if(!amount||amount<=0){alert('Upiši ispravan iznos');return;}
@@ -2532,7 +2533,7 @@ async function submitAddIncome(){
   if(APP.view==='expenses')renderExpenses();
 }
 async function submitEditIncome(id){
-  const amount=parseFloat(document.getElementById('inc-amount')?.value||'');
+  const amount=parseAmt(document.getElementById('inc-amount')?.value||'');
   const type=document.getElementById('inc-type')?.value||'Plata';
   const date=document.getElementById('inc-date')?.value||'';
   if(!amount||amount<=0){alert('Upiši ispravan iznos');return;}
@@ -2552,7 +2553,7 @@ async function removeIncomeById(id){
   if(APP.view==='expenses')renderExpenses();
 }
 function addIncome(){
-  const amount=parseFloat(document.getElementById('inc-amount')?.value||'');
+  const amount=parseAmt(document.getElementById('inc-amount')?.value||'');
   const type=document.getElementById('inc-type')?.value||'Plata';
   const date=document.getElementById('inc-month')?.value||new Date().toISOString().split('T')[0];
   const method=_incMethod||'Keš';
@@ -2571,7 +2572,7 @@ function removeIncome(idx){
   renderProfile();
 }
 function renderIncomeList(entries,totalCount){
-  const INC_TYPE_EMOJI={Plata:'💼',Kirija:'🏠'};
+  const INC_TYPE_EMOJI={Plata:'💼',Kirija:'🏠',Vanredno:'🎁'};
   const INC_MC={Keš:{color:'#10b981',bg:'#d1fae5'},Kartica:{color:'#4361ee',bg:'#eef0fd'}};
   if(entries===undefined)entries=getIncomeEntries();
   if(!totalCount)totalCount=entries.length;
