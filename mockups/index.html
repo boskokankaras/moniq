@@ -19,8 +19,9 @@ html,body{background:#0e0e10;color:#eaeaea;font-family:'Inter',system-ui,sans-se
 .dir-tabs button.active{background:#fff;color:#000;border-color:#fff;font-weight:600}
 .dir-tabs button.recommended::before{content:"★ ";color:#facc15;font-size:11px}
 main{padding:32px 16px 80px}
-.mockup-row{display:none;gap:24px;justify-content:center;flex-wrap:wrap;max-width:1400px;margin:0 auto}
-.mockup-row.active{display:flex}
+.mockup-row{display:none}
+.mockup-row.active{display:grid;grid-template-columns:repeat(auto-fit,minmax(390px,420px));gap:32px 24px;justify-content:center;max-width:1480px;margin:0 auto}
+.mockup-row.active .intro-banner{grid-column:1/-1;justify-self:stretch}
 .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
 .screen-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#888}
 .phone{width:390px;height:780px;border-radius:50px;border:8px solid #0a0a0a;box-shadow:0 0 0 1px #2a2a2a,0 50px 100px -20px rgba(0,0,0,.6);overflow:hidden;position:relative}
@@ -28,7 +29,7 @@ main{padding:32px 16px 80px}
 .viewport{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .viewport::-webkit-scrollbar{width:0}
 .status-bar{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 10px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.intro-banner{max-width:880px;margin:0 auto 40px;padding:24px 28px;background:linear-gradient(135deg,#1a1a1d,#0e0e10);border:1px solid #2a2a2a;border-radius:20px}
+.intro-banner{margin:0 auto 16px;padding:24px 28px;background:linear-gradient(135deg,#1a1a1d,#0e0e10);border:1px solid #2a2a2a;border-radius:20px;max-width:1200px}
 .intro-banner h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px;color:#fff;margin-bottom:8px}
 .intro-banner p{font-size:14px;color:#aaa;line-height:1.6}
 .intro-banner strong{color:#fff;font-weight:600}
@@ -176,6 +177,116 @@ main{padding:32px 16px 80px}
 .calm-month-divider b{color:#0E1116}
 .calm-list{padding:0 20px}
 
+/* ── Calm Ledger — additional components ── */
+.calm-balance-top{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 20px 0}
+.calm-balance-card{background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:12px;padding:14px 16px}
+.calm-balance-card-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B6B73;display:flex;align-items:center;gap:6px}
+.calm-balance-card-label .dot-card{width:7px;height:7px;border-radius:50%;background:#4361ee}
+.calm-balance-card-label .dot-cash{width:7px;height:7px;border-radius:50%;background:#10b981}
+.calm-balance-card-amount{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:6px}
+.calm-balance-card-delta{font-size:11px;color:#6B6B73;margin-top:2px;font-variant-numeric:tabular-nums}
+.calm-balance-card-delta.up{color:#10b981}
+.calm-balance-card-delta.down{color:#E07856}
+
+/* Bottom sheet (overlay style) */
+.calm-sheet-bg{position:absolute;inset:0;background:rgba(14,17,22,.32);backdrop-filter:blur(4px);z-index:8}
+.calm-sheet{position:absolute;left:0;right:0;bottom:0;background:#F6F5F2;border-top-left-radius:24px;border-top-right-radius:24px;padding:8px 0 0;z-index:9;box-shadow:0 -10px 40px -10px rgba(14,17,22,.18);max-height:96%;display:flex;flex-direction:column}
+.calm-sheet-handle{width:36px;height:4px;background:rgba(14,17,22,.16);border-radius:99px;margin:6px auto 14px}
+.calm-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:0 20px 16px;border-bottom:1px solid rgba(14,17,22,.06)}
+.calm-sheet-head h3{font-size:17px;font-weight:700;letter-spacing:-.01em;color:#0E1116}
+.calm-sheet-close{width:30px;height:30px;border-radius:50%;background:rgba(14,17,22,.06);display:flex;align-items:center;justify-content:center;color:#6B6B73;font-size:14px}
+.calm-sheet-body{flex:1;overflow-y:auto;padding:20px}
+.calm-sheet-foot{padding:14px 20px 24px;border-top:1px solid rgba(14,17,22,.06);background:#F6F5F2}
+
+/* Amount display */
+.calm-amount-display{text-align:center;padding:22px 20px 18px}
+.calm-amount-cur{font-family:'JetBrains Mono',monospace;font-size:24px;color:#6B6B73;vertical-align:18px;margin-right:4px}
+.calm-amount-big{font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:600;color:#0E1116;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.calm-amount-caret{display:inline-block;width:2px;height:46px;background:#7C5CFF;vertical-align:-8px;margin-left:2px;animation:blink 1s infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.calm-amount-meta{font-size:12px;color:#6B6B73;margin-top:8px}
+
+/* Method chips */
+.calm-method-row{display:flex;gap:8px;padding:0 20px 16px;overflow-x:auto;scrollbar-width:none}
+.calm-method-row::-webkit-scrollbar{display:none}
+.calm-method-chip{flex-shrink:0;padding:9px 14px;border-radius:10px;background:#fff;border:1px solid rgba(14,17,22,.08);font-size:13px;font-weight:600;color:#0E1116;display:flex;align-items:center;gap:6px}
+.calm-method-chip.active{background:#0E1116;color:#fff;border-color:#0E1116}
+.calm-method-chip svg{width:14px;height:14px}
+
+/* Numpad */
+.calm-numpad{display:grid;grid-template-columns:repeat(3,1fr);background:#E5E3DD;gap:1px;border-top:1px solid rgba(14,17,22,.06)}
+.calm-numkey{background:#F6F5F2;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:500;color:#0E1116;height:62px;cursor:pointer;user-select:none}
+.calm-numkey.fn{color:#6B6B73;font-size:20px}
+.calm-numkey:active{background:#E5E3DD}
+
+/* Form rows */
+.calm-form-row{padding:14px 20px;background:#fff;border-radius:12px;border:1px solid rgba(14,17,22,.06);margin-bottom:10px}
+.calm-form-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B73;margin-bottom:6px}
+.calm-form-input{width:100%;border:none;background:none;font-family:inherit;font-size:15px;color:#0E1116;outline:none}
+.calm-form-input::placeholder{color:#9AA0A6}
+.calm-cat-strip{display:flex;gap:6px;padding:6px 0 0;flex-wrap:wrap}
+.calm-cat-chip{padding:6px 10px;border-radius:8px;background:rgba(14,17,22,.04);font-size:12px;font-weight:600;color:#0E1116;display:inline-flex;align-items:center;gap:5px}
+.calm-cat-chip.suggested{background:#EDE7FE;color:#5B3FD9;outline:2px solid #7C5CFF;outline-offset:1px;animation:cat-glow 1.6s ease-in-out infinite}
+@keyframes cat-glow{0%,100%{outline-color:#7C5CFF}50%{outline-color:#A99AFF}}
+.calm-cat-detected{font-size:11px;color:#5B3FD9;margin-top:8px;font-weight:500;display:flex;align-items:center;gap:5px}
+.calm-cat-detected svg{width:11px;height:11px}
+
+/* Save button */
+.calm-btn-save{display:block;width:100%;padding:16px;background:#0E1116;color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:.01em;cursor:pointer}
+.calm-btn-save:active{background:#26252A}
+
+/* Income toggle */
+.calm-tog{display:flex;background:#E5E3DD;border-radius:12px;padding:3px;margin:0 0 16px}
+.calm-tog button{flex:1;padding:9px 12px;background:transparent;border:none;font-family:inherit;font-size:13px;font-weight:600;color:#6B6B73;border-radius:9px;cursor:pointer}
+.calm-tog button.active{background:#fff;color:#0E1116;box-shadow:0 1px 4px rgba(14,17,22,.08)}
+
+/* Settings page */
+.calm-settings-section{margin:0 20px 18px}
+.calm-settings-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B6B73;margin:0 4px 8px}
+.calm-settings-card{background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:12px;overflow:hidden}
+.calm-setting-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(14,17,22,.05)}
+.calm-setting-row:last-child{border-bottom:none}
+.calm-setting-icon{width:28px;height:28px;border-radius:8px;background:rgba(14,17,22,.04);display:flex;align-items:center;justify-content:center;color:#6B6B73}
+.calm-setting-icon svg{width:14px;height:14px;stroke-width:2}
+.calm-setting-info{flex:1;min-width:0}
+.calm-setting-name{font-size:14px;font-weight:500;color:#0E1116}
+.calm-setting-sub{font-size:11px;color:#6B6B73;margin-top:1px}
+.calm-setting-value{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums}
+.calm-setting-chev{color:#6B6B73}
+.calm-switch{width:36px;height:22px;background:#E5E3DD;border-radius:99px;position:relative;flex-shrink:0;transition:background .15s}
+.calm-switch.on{background:#0E1116}
+.calm-switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.calm-switch.on::after{transform:translateX(14px)}
+.calm-btn-signout{display:block;width:calc(100% - 40px);margin:14px 20px 0;padding:14px;background:#FEE2E2;color:#E07856;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;text-align:center}
+
+/* Pretplate detail */
+.calm-sub-hero{padding:24px 20px 8px;text-align:center}
+.calm-sub-hero-amount{font-family:'JetBrains Mono',monospace;font-size:46px;font-weight:600;letter-spacing:-.03em;color:#0E1116;font-variant-numeric:tabular-nums}
+.calm-sub-hero-amount span{font-size:18px;color:#6B6B73;font-family:'Inter',sans-serif;font-weight:500}
+.calm-sub-hero-meta{font-size:13px;color:#6B6B73;margin-top:6px}
+.calm-sub-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 20px}
+.calm-sub-stat{background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:12px;padding:12px 14px}
+.calm-sub-stat-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B73}
+.calm-sub-stat-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums;margin-top:4px}
+.calm-sub-filter{display:flex;gap:6px;padding:8px 20px 12px}
+.calm-sub-filter button{padding:6px 12px;background:transparent;border:1px solid transparent;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;color:#6B6B73;cursor:pointer}
+.calm-sub-filter button.active{background:#0E1116;color:#fff}
+.calm-sub-list{padding:0 20px}
+.calm-sub-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(14,17,22,.06)}
+.calm-sub-row:last-child{border-bottom:none}
+.calm-sub-row-next{font-size:11px;color:#7C5CFF;font-weight:600;background:#EDE7FE;padding:2px 6px;border-radius:4px;margin-top:2px;display:inline-block}
+
+/* Rate widget */
+.calm-rate-card{background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:12px;padding:14px;margin:0 20px 14px}
+.calm-rate-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.calm-rate-name{font-size:14px;font-weight:600;color:#0E1116}
+.calm-rate-creditor{font-size:11px;color:#6B6B73;margin-top:1px}
+.calm-rate-amount{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums}
+.calm-rate-progress{margin-top:10px}
+.calm-rate-bar{height:4px;background:#E5E3DD;border-radius:99px;overflow:hidden}
+.calm-rate-bar-fill{height:100%;background:#7C5CFF;border-radius:99px}
+.calm-rate-meta{display:flex;justify-content:space-between;font-size:11px;color:#6B6B73;margin-top:6px;font-variant-numeric:tabular-nums}
+
 /* ═══════════════════════════════════════════════════════════════
    PRAVAC 3 — NUMBERS FIRST
    ═══════════════════════════════════════════════════════════════ */
@@ -250,8 +361,8 @@ main{padding:32px 16px 80px}
   <h1>Moniq — Redesign Mockups</h1>
   <p>Tri pravca. Logika ostaje ista, ovo je samo vizuelni jezik. Klikni na pravac da prebaciš.</p>
   <div class="dir-tabs">
-    <button class="active recommended" data-dir="diary">Money Diary</button>
-    <button data-dir="calm">Calm Ledger</button>
+    <button data-dir="diary">Money Diary</button>
+    <button class="active recommended" data-dir="calm">Calm Ledger</button>
     <button data-dir="numbers">Numbers First</button>
   </div>
 </header>
@@ -259,7 +370,7 @@ main{padding:32px 16px 80px}
 <main>
 
 <!-- ═══════════════════════ MONEY DIARY ═══════════════════════ -->
-<section class="mockup-row active" data-dir="diary">
+<section class="mockup-row" data-dir="diary">
 
 <div class="intro-banner" style="flex-basis:100%">
   <h2>Money Diary — ekspresivni dnevnik</h2>
@@ -425,11 +536,11 @@ main{padding:32px 16px 80px}
 
 
 <!-- ═══════════════════════ CALM LEDGER ═══════════════════════ -->
-<section class="mockup-row" data-dir="calm">
+<section class="mockup-row active" data-dir="calm">
 
-<div class="intro-banner" style="flex-basis:100%">
+<div class="intro-banner">
   <h2>Calm Ledger — tih i precizan</h2>
-  <p>Off-white pozadina <strong>#F6F5F2</strong> (papir, ne plastika), skoro-crni tekst <strong>#0E1116</strong>, ljubičasta <strong>#7C5CFF</strong> samo na grafici/chart elementima. <strong>Inter</strong> + <strong>JetBrains Mono</strong> sa tabular figures za iznose. Gusta lista, hairline separatori, bez sjenki kartica. Profesionalan alat — nema krika, sve je suzdržano.</p>
+  <p>Off-white pozadina <strong>#F6F5F2</strong>, skoro-crni tekst <strong>#0E1116</strong>, ljubičasta <strong>#7C5CFF</strong> samo na grafikama/akcentima. <strong>Inter</strong> body + <strong>JetBrains Mono</strong> sa tabular figures za sve iznose. Gusta lista, hairline separatori, bez sjenki kartica. Stanje računa <strong>na vrhu dashboard-a</strong> sa indikatorom kretanja. Custom numerički keypad za unos. Auto-prepoznavanje kategorije sa subtilnom ljubičastom indikacijom. Sve features iz trenutne app-acije zadržane — samo posloženije i tiše.</p>
 </div>
 
 <div class="phone-wrap">
@@ -439,14 +550,33 @@ main{padding:32px 16px 80px}
       <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
       <div class="calm-header">
         <div class="calm-brand"><span class="calm-brand-dot"></span>moniq</div>
-        <div class="calm-icon-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <div style="display:flex;gap:8px">
+          <div class="calm-icon-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="calm-icon-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </div>
         </div>
       </div>
+
+      <div class="calm-balance-top">
+        <div class="calm-balance-card">
+          <div class="calm-balance-card-label"><span class="dot-card"></span>KARTICA</div>
+          <div class="calm-balance-card-amount">€4.218,50</div>
+          <div class="calm-balance-card-delta up">↑ €42,30 ovog tjedna</div>
+        </div>
+        <div class="calm-balance-card">
+          <div class="calm-balance-card-label"><span class="dot-cash"></span>KEŠ</div>
+          <div class="calm-balance-card-amount">€243,00</div>
+          <div class="calm-balance-card-delta down">↓ €18,50 ovog tjedna</div>
+        </div>
+      </div>
+
       <div class="calm-hero">
-        <div class="calm-hero-label">MAJ · 2026</div>
+        <div class="calm-hero-label">MAJ · 2026 — POTROŠENO</div>
         <div class="calm-hero-amount">€1.247,43</div>
-        <div class="calm-hero-meta">od <b>€3.000</b> budžeta · prosjek <b>€71,85/dan</b></div>
+        <div class="calm-hero-meta">od <b>€3.000</b> budžeta · prosjek <b>€71,85/dan</b> · ostalo <b>5 dana</b></div>
         <div class="calm-bar"><div class="calm-bar-fill"></div></div>
       </div>
       <div class="calm-quick">
@@ -465,20 +595,30 @@ main{padding:32px 16px 80px}
         <div class="calm-tx"><div class="calm-tx-icon purple">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Claude Pro</div><div class="calm-tx-meta">Naplata: 04. svakog mjeseca</div></div><div class="calm-tx-amount">€17,07</div></div>
       </div>
 
+      <div class="calm-section" style="padding-bottom:4px">
+        <div class="calm-section-head"><div class="calm-section-title">Rate na otplati</div><div class="calm-section-link">1 aktivna →</div></div>
+      </div>
+      <div class="calm-rate-card">
+        <div class="calm-rate-head">
+          <div>
+            <div class="calm-rate-name">Xiaomi usisivač</div>
+            <div class="calm-rate-creditor">Multicom · Kartica</div>
+          </div>
+          <div class="calm-rate-amount">€37,42<span style="font-size:11px;color:#6B6B73;font-weight:500"> /mj</span></div>
+        </div>
+        <div class="calm-rate-progress">
+          <div class="calm-rate-bar"><div class="calm-rate-bar-fill" style="width:16.7%"></div></div>
+          <div class="calm-rate-meta"><span>4 / 24 rate</span><span>Ostalo €748,40</span></div>
+        </div>
+      </div>
+
       <div class="calm-section">
         <div class="calm-section-head"><div class="calm-section-title">Posljednje</div><div class="calm-section-link">Vidi sve →</div></div>
         <div class="calm-tx"><div class="calm-tx-icon">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Aco-Rade licenca</div><div class="calm-tx-meta">14.05 · Biznis · Pretplate</div></div><div class="calm-tx-amount">€8,65</div></div>
         <div class="calm-tx"><div class="calm-tx-icon">R</div><div class="calm-tx-info"><div class="calm-tx-desc">Reklame</div><div class="calm-tx-meta">14.05 · Biznis · Marketing</div></div><div class="calm-tx-amount">€4,85</div></div>
         <div class="calm-tx"><div class="calm-tx-icon" style="background:#FB7701">t</div><div class="calm-tx-info"><div class="calm-tx-desc">Temu</div><div class="calm-tx-meta">12.05 · Kartica · Shopping</div></div><div class="calm-tx-amount">€25,59</div></div>
         <div class="calm-tx"><div class="calm-tx-icon">SC</div><div class="calm-tx-info"><div class="calm-tx-desc">Sicilija City</div><div class="calm-tx-meta">11.05 · Kartica · Hrana</div></div><div class="calm-tx-amount">€2,50</div></div>
-      </div>
-
-      <div class="calm-balance">
-        <div class="calm-balance-title">Stanje računa</div>
-        <div class="calm-balance-grid">
-          <div class="calm-balance-cell"><div class="calm-balance-label">Kartica</div><div class="calm-balance-amount">€4.218,50</div></div>
-          <div class="calm-balance-cell"><div class="calm-balance-label">Keš</div><div class="calm-balance-amount">€243,00</div></div>
-        </div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#ef4444">G</div><div class="calm-tx-info"><div class="calm-tx-desc">Gorivo Raptor</div><div class="calm-tx-meta">10.05 · INA · Gorivo</div></div><div class="calm-tx-amount">€107,76</div></div>
       </div>
 
       <div class="calm-fab">+</div>
@@ -552,6 +692,388 @@ main{padding:32px 16px 80px}
       <div class="calm-bottom-nav">
         <div class="calm-nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
         <div class="calm-nav-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Dodaj trošak · korak 1</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <!-- Pozadina dashboard-a vidljiva iza overlay-a -->
+      <div class="calm-header" style="opacity:.35">
+        <div class="calm-brand"><span class="calm-brand-dot"></span>moniq</div>
+        <div style="display:flex;gap:8px">
+          <div class="calm-icon-btn"></div>
+          <div class="calm-icon-btn"></div>
+        </div>
+      </div>
+      <div class="calm-balance-top" style="opacity:.25">
+        <div class="calm-balance-card"><div class="calm-balance-card-label"><span class="dot-card"></span>KARTICA</div><div class="calm-balance-card-amount">€4.218,50</div></div>
+        <div class="calm-balance-card"><div class="calm-balance-card-label"><span class="dot-cash"></span>KEŠ</div><div class="calm-balance-card-amount">€243,00</div></div>
+      </div>
+      <div class="calm-sheet-bg"></div>
+      <div class="calm-sheet">
+        <div class="calm-sheet-handle"></div>
+        <div class="calm-sheet-head">
+          <h3>Novi trošak</h3>
+          <div class="calm-sheet-close">✕</div>
+        </div>
+        <div class="calm-amount-display">
+          <span class="calm-amount-cur">€</span><span class="calm-amount-big">42,50</span><span class="calm-amount-caret"></span>
+          <div class="calm-amount-meta">Iznos u EUR</div>
+        </div>
+        <div class="calm-method-row">
+          <div class="calm-method-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Kartica
+          </div>
+          <div class="calm-method-chip active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+            Keš
+          </div>
+          <div class="calm-method-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="22" x2="21" y2="22"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5,10 5,3 19,3 19,10"/></svg>
+            Virman
+          </div>
+          <div class="calm-method-chip">INA</div>
+          <div class="calm-method-chip">Biznis</div>
+        </div>
+        <div class="calm-numpad">
+          <div class="calm-numkey">1</div><div class="calm-numkey">2</div><div class="calm-numkey">3</div>
+          <div class="calm-numkey">4</div><div class="calm-numkey">5</div><div class="calm-numkey">6</div>
+          <div class="calm-numkey">7</div><div class="calm-numkey">8</div><div class="calm-numkey">9</div>
+          <div class="calm-numkey fn">,</div><div class="calm-numkey">0</div><div class="calm-numkey fn">⌫</div>
+        </div>
+        <div class="calm-sheet-foot">
+          <button class="calm-btn-save">Dalje →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Dodaj trošak · korak 2</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="calm-header" style="opacity:.35">
+        <div class="calm-brand"><span class="calm-brand-dot"></span>moniq</div>
+      </div>
+      <div class="calm-sheet-bg"></div>
+      <div class="calm-sheet" style="padding-top:8px">
+        <div class="calm-sheet-handle"></div>
+        <div class="calm-sheet-head">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="calm-sheet-close" style="background:transparent;font-size:16px">←</div>
+            <h3>Detalji troška</h3>
+          </div>
+          <div class="calm-sheet-close">✕</div>
+        </div>
+        <div class="calm-sheet-body">
+          <div style="background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#6B6B73;text-transform:uppercase">Iznos</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums">€42,50</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#6B6B73;text-transform:uppercase">Metoda</div>
+              <div style="font-size:14px;font-weight:600;margin-top:2px;display:inline-flex;align-items:center;gap:5px">
+                <span style="width:7px;height:7px;background:#10b981;border-radius:50%;display:inline-block"></span>Keš
+              </div>
+            </div>
+          </div>
+
+          <div class="calm-form-row">
+            <div class="calm-form-label">Opis</div>
+            <input class="calm-form-input" placeholder="npr. Glovo Wolt, Gorivo Raptor..." value="Glovo Walter"/>
+            <div class="calm-cat-detected">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Automatski prepoznata kategorija
+            </div>
+            <div class="calm-cat-strip">
+              <span class="calm-cat-chip suggested">🛵 Dostava hrane</span>
+              <span class="calm-cat-chip">🍽 Hrana</span>
+              <span class="calm-cat-chip">📦 Ostalo</span>
+              <span class="calm-cat-chip">+ Promijeni</span>
+            </div>
+          </div>
+
+          <div class="calm-form-row">
+            <div class="calm-form-label">Datum</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <input class="calm-form-input" value="Danas · 26. maj 2026" style="flex:1"/>
+              <div style="color:#6B6B73">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="calm-form-row">
+            <div class="calm-form-label">Napomena (opcionalno)</div>
+            <input class="calm-form-input" placeholder="Bilješka samo za tebe..."/>
+          </div>
+        </div>
+        <div class="calm-sheet-foot">
+          <button class="calm-btn-save">Sačuvaj trošak</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Dodaj primanje</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="calm-header" style="opacity:.35">
+        <div class="calm-brand"><span class="calm-brand-dot"></span>moniq</div>
+      </div>
+      <div class="calm-sheet-bg"></div>
+      <div class="calm-sheet">
+        <div class="calm-sheet-handle"></div>
+        <div class="calm-sheet-head">
+          <h3>Novo primanje</h3>
+          <div class="calm-sheet-close">✕</div>
+        </div>
+        <div class="calm-sheet-body">
+          <div class="calm-tog">
+            <button class="active">Plata</button>
+            <button>Vanredno primanje</button>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:14px;padding:24px 16px;text-align:center;margin-bottom:14px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums;letter-spacing:-.03em">
+              <span style="font-size:18px;color:#6B6B73;vertical-align:18px;margin-right:4px">€</span>1.450,00
+            </div>
+            <div style="font-size:12px;color:#6B6B73;margin-top:6px">Iznos primanja</div>
+          </div>
+
+          <div class="calm-form-row">
+            <div class="calm-form-label">Tip primanja</div>
+            <div class="calm-cat-strip">
+              <span class="calm-cat-chip suggested">💼 Plata</span>
+              <span class="calm-cat-chip">🎁 Bonus</span>
+              <span class="calm-cat-chip">💱 Konverzija</span>
+              <span class="calm-cat-chip">+ Drugi</span>
+            </div>
+          </div>
+
+          <div class="calm-form-row">
+            <div class="calm-form-label">Na koji račun?</div>
+            <div class="calm-method-row" style="padding:6px 0 0">
+              <div class="calm-method-chip active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Kartica</div>
+              <div class="calm-method-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>Keš</div>
+            </div>
+          </div>
+
+          <div class="calm-form-row">
+            <div class="calm-form-label">Datum</div>
+            <input class="calm-form-input" value="Danas · 26. maj 2026"/>
+          </div>
+        </div>
+        <div class="calm-sheet-foot">
+          <button class="calm-btn-save">Sačuvaj primanje</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Postavke</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="calm-list-header"><div class="calm-list-title">Postavke</div></div>
+
+      <div class="calm-settings-section">
+        <div class="calm-settings-title">Stanje računa</div>
+        <div class="calm-settings-card">
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Početno stanje · Kartica</div><div class="calm-setting-sub">Postavi koliko ima na kartici sad</div></div>
+            <div class="calm-setting-value">€4.218,50</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Početno stanje · Keš</div><div class="calm-setting-sub">Postavi gotovinu sad</div></div>
+            <div class="calm-setting-value">€243,00</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Mjesečni budžet</div><div class="calm-setting-sub">Cilj potrošnje po mjesecu</div></div>
+            <div class="calm-setting-value">€3.000,00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calm-settings-section">
+        <div class="calm-settings-title">Aplikacija</div>
+        <div class="calm-settings-card">
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Valuta</div><div class="calm-setting-sub">Prikaz iznosa u aplikaciji</div></div>
+            <div class="calm-setting-value">EUR €</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Tamna tema</div><div class="calm-setting-sub">Trenutno: prati sistem</div></div>
+            <div class="calm-switch on"></div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Sakrij iznose</div><div class="calm-setting-sub">Tap na oko gore za toggle</div></div>
+            <div class="calm-switch"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calm-settings-section">
+        <div class="calm-settings-title">Načini plaćanja</div>
+        <div class="calm-settings-card">
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon" style="background:#eef0fd;color:#4361ee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Kartica</div><div class="calm-setting-sub">Plava · 387 transakcija</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon" style="background:#d1fae5;color:#10b981"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Keš</div><div class="calm-setting-sub">Zelena · 142 transakcije</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon" style="background:#fef3c7;color:#f59e0b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="22" x2="21" y2="22"/><polyline points="5,10 5,3 19,3 19,10"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Virman</div><div class="calm-setting-sub">Žuta · 89 transakcija</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon" style="background:#fee2e2;color:#ef4444">⛽</div>
+            <div class="calm-setting-info"><div class="calm-setting-name">INA</div><div class="calm-setting-sub">Crvena · 38 transakcija</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon" style="background:#ede9fe;color:#8b5cf6">💼</div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Biznis</div><div class="calm-setting-sub">Ljubičasta · 263 transakcija</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+          <div class="calm-setting-row" style="color:#7C5CFF">
+            <div class="calm-setting-icon" style="background:#EDE7FE;color:#7C5CFF">+</div>
+            <div class="calm-setting-info"><div class="calm-setting-name" style="color:#7C5CFF">Dodaj način plaćanja</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calm-settings-section">
+        <div class="calm-settings-title">Podaci</div>
+        <div class="calm-settings-card">
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Eksport CSV</div><div class="calm-setting-sub">831 transakcija · ~94 KB</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">Sinkronizacija</div><div class="calm-setting-sub">Posljednja: prije 2 min</div></div>
+            <div style="color:#10b981;font-size:12px;font-weight:600">● Online</div>
+          </div>
+          <div class="calm-setting-row">
+            <div class="calm-setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="calm-setting-info"><div class="calm-setting-name">O aplikaciji</div><div class="calm-setting-sub">v12 · build 26.05.2026</div></div>
+            <div class="calm-setting-chev">›</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="calm-btn-signout">Odjavi se</button>
+
+      <div style="height:88px"></div>
+
+      <div class="calm-bottom-nav">
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="calm-nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Pretplate — detaljnije</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="calm-list-header" style="padding-bottom:0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="calm-sheet-close" style="background:transparent;font-size:18px">←</div>
+          <div class="calm-list-title">Pretplate</div>
+        </div>
+      </div>
+      <div class="calm-sub-hero">
+        <div class="calm-sub-hero-amount">€198,42<span> /mj</span></div>
+        <div class="calm-sub-hero-meta">16 aktivnih · €2.381,04 godišnje</div>
+      </div>
+      <div class="calm-sub-stats">
+        <div class="calm-sub-stat"><div class="calm-sub-stat-label">Mjesečne</div><div class="calm-sub-stat-value">€132,18</div></div>
+        <div class="calm-sub-stat"><div class="calm-sub-stat-label">Godišnje</div><div class="calm-sub-stat-value">€66,24</div></div>
+      </div>
+      <div class="calm-sub-filter">
+        <button class="active">Sve (16)</button>
+        <button>Mjesečne (14)</button>
+        <button>Godišnje (2)</button>
+      </div>
+
+      <div class="calm-sub-list">
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon" style="background:#000;color:#E50914">N</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">Netflix</div><div class="calm-tx-meta">Naplata 28. svakog mjeseca</div><span class="calm-sub-row-next">Sljedeća 28. maj</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€9,99</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€119,88/god</div></div>
+        </div>
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon green">S</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">Spotify</div><div class="calm-tx-meta">Naplata 28. svakog mjeseca</div><span class="calm-sub-row-next">Sljedeća 28. maj</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€10,49</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€125,88/god</div></div>
+        </div>
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon" style="background:#00C2E8;color:#000">C</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">Canva Pro</div><div class="calm-tx-meta">Naplata 04. svakog mjeseca</div><span class="calm-sub-row-next" style="background:#FCE6E6;color:#E07856">Naplata za 9 dana</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€23,99</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€287,88/god</div></div>
+        </div>
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon purple">A</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">Claude Pro</div><div class="calm-tx-meta">Naplata 04. svakog mjeseca</div><span class="calm-sub-row-next">Sljedeća 04. jun</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€17,07</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€204,84/god</div></div>
+        </div>
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon" style="background:#10a37f">C</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">ChatGPT Plus</div><div class="calm-tx-meta">Naplata 16. svakog mjeseca</div><span class="calm-sub-row-next">Sljedeća 16. jun</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€22,99</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€275,88/god</div></div>
+        </div>
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon" style="background:#000">H</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">Higsfield AI</div><div class="calm-tx-meta">Godišnja · 16. feb svake godine</div><span class="calm-sub-row-next" style="background:#E6F0E6;color:#4F7B5E">Sljedeća za 268 dana</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€308,45</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€25,70/mj equiv.</div></div>
+        </div>
+        <div class="calm-sub-row">
+          <div class="calm-tx-icon" style="background:#FCEDD7;color:#B8830F">CC</div>
+          <div class="calm-tx-info"><div class="calm-tx-desc">CapCut Pro</div><div class="calm-tx-meta">Naplata 07. svakog mjeseca</div><span class="calm-sub-row-next">Sljedeća 07. jun</span></div>
+          <div style="text-align:right"><div class="calm-tx-amount">€6,99</div><div style="font-size:10px;color:#6B6B73;margin-top:2px">€83,88/god</div></div>
+        </div>
+      </div>
+
+      <div style="height:80px"></div>
+
+      <div class="calm-fab">+</div>
+      <div class="calm-bottom-nav">
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
         <div class="calm-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
         <div class="calm-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
       </div>
