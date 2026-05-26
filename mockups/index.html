@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moniq — Redesign Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+html,body{background:#0e0e10;color:#eaeaea;font-family:'Inter',system-ui,sans-serif;line-height:1.5;min-height:100vh}
+.page-header{position:sticky;top:0;z-index:50;background:rgba(14,14,16,.85);backdrop-filter:blur(20px);border-bottom:1px solid #222;padding:20px 24px}
+.page-header h1{font-family:'Fraunces',serif;font-weight:500;font-size:28px;letter-spacing:-.02em;color:#fff}
+.page-header p{font-size:13px;color:#888;margin-top:4px}
+.dir-tabs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.dir-tabs button{appearance:none;border:1px solid #333;background:#1a1a1d;color:#aaa;padding:10px 18px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.dir-tabs button:hover{border-color:#555;color:#fff}
+.dir-tabs button.active{background:#fff;color:#000;border-color:#fff;font-weight:600}
+.dir-tabs button.recommended::before{content:"★ ";color:#facc15;font-size:11px}
+main{padding:32px 16px 80px}
+.mockup-row{display:none;gap:24px;justify-content:center;flex-wrap:wrap;max-width:1400px;margin:0 auto}
+.mockup-row.active{display:flex}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.screen-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#888}
+.phone{width:390px;height:780px;border-radius:50px;border:8px solid #0a0a0a;box-shadow:0 0 0 1px #2a2a2a,0 50px 100px -20px rgba(0,0,0,.6);overflow:hidden;position:relative}
+.phone::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:115px;height:32px;background:#000;border-radius:20px;z-index:100}
+.viewport{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.viewport::-webkit-scrollbar{width:0}
+.status-bar{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 10px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.intro-banner{max-width:880px;margin:0 auto 40px;padding:24px 28px;background:linear-gradient(135deg,#1a1a1d,#0e0e10);border:1px solid #2a2a2a;border-radius:20px}
+.intro-banner h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px;color:#fff;margin-bottom:8px}
+.intro-banner p{font-size:14px;color:#aaa;line-height:1.6}
+.intro-banner strong{color:#fff;font-weight:600}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRAVAC 2 — MONEY DIARY (preporučeni, prvi)
+   ═══════════════════════════════════════════════════════════════ */
+.diary{background:#FFFBF5;color:#1F1A14;font-family:'Inter',sans-serif}
+.diary .status-bar{color:#1F1A14}
+.diary-header{padding:20px 24px 8px;display:flex;align-items:center;justify-content:space-between}
+.diary-greet{font-size:13px;color:#8a7a64;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.diary-sync{display:flex;align-items:center;gap:6px;font-size:11px;color:#8a7a64}
+.diary-sync-dot{width:7px;height:7px;border-radius:50%;background:#4F7B5E}
+.diary-hero{padding:8px 24px 32px}
+.diary-month{font-family:'Fraunces',serif;font-weight:400;font-size:80px;line-height:.88;letter-spacing:-.04em;color:#1F1A14}
+.diary-year{font-family:'Fraunces',serif;font-weight:300;font-size:22px;color:#8a7a64;margin-top:6px;font-style:italic}
+.diary-spend{margin-top:28px}
+.diary-spend-label{font-size:13px;color:#8a7a64;letter-spacing:.04em;margin-bottom:6px}
+.diary-spend-amount{font-family:'Fraunces',serif;font-weight:400;font-size:44px;letter-spacing:-.02em;color:#1F1A14}
+.diary-spend-meta{font-size:13px;color:#8a7a64;margin-top:8px}
+.diary-spend-meta strong{color:#E62727;font-weight:600}
+.diary-budget{margin:16px 0 0;height:6px;background:#F0E8D8;border-radius:99px;overflow:hidden}
+.diary-budget-fill{height:100%;background:linear-gradient(90deg,#E62727,#F4A742);border-radius:99px;width:41.6%}
+.diary-section{padding:24px;border-top:1px solid #EFE5D2}
+.diary-section-title{font-family:'Fraunces',serif;font-weight:500;font-size:22px;color:#1F1A14;margin-bottom:4px;letter-spacing:-.01em}
+.diary-section-sub{font-size:13px;color:#8a7a64;margin-bottom:18px}
+.diary-cat-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #F4EDDC}
+.diary-cat-row:last-child{border-bottom:none}
+.diary-cat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.diary-cat-icon.mkt{background:#FCE6E6;color:#E62727}
+.diary-cat-icon.fuel{background:#FCF1DC;color:#B8830F}
+.diary-cat-icon.food{background:#E6F0E6;color:#4F7B5E}
+.diary-cat-icon.sub{background:#EDE6FC;color:#7A6FE6}
+.diary-cat-icon.shop{background:#FCEDF0;color:#C8597A}
+.diary-cat-icon.health{background:#FFE6E6;color:#D14B4B}
+.diary-cat-info{flex:1;min-width:0}
+.diary-cat-name{font-size:15px;font-weight:600;color:#1F1A14}
+.diary-cat-count{font-size:12px;color:#8a7a64;margin-top:1px}
+.diary-cat-amount{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:#1F1A14;font-variant-numeric:tabular-nums}
+.diary-sub-hero{padding:20px 24px 4px}
+.diary-sub-total{font-family:'Fraunces',serif;font-size:32px;font-weight:400;color:#1F1A14;letter-spacing:-.02em}
+.diary-sub-total span{font-size:18px;color:#8a7a64;font-style:italic}
+.diary-sub-meta{font-size:13px;color:#8a7a64;margin-top:4px}
+.diary-tx{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #F4EDDC}
+.diary-tx:last-child{border-bottom:none}
+.diary-tx-logo{width:36px;height:36px;border-radius:10px;background:#1F1A14;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;letter-spacing:-.02em}
+.diary-tx-logo.netflix{background:#000;color:#E50914}
+.diary-tx-logo.wolt{background:#00C2E8;color:#000}
+.diary-tx-logo.glovo{background:#FFC244;color:#1F1A14}
+.diary-tx-logo.amazon{background:#FF9900;color:#000}
+.diary-tx-logo.temu{background:#FB7701;color:#fff}
+.diary-tx-logo.spotify{background:#1DB954;color:#000}
+.diary-tx-info{flex:1;min-width:0}
+.diary-tx-desc{font-size:14px;font-weight:600;color:#1F1A14;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diary-tx-meta{font-size:12px;color:#8a7a64;margin-top:1px}
+.diary-tx-amount{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:#1F1A14;font-variant-numeric:tabular-nums}
+.diary-balance{margin:20px 24px;background:#1F1A14;border-radius:20px;padding:22px 24px;color:#FFFBF5}
+.diary-balance-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;margin-bottom:14px;color:#FFFBF5}
+.diary-balance-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0}
+.diary-balance-row+.diary-balance-row{border-top:1px solid #2D2820}
+.diary-balance-label{font-size:13px;color:#A89B82}
+.diary-balance-amount{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:#FFFBF5;font-variant-numeric:tabular-nums}
+.diary-bottom-nav{position:sticky;bottom:0;background:rgba(255,251,245,.92);backdrop-filter:blur(20px);border-top:1px solid #EFE5D2;display:grid;grid-template-columns:repeat(4,1fr);padding:10px 0 22px}
+.diary-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:#8a7a64;font-weight:500}
+.diary-nav-item.active{color:#E62727}
+.diary-nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.diary-fab{position:absolute;bottom:96px;right:24px;width:60px;height:60px;border-radius:50%;background:#E62727;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px -4px rgba(230,39,39,.4);z-index:10;font-size:28px;font-weight:300}
+
+/* List view — Money Diary */
+.diary-list-header{padding:20px 24px 12px}
+.diary-list-title{font-family:'Fraunces',serif;font-size:32px;font-weight:400;letter-spacing:-.02em;color:#1F1A14}
+.diary-search{margin:8px 24px 16px;display:flex;align-items:center;gap:10px;padding:12px 16px;background:#F4EDDC;border-radius:14px}
+.diary-search input{flex:1;border:none;background:none;font-size:14px;color:#1F1A14;outline:none;font-family:inherit}
+.diary-search input::placeholder{color:#8a7a64}
+.diary-months{display:flex;gap:8px;padding:0 24px 16px;overflow-x:auto;scrollbar-width:none}
+.diary-months::-webkit-scrollbar{display:none}
+.diary-month-pill{flex-shrink:0;padding:8px 16px;border-radius:999px;background:transparent;border:1px solid #EFE5D2;font-size:13px;font-weight:600;color:#8a7a64;font-family:inherit;cursor:pointer}
+.diary-month-pill.active{background:#1F1A14;color:#FFFBF5;border-color:#1F1A14}
+.diary-filter-chips{display:flex;gap:6px;padding:0 24px 8px;flex-wrap:wrap}
+.diary-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 10px 6px 12px;border-radius:999px;background:#FCE6E6;color:#E62727;font-size:12px;font-weight:600}
+.diary-chip-x{font-size:14px;line-height:1;opacity:.7}
+.diary-day-header{padding:18px 24px 8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8a7a64;display:flex;justify-content:space-between;align-items:baseline}
+.diary-day-header-total{font-family:'JetBrains Mono',monospace;color:#1F1A14;font-weight:600;font-size:12px}
+.diary-list-tx{padding:0 24px}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRAVAC 1 — CALM LEDGER
+   ═══════════════════════════════════════════════════════════════ */
+.calm{background:#F6F5F2;color:#0E1116;font-family:'Inter',sans-serif}
+.calm .status-bar{color:#0E1116}
+.calm-header{padding:8px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.calm-brand{font-weight:700;font-size:17px;letter-spacing:-.02em}
+.calm-brand-dot{display:inline-block;width:8px;height:8px;background:#7C5CFF;border-radius:50%;margin-right:6px;vertical-align:1px}
+.calm-icon-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6B6B73;border:1px solid rgba(14,17,22,.08)}
+.calm-hero{padding:32px 20px 24px}
+.calm-hero-label{font-size:12px;font-weight:500;color:#6B6B73;letter-spacing:.04em;text-transform:uppercase}
+.calm-hero-amount{font-family:'Inter',sans-serif;font-weight:600;font-size:56px;letter-spacing:-.04em;line-height:1;margin-top:8px;color:#0E1116;font-variant-numeric:tabular-nums}
+.calm-hero-meta{font-size:13px;color:#6B6B73;margin-top:10px;font-variant-numeric:tabular-nums}
+.calm-hero-meta b{color:#0E1116;font-weight:600}
+.calm-bar{margin-top:16px;height:4px;background:#E5E3DD;border-radius:99px;overflow:hidden}
+.calm-bar-fill{height:100%;background:#0E1116;width:41.6%}
+.calm-quick{display:flex;gap:8px;padding:0 20px 8px;overflow-x:auto;scrollbar-width:none}
+.calm-quick::-webkit-scrollbar{display:none}
+.calm-quick-chip{flex-shrink:0;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(14,17,22,.06);font-size:12px}
+.calm-quick-chip b{display:block;font-weight:600;color:#0E1116;font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:2px;font-variant-numeric:tabular-nums}
+.calm-quick-chip span{color:#6B6B73}
+.calm-section{padding:24px 20px 4px}
+.calm-section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.calm-section-title{font-size:13px;font-weight:600;color:#0E1116;letter-spacing:.04em;text-transform:uppercase}
+.calm-section-link{font-size:12px;color:#6B6B73}
+.calm-tx{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(14,17,22,.06)}
+.calm-tx:last-child{border-bottom:none}
+.calm-tx-icon{width:32px;height:32px;border-radius:8px;background:#0E1116;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.calm-tx-icon.purple{background:#7C5CFF}
+.calm-tx-icon.green{background:#4ADE80;color:#0E1116}
+.calm-tx-icon.gray{background:#E5E3DD;color:#0E1116}
+.calm-tx-info{flex:1;min-width:0}
+.calm-tx-desc{font-size:14px;font-weight:500;color:#0E1116;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calm-tx-meta{font-size:12px;color:#6B6B73;margin-top:1px;font-variant-numeric:tabular-nums}
+.calm-tx-amount{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums}
+.calm-balance{margin:20px 20px 16px;background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:12px;padding:16px}
+.calm-balance-title{font-size:11px;font-weight:600;color:#6B6B73;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.calm-balance-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.calm-balance-cell{padding:8px 0}
+.calm-balance-label{font-size:12px;color:#6B6B73}
+.calm-balance-amount{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;color:#0E1116;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
+.calm-bottom-nav{position:sticky;bottom:0;background:rgba(246,245,242,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(14,17,22,.06);display:grid;grid-template-columns:repeat(4,1fr);padding:10px 0 22px}
+.calm-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:#6B6B73;font-weight:500}
+.calm-nav-item.active{color:#0E1116}
+.calm-nav-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.calm-fab{position:absolute;bottom:90px;right:20px;width:52px;height:52px;border-radius:14px;background:#0E1116;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px -8px rgba(14,17,22,.4);z-index:10;font-size:24px;font-weight:300}
+
+/* Calm list view */
+.calm-list-header{padding:8px 20px 16px;display:flex;align-items:center;justify-content:space-between}
+.calm-list-title{font-size:22px;font-weight:700;letter-spacing:-.02em;color:#0E1116}
+.calm-search{margin:0 20px 12px;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid rgba(14,17,22,.06);border-radius:10px}
+.calm-search input{flex:1;border:none;background:none;font-size:14px;color:#0E1116;outline:none;font-family:inherit}
+.calm-months{display:flex;gap:6px;padding:0 20px 12px;overflow-x:auto;scrollbar-width:none}
+.calm-months::-webkit-scrollbar{display:none}
+.calm-month-pill{flex-shrink:0;padding:6px 14px;border-radius:8px;background:transparent;border:1px solid transparent;font-size:13px;font-weight:600;color:#6B6B73;font-family:inherit;font-variant-numeric:tabular-nums}
+.calm-month-pill.active{background:#0E1116;color:#fff}
+.calm-chips{display:flex;gap:6px;padding:0 20px 6px;flex-wrap:wrap}
+.calm-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:6px;background:rgba(14,17,22,.06);color:#0E1116;font-size:11px;font-weight:500}
+.calm-month-divider{padding:16px 20px 6px;display:flex;justify-content:space-between;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B6B73;font-variant-numeric:tabular-nums}
+.calm-month-divider b{color:#0E1116}
+.calm-list{padding:0 20px}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRAVAC 3 — NUMBERS FIRST
+   ═══════════════════════════════════════════════════════════════ */
+.num{background:#FFFFFF;color:#000;font-family:'JetBrains Mono',monospace}
+.num .status-bar{color:#000;font-family:'JetBrains Mono',monospace}
+.num-header{padding:8px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #000}
+.num-brand{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.num-date{font-size:11px;color:#666;letter-spacing:.06em}
+.num-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #000}
+.num-cell{padding:20px 16px;border-right:1px solid #000;display:flex;flex-direction:column;justify-content:space-between;min-height:120px}
+.num-cell:nth-child(2n){border-right:none}
+.num-cell:nth-child(-n+2){border-bottom:1px solid #000}
+.num-cell-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#999}
+.num-cell-value{font-size:32px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.num-cell-sub{font-size:10px;color:#666;letter-spacing:.04em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.num-cell.accent .num-cell-value{color:#0066FF}
+.num-cell.warn .num-cell-value{color:#FF0033}
+.num-section{border-bottom:1px solid #000}
+.num-section-head{padding:14px 20px 12px;border-bottom:1px solid #ddd;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between}
+.num-section-head span{color:#666;letter-spacing:.04em;text-transform:none;font-weight:500}
+.num-cat-row{padding:12px 20px;border-bottom:1px solid #f3f3f3;display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:12px;font-size:13px}
+.num-cat-row:last-child{border-bottom:none}
+.num-cat-code{font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 6px;background:#000;color:#fff;border-radius:2px;text-align:center}
+.num-cat-code.mkt{background:#FF0033;color:#fff}
+.num-cat-code.ful{background:#FF6600;color:#fff}
+.num-cat-code.sub{background:#0066FF;color:#fff}
+.num-cat-code.foo{background:#00AA44;color:#fff}
+.num-cat-code.shp{background:#9933FF;color:#fff}
+.num-cat-bar{position:relative;height:6px;background:#f3f3f3;border-radius:0}
+.num-cat-bar-fill{position:absolute;top:0;left:0;height:100%;background:#000}
+.num-cat-amount{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.num-table-head{display:grid;grid-template-columns:54px 1fr 38px 56px 84px;gap:8px;padding:8px 16px;border-bottom:1px solid #000;background:#fafafa;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#666}
+.num-table-row{display:grid;grid-template-columns:54px 1fr 38px 56px 84px;gap:8px;padding:11px 16px;border-bottom:1px solid #f3f3f3;font-size:12px;align-items:center}
+.num-table-row:last-child{border-bottom:none}
+.num-td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.num-td.date{color:#666;font-variant-numeric:tabular-nums}
+.num-td.desc{font-weight:500}
+.num-td.cat{font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 4px;color:#fff;border-radius:2px;text-align:center;background:#000}
+.num-td.cat.mkt{background:#FF0033}
+.num-td.cat.ful{background:#FF6600}
+.num-td.cat.sub{background:#0066FF}
+.num-td.cat.foo{background:#00AA44}
+.num-td.cat.shp{background:#9933FF}
+.num-td.cat.hea{background:#FF3399}
+.num-td.met{font-size:10px;color:#666;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.num-td.amount{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.num-month-row{padding:8px 16px;background:#000;color:#fff;display:grid;grid-template-columns:1fr auto;align-items:center;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.num-month-row .total{font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:.02em}
+.num-search{padding:10px 16px;border-bottom:1px solid #000;display:flex;align-items:center;gap:8px}
+.num-search-prefix{font-size:11px;color:#999;font-weight:700}
+.num-search input{flex:1;border:none;background:none;font-size:12px;font-family:inherit;outline:none;color:#000}
+.num-search input::placeholder{color:#bbb}
+.num-cmd-bar{padding:0 16px 10px;display:flex;gap:6px;flex-wrap:wrap}
+.num-cmd{font-size:10px;padding:3px 6px;background:#000;color:#fff;letter-spacing:.04em;font-weight:600}
+.num-cmd.active{background:#0066FF}
+.num-bottom-nav{position:sticky;bottom:0;background:#fff;border-top:1px solid #000;display:grid;grid-template-columns:repeat(4,1fr)}
+.num-nav-item{padding:14px 0 22px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:#999;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-right:1px solid #f3f3f3}
+.num-nav-item:last-child{border-right:none}
+.num-nav-item.active{color:#000}
+.num-nav-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.num-fab{position:absolute;bottom:84px;right:16px;width:48px;height:48px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;z-index:10;font-size:22px;font-weight:300;font-family:'JetBrains Mono',monospace}
+
+/* ─── Responsive ─── */
+@media (max-width:900px){
+  .mockup-row.active{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Moniq — Redesign Mockups</h1>
+  <p>Tri pravca. Logika ostaje ista, ovo je samo vizuelni jezik. Klikni na pravac da prebaciš.</p>
+  <div class="dir-tabs">
+    <button class="active recommended" data-dir="diary">Money Diary</button>
+    <button data-dir="calm">Calm Ledger</button>
+    <button data-dir="numbers">Numbers First</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════════════════ MONEY DIARY ═══════════════════════ -->
+<section class="mockup-row active" data-dir="diary">
+
+<div class="intro-banner" style="flex-basis:100%">
+  <h2>Money Diary — ekspresivni dnevnik</h2>
+  <p>Kremasta pozadina <strong>#FFFBF5</strong>, <strong>Fraunces</strong> serif za naslove + <strong>JetBrains Mono</strong> za iznose. Tvoj logo crveni <strong>#E62727</strong> konačno radi posao kao brand boja. Mjesec je naslovna stranica, kao knjiga. Generous whitespace, kategorijske ikone u kružićima u toplim tonovima (med, terra, mahovina). Personality bez igračkastosti.</p>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Dashboard</div>
+  <div class="phone">
+    <div class="viewport diary">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="diary-header">
+        <span class="diary-greet">Ponedjeljak · 26. maj</span>
+        <span class="diary-sync"><span class="diary-sync-dot"></span>Sinhronizovano</span>
+      </div>
+      <div class="diary-hero">
+        <div class="diary-month">Maj</div>
+        <div class="diary-year">u 2026.</div>
+        <div class="diary-spend">
+          <div class="diary-spend-label">POTROŠENO OVAJ MJESEC</div>
+          <div class="diary-spend-amount">€1.247,43</div>
+          <div class="diary-spend-meta">od <strong>€3.000</strong> · €71,85/dan · 5 dana ostalo</div>
+        </div>
+        <div class="diary-budget"><div class="diary-budget-fill"></div></div>
+      </div>
+
+      <div class="diary-section">
+        <div class="diary-section-title">Po kategorijama</div>
+        <div class="diary-section-sub">Mjesec u tonovima</div>
+        <div class="diary-cat-row">
+          <div class="diary-cat-icon mkt">📣</div>
+          <div class="diary-cat-info"><div class="diary-cat-name">Marketing</div><div class="diary-cat-count">12 troškova</div></div>
+          <div class="diary-cat-amount">€478,70</div>
+        </div>
+        <div class="diary-cat-row">
+          <div class="diary-cat-icon fuel">⛽</div>
+          <div class="diary-cat-info"><div class="diary-cat-name">Gorivo &amp; Auto</div><div class="diary-cat-count">4 troška</div></div>
+          <div class="diary-cat-amount">€232,85</div>
+        </div>
+        <div class="diary-cat-row">
+          <div class="diary-cat-icon sub">📱</div>
+          <div class="diary-cat-info"><div class="diary-cat-name">Pretplate</div><div class="diary-cat-count">8 troškova</div></div>
+          <div class="diary-cat-amount">€198,42</div>
+        </div>
+        <div class="diary-cat-row">
+          <div class="diary-cat-icon food">🍽</div>
+          <div class="diary-cat-info"><div class="diary-cat-name">Hrana &amp; Kafići</div><div class="diary-cat-count">9 troškova</div></div>
+          <div class="diary-cat-amount">€164,94</div>
+        </div>
+        <div class="diary-cat-row">
+          <div class="diary-cat-icon shop">🛒</div>
+          <div class="diary-cat-info"><div class="diary-cat-name">Online Shopping</div><div class="diary-cat-count">3 troška</div></div>
+          <div class="diary-cat-amount">€104,53</div>
+        </div>
+      </div>
+
+      <div class="diary-sub-hero">
+        <div class="diary-sub-total">€198,42<span> / mjesec na pretplatama</span></div>
+        <div class="diary-sub-meta">16 aktivnih · 2 godišnje</div>
+      </div>
+      <div class="diary-section" style="padding-top:14px;border-top:none">
+        <div class="diary-tx"><div class="diary-tx-logo netflix">N</div><div class="diary-tx-info"><div class="diary-tx-desc">Netflix</div><div class="diary-tx-meta">28. apr · sljedeća 28. maj</div></div><div class="diary-tx-amount">€9,99</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo spotify">S</div><div class="diary-tx-info"><div class="diary-tx-desc">Spotify</div><div class="diary-tx-meta">28. apr · sljedeća 28. maj</div></div><div class="diary-tx-amount">€10,49</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">C</div><div class="diary-tx-info"><div class="diary-tx-desc">Canva Pro</div><div class="diary-tx-meta">04. maj · sljedeća 04. jun</div></div><div class="diary-tx-amount">€23,99</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">A</div><div class="diary-tx-info"><div class="diary-tx-desc">Claude Pro</div><div class="diary-tx-meta">04. maj · sljedeća 04. jun</div></div><div class="diary-tx-amount">€17,07</div></div>
+      </div>
+
+      <div class="diary-section">
+        <div class="diary-section-title">Posljednji troškovi</div>
+        <div class="diary-section-sub">Ovaj sedmica</div>
+        <div class="diary-tx"><div class="diary-tx-logo">A</div><div class="diary-tx-info"><div class="diary-tx-desc">Aco-Rade licenca softver</div><div class="diary-tx-meta">14. maj · Biznis · Pretplate</div></div><div class="diary-tx-amount">€8,65</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">R</div><div class="diary-tx-info"><div class="diary-tx-desc">Reklame</div><div class="diary-tx-meta">14. maj · Biznis · Marketing</div></div><div class="diary-tx-amount">€4,85</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo temu">t</div><div class="diary-tx-info"><div class="diary-tx-desc">Temu</div><div class="diary-tx-meta">12. maj · Kartica · Shopping</div></div><div class="diary-tx-amount">€25,59</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">SC</div><div class="diary-tx-info"><div class="diary-tx-desc">Sicilija City</div><div class="diary-tx-meta">11. maj · Kartica · Hrana</div></div><div class="diary-tx-amount">€2,50</div></div>
+      </div>
+
+      <div class="diary-balance">
+        <div class="diary-balance-title">Stanje računa</div>
+        <div class="diary-balance-row"><span class="diary-balance-label">Kartica</span><span class="diary-balance-amount">€4.218,50</span></div>
+        <div class="diary-balance-row"><span class="diary-balance-label">Keš</span><span class="diary-balance-amount">€243,00</span></div>
+        <div class="diary-balance-row"><span class="diary-balance-label">Ukupno</span><span class="diary-balance-amount">€4.461,50</span></div>
+      </div>
+
+      <div class="diary-fab">+</div>
+      <div class="diary-bottom-nav">
+        <div class="diary-nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="diary-nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="diary-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
+        <div class="diary-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Lista troškova</div>
+  <div class="phone">
+    <div class="viewport diary">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="diary-list-header"><div class="diary-list-title">Troškovi</div></div>
+      <div class="diary-search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a7a64" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Pretraga...">
+      </div>
+      <div class="diary-months">
+        <button class="diary-month-pill active">Maj</button>
+        <button class="diary-month-pill">Apr</button>
+        <button class="diary-month-pill">Mar</button>
+        <button class="diary-month-pill">Feb</button>
+        <button class="diary-month-pill">Jan</button>
+      </div>
+      <div class="diary-filter-chips">
+        <div class="diary-chip">Marketing<span class="diary-chip-x">×</span></div>
+        <div class="diary-chip">Biznis<span class="diary-chip-x">×</span></div>
+        <div class="diary-chip" style="background:#F4EDDC;color:#8a7a64">+ Filtriraj</div>
+      </div>
+
+      <div class="diary-day-header"><span>Sri · 14. maj</span><span class="diary-day-header-total">€13,50</span></div>
+      <div class="diary-list-tx">
+        <div class="diary-tx"><div class="diary-tx-logo">A</div><div class="diary-tx-info"><div class="diary-tx-desc">Aco-Rade licenca softver</div><div class="diary-tx-meta">Biznis · Pretplate</div></div><div class="diary-tx-amount">€8,65</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">R</div><div class="diary-tx-info"><div class="diary-tx-desc">Reklame</div><div class="diary-tx-meta">Biznis · Marketing</div></div><div class="diary-tx-amount">€4,85</div></div>
+      </div>
+
+      <div class="diary-day-header"><span>Pon · 12. maj</span><span class="diary-day-header-total">€80,59</span></div>
+      <div class="diary-list-tx">
+        <div class="diary-tx"><div class="diary-tx-logo">R</div><div class="diary-tx-info"><div class="diary-tx-desc">Reklame</div><div class="diary-tx-meta">Biznis · Marketing</div></div><div class="diary-tx-amount">€55,00</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo temu">t</div><div class="diary-tx-info"><div class="diary-tx-desc">Temu</div><div class="diary-tx-meta">Kartica · Shopping</div></div><div class="diary-tx-amount">€25,59</div></div>
+      </div>
+
+      <div class="diary-day-header"><span>Ned · 11. maj</span><span class="diary-day-header-total">€2,50</span></div>
+      <div class="diary-list-tx">
+        <div class="diary-tx"><div class="diary-tx-logo">SC</div><div class="diary-tx-info"><div class="diary-tx-desc">Sicilija City</div><div class="diary-tx-meta">Kartica · Hrana</div></div><div class="diary-tx-amount">€2,50</div></div>
+      </div>
+
+      <div class="diary-day-header"><span>Sub · 10. maj</span><span class="diary-day-header-total">€149,36</span></div>
+      <div class="diary-list-tx">
+        <div class="diary-tx"><div class="diary-tx-logo">G</div><div class="diary-tx-info"><div class="diary-tx-desc">Gorivo Raptor</div><div class="diary-tx-meta">INA · Gorivo</div></div><div class="diary-tx-amount">€107,76</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">A</div><div class="diary-tx-info"><div class="diary-tx-desc">Apoteka Cigo</div><div class="diary-tx-meta">Kartica · Zdravlje</div></div><div class="diary-tx-amount">€27,85</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo wolt">W</div><div class="diary-tx-info"><div class="diary-tx-desc">Wolt Sac bureci</div><div class="diary-tx-meta">Biznis · Dostava</div></div><div class="diary-tx-amount">€10,11</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">A</div><div class="diary-tx-info"><div class="diary-tx-desc">Apoteka presing BG</div><div class="diary-tx-meta">Kartica · Zdravlje</div></div><div class="diary-tx-amount">€3,64</div></div>
+      </div>
+
+      <div class="diary-day-header"><span>Pet · 09. maj</span><span class="diary-day-header-total">€174,49</span></div>
+      <div class="diary-list-tx" style="padding-bottom:24px">
+        <div class="diary-tx"><div class="diary-tx-logo">M</div><div class="diary-tx-info"><div class="diary-tx-desc">Marija Cobeljic ručak</div><div class="diary-tx-meta">Biznis · Hrana</div></div><div class="diary-tx-amount">€71,06</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo">R</div><div class="diary-tx-info"><div class="diary-tx-desc">Reklame</div><div class="diary-tx-meta">Biznis · Marketing</div></div><div class="diary-tx-amount">€55,00</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo wolt">W</div><div class="diary-tx-info"><div class="diary-tx-desc">Wolt Karpuzzi BG</div><div class="diary-tx-meta">Biznis · Dostava</div></div><div class="diary-tx-amount">€34,62</div></div>
+        <div class="diary-tx"><div class="diary-tx-logo wolt">W</div><div class="diary-tx-info"><div class="diary-tx-desc">Wolt Trpkovic bureci BG</div><div class="diary-tx-meta">Biznis · Dostava</div></div><div class="diary-tx-amount">€13,81</div></div>
+      </div>
+
+      <div class="diary-fab">+</div>
+      <div class="diary-bottom-nav">
+        <div class="diary-nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="diary-nav-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="diary-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
+        <div class="diary-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+
+<!-- ═══════════════════════ CALM LEDGER ═══════════════════════ -->
+<section class="mockup-row" data-dir="calm">
+
+<div class="intro-banner" style="flex-basis:100%">
+  <h2>Calm Ledger — tih i precizan</h2>
+  <p>Off-white pozadina <strong>#F6F5F2</strong> (papir, ne plastika), skoro-crni tekst <strong>#0E1116</strong>, ljubičasta <strong>#7C5CFF</strong> samo na grafici/chart elementima. <strong>Inter</strong> + <strong>JetBrains Mono</strong> sa tabular figures za iznose. Gusta lista, hairline separatori, bez sjenki kartica. Profesionalan alat — nema krika, sve je suzdržano.</p>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Dashboard</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="calm-header">
+        <div class="calm-brand"><span class="calm-brand-dot"></span>moniq</div>
+        <div class="calm-icon-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </div>
+      </div>
+      <div class="calm-hero">
+        <div class="calm-hero-label">MAJ · 2026</div>
+        <div class="calm-hero-amount">€1.247,43</div>
+        <div class="calm-hero-meta">od <b>€3.000</b> budžeta · prosjek <b>€71,85/dan</b></div>
+        <div class="calm-bar"><div class="calm-bar-fill"></div></div>
+      </div>
+      <div class="calm-quick">
+        <div class="calm-quick-chip"><span>Marketing</span><b>€478,70</b></div>
+        <div class="calm-quick-chip"><span>Gorivo</span><b>€232,85</b></div>
+        <div class="calm-quick-chip"><span>Pretplate</span><b>€198,42</b></div>
+        <div class="calm-quick-chip"><span>Hrana</span><b>€164,94</b></div>
+        <div class="calm-quick-chip"><span>Shopping</span><b>€104,53</b></div>
+      </div>
+
+      <div class="calm-section">
+        <div class="calm-section-head"><div class="calm-section-title">Pretplate</div><div class="calm-section-link">€198,42/mj · 16 aktivnih →</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#000;color:#E50914">N</div><div class="calm-tx-info"><div class="calm-tx-desc">Netflix</div><div class="calm-tx-meta">Naplata: 28. svakog mjeseca</div></div><div class="calm-tx-amount">€9,99</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon green">S</div><div class="calm-tx-info"><div class="calm-tx-desc">Spotify</div><div class="calm-tx-meta">Naplata: 28. svakog mjeseca</div></div><div class="calm-tx-amount">€10,49</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#00C2E8;color:#000">C</div><div class="calm-tx-info"><div class="calm-tx-desc">Canva Pro</div><div class="calm-tx-meta">Naplata: 04. svakog mjeseca</div></div><div class="calm-tx-amount">€23,99</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon purple">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Claude Pro</div><div class="calm-tx-meta">Naplata: 04. svakog mjeseca</div></div><div class="calm-tx-amount">€17,07</div></div>
+      </div>
+
+      <div class="calm-section">
+        <div class="calm-section-head"><div class="calm-section-title">Posljednje</div><div class="calm-section-link">Vidi sve →</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Aco-Rade licenca</div><div class="calm-tx-meta">14.05 · Biznis · Pretplate</div></div><div class="calm-tx-amount">€8,65</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">R</div><div class="calm-tx-info"><div class="calm-tx-desc">Reklame</div><div class="calm-tx-meta">14.05 · Biznis · Marketing</div></div><div class="calm-tx-amount">€4,85</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#FB7701">t</div><div class="calm-tx-info"><div class="calm-tx-desc">Temu</div><div class="calm-tx-meta">12.05 · Kartica · Shopping</div></div><div class="calm-tx-amount">€25,59</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">SC</div><div class="calm-tx-info"><div class="calm-tx-desc">Sicilija City</div><div class="calm-tx-meta">11.05 · Kartica · Hrana</div></div><div class="calm-tx-amount">€2,50</div></div>
+      </div>
+
+      <div class="calm-balance">
+        <div class="calm-balance-title">Stanje računa</div>
+        <div class="calm-balance-grid">
+          <div class="calm-balance-cell"><div class="calm-balance-label">Kartica</div><div class="calm-balance-amount">€4.218,50</div></div>
+          <div class="calm-balance-cell"><div class="calm-balance-label">Keš</div><div class="calm-balance-amount">€243,00</div></div>
+        </div>
+      </div>
+
+      <div class="calm-fab">+</div>
+      <div class="calm-bottom-nav">
+        <div class="calm-nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Lista troškova</div>
+  <div class="phone">
+    <div class="viewport calm">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="calm-list-header"><div class="calm-list-title">Troškovi</div></div>
+      <div class="calm-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B73" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Pretraga...">
+      </div>
+      <div class="calm-months">
+        <button class="calm-month-pill active">Maj 26</button>
+        <button class="calm-month-pill">Apr 26</button>
+        <button class="calm-month-pill">Mar 26</button>
+        <button class="calm-month-pill">Feb 26</button>
+        <button class="calm-month-pill">Jan 26</button>
+      </div>
+      <div class="calm-chips">
+        <div class="calm-chip">Marketing ×</div>
+        <div class="calm-chip">Biznis ×</div>
+        <div class="calm-chip" style="background:transparent;border:1px dashed rgba(14,17,22,.15)">+ filter</div>
+      </div>
+
+      <div class="calm-month-divider"><span>SRIJ · 14.05</span><b>€13,50</b></div>
+      <div class="calm-list">
+        <div class="calm-tx"><div class="calm-tx-icon">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Aco-Rade licenca softver</div><div class="calm-tx-meta">Biznis · Pretplate</div></div><div class="calm-tx-amount">€8,65</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">R</div><div class="calm-tx-info"><div class="calm-tx-desc">Reklame</div><div class="calm-tx-meta">Biznis · Marketing</div></div><div class="calm-tx-amount">€4,85</div></div>
+      </div>
+
+      <div class="calm-month-divider"><span>PON · 12.05</span><b>€80,59</b></div>
+      <div class="calm-list">
+        <div class="calm-tx"><div class="calm-tx-icon">R</div><div class="calm-tx-info"><div class="calm-tx-desc">Reklame</div><div class="calm-tx-meta">Biznis · Marketing</div></div><div class="calm-tx-amount">€55,00</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#FB7701">t</div><div class="calm-tx-info"><div class="calm-tx-desc">Temu</div><div class="calm-tx-meta">Kartica · Shopping</div></div><div class="calm-tx-amount">€25,59</div></div>
+      </div>
+
+      <div class="calm-month-divider"><span>NED · 11.05</span><b>€2,50</b></div>
+      <div class="calm-list">
+        <div class="calm-tx"><div class="calm-tx-icon">SC</div><div class="calm-tx-info"><div class="calm-tx-desc">Sicilija City</div><div class="calm-tx-meta">Kartica · Hrana</div></div><div class="calm-tx-amount">€2,50</div></div>
+      </div>
+
+      <div class="calm-month-divider"><span>SUB · 10.05</span><b>€149,36</b></div>
+      <div class="calm-list">
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#ef4444">G</div><div class="calm-tx-info"><div class="calm-tx-desc">Gorivo Raptor</div><div class="calm-tx-meta">INA · Gorivo</div></div><div class="calm-tx-amount">€107,76</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Apoteka Cigo</div><div class="calm-tx-meta">Kartica · Zdravlje</div></div><div class="calm-tx-amount">€27,85</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#00C2E8;color:#000">W</div><div class="calm-tx-info"><div class="calm-tx-desc">Wolt Sac bureci</div><div class="calm-tx-meta">Biznis · Dostava</div></div><div class="calm-tx-amount">€10,11</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">A</div><div class="calm-tx-info"><div class="calm-tx-desc">Apoteka presing BG</div><div class="calm-tx-meta">Kartica · Zdravlje</div></div><div class="calm-tx-amount">€3,64</div></div>
+      </div>
+
+      <div class="calm-month-divider"><span>PET · 09.05</span><b>€174,49</b></div>
+      <div class="calm-list" style="padding-bottom:24px">
+        <div class="calm-tx"><div class="calm-tx-icon">M</div><div class="calm-tx-info"><div class="calm-tx-desc">Marija Cobeljic ručak</div><div class="calm-tx-meta">Biznis · Hrana</div></div><div class="calm-tx-amount">€71,06</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon">R</div><div class="calm-tx-info"><div class="calm-tx-desc">Reklame</div><div class="calm-tx-meta">Biznis · Marketing</div></div><div class="calm-tx-amount">€55,00</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#00C2E8;color:#000">W</div><div class="calm-tx-info"><div class="calm-tx-desc">Wolt Karpuzzi BG</div><div class="calm-tx-meta">Biznis · Dostava</div></div><div class="calm-tx-amount">€34,62</div></div>
+        <div class="calm-tx"><div class="calm-tx-icon" style="background:#00C2E8;color:#000">W</div><div class="calm-tx-info"><div class="calm-tx-desc">Wolt Trpkovic BG</div><div class="calm-tx-meta">Biznis · Dostava</div></div><div class="calm-tx-amount">€13,81</div></div>
+      </div>
+
+      <div class="calm-fab">+</div>
+      <div class="calm-bottom-nav">
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="calm-nav-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Postavke</div>
+        <div class="calm-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+
+<!-- ═══════════════════════ NUMBERS FIRST ═══════════════════════ -->
+<section class="mockup-row" data-dir="numbers">
+
+<div class="intro-banner" style="flex-basis:100%">
+  <h2>Numbers First — data spreadsheet u džepu</h2>
+  <p>Maksimalan kontrast — čisto crno na čisto bijelom, <strong>JetBrains Mono</strong> svuda. Lista je doslovno tabela sa 5 kolona. Kategorije su trobukvarni kodovi (MKT, FUL, SUB...) sa boja-tag-om. Bez sjenki, bez zaobljenja, bez emoji-ja. Brutalno funkcionalno — za one koji vole spreadsheet-e, ali u lijepom okviru.</p>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Dashboard</div>
+  <div class="phone">
+    <div class="viewport num">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="num-header">
+        <div class="num-brand">MONIQ</div>
+        <div class="num-date">26·05·2026</div>
+      </div>
+
+      <div class="num-grid">
+        <div class="num-cell">
+          <div class="num-cell-label">POTROŠENO</div>
+          <div>
+            <div class="num-cell-value">€1.247</div>
+            <div class="num-cell-sub">41,6% / €3.000</div>
+          </div>
+        </div>
+        <div class="num-cell">
+          <div class="num-cell-label">PROSJEK/DAN</div>
+          <div>
+            <div class="num-cell-value">€71</div>
+            <div class="num-cell-sub">26 dana</div>
+          </div>
+        </div>
+        <div class="num-cell">
+          <div class="num-cell-label">PREOSTALO</div>
+          <div>
+            <div class="num-cell-value">€1.752</div>
+            <div class="num-cell-sub">5 dana</div>
+          </div>
+        </div>
+        <div class="num-cell accent">
+          <div class="num-cell-label">PRETPLATE/MJ</div>
+          <div>
+            <div class="num-cell-value">€198</div>
+            <div class="num-cell-sub">16 aktivnih</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="num-section">
+        <div class="num-section-head"><span>PO KATEGORIJAMA</span><span>MAJ 2026</span></div>
+        <div class="num-cat-row">
+          <div class="num-cat-code mkt">MKT</div>
+          <div class="num-cat-bar"><div class="num-cat-bar-fill" style="width:100%;background:#FF0033"></div></div>
+          <div class="num-cat-amount">€478</div>
+        </div>
+        <div class="num-cat-row">
+          <div class="num-cat-code ful">FUL</div>
+          <div class="num-cat-bar"><div class="num-cat-bar-fill" style="width:49%;background:#FF6600"></div></div>
+          <div class="num-cat-amount">€232</div>
+        </div>
+        <div class="num-cat-row">
+          <div class="num-cat-code sub">SUB</div>
+          <div class="num-cat-bar"><div class="num-cat-bar-fill" style="width:41%;background:#0066FF"></div></div>
+          <div class="num-cat-amount">€198</div>
+        </div>
+        <div class="num-cat-row">
+          <div class="num-cat-code foo">FOO</div>
+          <div class="num-cat-bar"><div class="num-cat-bar-fill" style="width:34%;background:#00AA44"></div></div>
+          <div class="num-cat-amount">€164</div>
+        </div>
+        <div class="num-cat-row">
+          <div class="num-cat-code shp">SHP</div>
+          <div class="num-cat-bar"><div class="num-cat-bar-fill" style="width:22%;background:#9933FF"></div></div>
+          <div class="num-cat-amount">€104</div>
+        </div>
+      </div>
+
+      <div class="num-section">
+        <div class="num-section-head"><span>RAČUNI</span><span>UKUPNO €4.461</span></div>
+        <div class="num-cat-row" style="grid-template-columns:60px 1fr auto">
+          <div class="num-cat-code" style="background:#000">KART</div>
+          <div style="font-size:11px;color:#666;letter-spacing:.04em">KARTICA</div>
+          <div class="num-cat-amount">€4.218,50</div>
+        </div>
+        <div class="num-cat-row" style="grid-template-columns:60px 1fr auto">
+          <div class="num-cat-code" style="background:#000">CASH</div>
+          <div style="font-size:11px;color:#666;letter-spacing:.04em">KEŠ</div>
+          <div class="num-cat-amount">€243,00</div>
+        </div>
+      </div>
+
+      <div class="num-section">
+        <div class="num-section-head"><span>STATISTIKE</span><span>MAJ</span></div>
+        <div class="num-cat-row" style="grid-template-columns:1fr auto"><div style="font-size:11px;color:#666;letter-spacing:.06em;text-transform:uppercase">Najveći trošak</div><div class="num-cat-amount">€107,76</div></div>
+        <div class="num-cat-row" style="grid-template-columns:1fr auto"><div style="font-size:11px;color:#666;letter-spacing:.06em;text-transform:uppercase">Najmanji trošak</div><div class="num-cat-amount">€1,71</div></div>
+        <div class="num-cat-row" style="grid-template-columns:1fr auto"><div style="font-size:11px;color:#666;letter-spacing:.06em;text-transform:uppercase">Prosječan trošak</div><div class="num-cat-amount">€34,65</div></div>
+        <div class="num-cat-row" style="grid-template-columns:1fr auto"><div style="font-size:11px;color:#666;letter-spacing:.06em;text-transform:uppercase">Ukupno transakcija</div><div class="num-cat-amount">36</div></div>
+      </div>
+
+      <div class="num-fab">+</div>
+      <div class="num-bottom-nav">
+        <div class="num-nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>DASH</div>
+        <div class="num-nav-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>LIST</div>
+        <div class="num-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>OPT</div>
+        <div class="num-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USR</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="screen-label">Lista (tabelarna)</div>
+  <div class="phone">
+    <div class="viewport num">
+      <div class="status-bar"><span>9:41</span><span>●●● 5G ▮</span></div>
+      <div class="num-header">
+        <div class="num-brand">TROŠKOVI · MAJ 26</div>
+        <div class="num-date">36 ST</div>
+      </div>
+      <div class="num-search">
+        <span class="num-search-prefix">▸</span>
+        <input type="text" placeholder="search...">
+      </div>
+      <div class="num-cmd-bar">
+        <span class="num-cmd active">/MAJ</span>
+        <span class="num-cmd active">/MKT</span>
+        <span class="num-cmd active">/BIZ</span>
+        <span class="num-cmd" style="background:#fff;color:#999;border:1px solid #ddd">/+</span>
+      </div>
+
+      <div class="num-table-head">
+        <div>DATUM</div>
+        <div>OPIS</div>
+        <div>KAT</div>
+        <div>MET</div>
+        <div style="text-align:right">IZNOS</div>
+      </div>
+
+      <div class="num-month-row">
+        <div>MAJ · 2026</div>
+        <div class="total">€1.247,43</div>
+      </div>
+
+      <div class="num-table-row">
+        <div class="num-td date">14.05</div>
+        <div class="num-td desc">Aco-Rade licenca</div>
+        <div class="num-td cat sub">SUB</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€8,65</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">14.05</div>
+        <div class="num-td desc">Reklame</div>
+        <div class="num-td cat mkt">MKT</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€4,85</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">12.05</div>
+        <div class="num-td desc">Reklame</div>
+        <div class="num-td cat mkt">MKT</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€55,00</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">12.05</div>
+        <div class="num-td desc">Temu</div>
+        <div class="num-td cat shp">SHP</div>
+        <div class="num-td met">KAR</div>
+        <div class="num-td amount">€25,59</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">11.05</div>
+        <div class="num-td desc">Sicilija City</div>
+        <div class="num-td cat foo">FOO</div>
+        <div class="num-td met">KAR</div>
+        <div class="num-td amount">€2,50</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">10.05</div>
+        <div class="num-td desc">Gorivo Raptor</div>
+        <div class="num-td cat ful">FUL</div>
+        <div class="num-td met">INA</div>
+        <div class="num-td amount">€107,76</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">10.05</div>
+        <div class="num-td desc">Apoteka Cigo</div>
+        <div class="num-td cat hea">HEA</div>
+        <div class="num-td met">KAR</div>
+        <div class="num-td amount">€27,85</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">10.05</div>
+        <div class="num-td desc">Wolt Sac bureci</div>
+        <div class="num-td cat foo">FOO</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€10,11</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">10.05</div>
+        <div class="num-td desc">Apoteka presing</div>
+        <div class="num-td cat hea">HEA</div>
+        <div class="num-td met">KAR</div>
+        <div class="num-td amount">€3,64</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">09.05</div>
+        <div class="num-td desc">Marija ručak</div>
+        <div class="num-td cat foo">FOO</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€71,06</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">09.05</div>
+        <div class="num-td desc">Reklame</div>
+        <div class="num-td cat mkt">MKT</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€55,00</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">09.05</div>
+        <div class="num-td desc">Wolt Karpuzzi BG</div>
+        <div class="num-td cat foo">FOO</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€34,62</div>
+      </div>
+      <div class="num-table-row">
+        <div class="num-td date">09.05</div>
+        <div class="num-td desc">Wolt Trpkovic BG</div>
+        <div class="num-td cat foo">FOO</div>
+        <div class="num-td met">BIZ</div>
+        <div class="num-td amount">€13,81</div>
+      </div>
+
+      <div class="num-month-row">
+        <div>APR · 2026</div>
+        <div class="total">€2.314,82</div>
+      </div>
+
+      <div class="num-fab">+</div>
+      <div class="num-bottom-nav">
+        <div class="num-nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>DASH</div>
+        <div class="num-nav-item active"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>LIST</div>
+        <div class="num-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>OPT</div>
+        <div class="num-nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USR</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+</main>
+
+<script>
+document.querySelectorAll('.dir-tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const dir=btn.dataset.dir;
+    document.querySelectorAll('.dir-tabs button').forEach(b=>b.classList.toggle('active',b===btn));
+    document.querySelectorAll('.mockup-row').forEach(r=>r.classList.toggle('active',r.dataset.dir===dir));
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+</script>
+
+</body>
+</html>
