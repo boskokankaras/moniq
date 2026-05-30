@@ -406,6 +406,8 @@ body:not(.dark){ background:var(--bg)!important; color:var(--text)!important; }
 /* neon polish */
 .bottom-sheet{background:rgba(14,15,24,.96)!important;border:1px solid var(--border)!important}
 .fab-menu-item{background:#15161F!important}
+.budtag,.budtag-on{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:1.5px solid var(--border);background:rgba(255,255,255,.04);color:var(--text)}
+.budtag-on{border-color:#8B5CF6;background:rgba(139,92,246,.15);color:#C4B5FD}
 @media (prefers-reduced-motion:reduce){.view.active,#view-dashboard.active>*{animation:none!important}.aur-ringfg{transition:none!important}}
 </style>
 </head>
@@ -631,6 +633,14 @@ function rebuildMC(){
 }
 
 let METHODS_CONFIG=loadMethodsConfig();
+/* Aurora: budžet konfiguracija (iz primanja + izbor metoda) */
+const BUDGET_INC_TYPES_ALL=['Plata','Kirija','Vanredno'];
+function getBudgetMethods(){try{const s=JSON.parse(localStorage.getItem('budget_methods'));if(Array.isArray(s)&&s.length)return s;}catch(e){}return ['Keš','Kartica'];}
+function getBudgetIncTypes(){try{const s=JSON.parse(localStorage.getItem('budget_inc_types'));if(Array.isArray(s))return s;}catch(e){}return ['Plata'];}
+function getBudgetMode(){return localStorage.getItem('budget_mode')||'manual';}
+function toggleBudgetMethod(m){let s=getBudgetMethods();s=s.includes(m)?s.filter(x=>x!==m):[...s,m];localStorage.setItem('budget_methods',JSON.stringify(s));try{renderSettings();}catch(e){}try{renderDashboard();}catch(e){}}
+function toggleBudgetIncType(t){let s=getBudgetIncTypes();s=s.includes(t)?s.filter(x=>x!==t):[...s,t];localStorage.setItem('budget_inc_types',JSON.stringify(s));try{renderSettings();}catch(e){}try{renderDashboard();}catch(e){}}
+function setBudgetMode(m){localStorage.setItem('budget_mode',m);try{renderSettings();}catch(e){}try{renderDashboard();}catch(e){}}
 let METHODS=[];let MC={};rebuildMC();
 
 const CATS = [
@@ -1164,8 +1174,11 @@ const _rItem=`<div class="expense-item${isExp?' ei-open':''}" onclick="toggleRec
   const _fn=_meta.first_name||'';
   const _greeting=_meta.gender==='zenski'?`Dobrodošla${_fn?', '+_fn:''}!`:`Dobrodošao${_fn?', '+_fn:''}!`;
   const _wallet=_meta.gender==='zenski'?'tvoj':'tvoj';
-  const _ringB=APP.budget>0?APP.budget:(_curIncome>0?_curIncome:0);
-  const _ringSpent=_personalTotal;
+  const _bMeth=getBudgetMethods();
+  const _ringSpent=curMonth.filter(e=>_bMeth.includes(e.method)).reduce((s,e)=>s+e.amount,0);
+  const _bIncT=getBudgetIncTypes();
+  const _incBudget=_incEntries.filter(e=>e.month===curYM&&_bIncT.includes(e.type||'Plata')).reduce((s,e)=>s+e.amount,0);
+  const _ringB=getBudgetMode()==='income'?_incBudget:(APP.budget>0?APP.budget:(_curIncome>0?_curIncome:0));
   const _ringPct=_ringB>0?Math.min(100,Math.round(_ringSpent/_ringB*100)):0;
   const _ringOst=_ringB>0?_ringB-_ringSpent:0;
   const _ringAvg=now.getDate()>0?_ringSpent/now.getDate():0;
@@ -1530,12 +1543,19 @@ function renderSettings(){
   const hasPendingChange=_pendingCurrency!==curCurrency;
   const currOpts=CURRENCIES.map(c=>`<button type="button" onclick="stageCurrency('${c.code}')" style="padding:8px 14px;border-radius:10px;border:2px solid ${_pendingCurrency===c.code?'var(--primary)':'var(--border)'};background:${_pendingCurrency===c.code?'#eef0fd':'var(--bg)'};color:${_pendingCurrency===c.code?'var(--primary)':'var(--sub)'};font-size:13px;font-weight:${_pendingCurrency===c.code?'700':'500'};cursor:pointer;font-family:inherit;transition:all .15s">${c.sym} ${c.code}</button>`).join('');
   const rateInfo=curCurrency==='EUR'?'Osnovna valuta — kurs 1:1':_fetchingRate?'⏳ Učitavam kurs...':`1 EUR = ${curRate.toFixed(4)} ${curCurrency}`;
+  var _bm0=getBudgetMode(),_bmeth0=getBudgetMethods(),_binc0=getBudgetIncTypes();
+  var _budModeBtns='<div style="display:flex;gap:8px;margin-bottom:14px"><button onclick="setBudgetMode(\'manual\')" class="'+(_bm0==='manual'?'budtag-on':'budtag')+'" style="flex:1">Ručno</button><button onclick="setBudgetMode(\'income\')" class="'+(_bm0==='income'?'budtag-on':'budtag')+'" style="flex:1">Iz primanja</button></div>';
+  var _budBody=_bm0==='manual'?'<div style="display:flex;gap:10px;margin-bottom:16px"><input type="number" inputmode="decimal" class="form-control" id="budget-input" value="'+(APP.budget||'')+'" placeholder="npr. 3000" style="flex:1"><button class="btn btn-primary" onclick="saveBudget()">Sačuvaj</button></div>':'<div style="font-size:12px;color:var(--sub);margin-bottom:8px">Budžet = zbir izabranih primanja ovog mjeseca:</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">'+BUDGET_INC_TYPES_ALL.map(function(t){return '<button onclick="toggleBudgetIncType(\''+t+'\')" class="'+(_binc0.includes(t)?'budtag-on':'budtag')+'">'+t+'</button>';}).join('')+'</div>';
+  var _budMeth='<div style="font-size:12px;color:var(--sub);margin-bottom:8px">Od budžeta se oduzimaju samo ove metode:</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+METHODS.map(function(m){return '<button onclick="toggleBudgetMethod(\''+m+'\')" class="'+(_bmeth0.includes(m)?'budtag-on':'budtag')+'">'+esc(m)+'</button>';}).join('')+'</div>';
+  var budgetCfgHTML='<div class="card settings-section"><div class="section-title">💰 Budžet</div><div style="font-size:13px;color:var(--sub);margin-bottom:12px">Kako se računa tvoj mjesečni budžet</div>'+_budModeBtns+_budBody+_budMeth+'</div>';
 
   document.getElementById('view-settings').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <h2 style="font-size:22px;font-weight:700;margin:0">Podesavanja</h2>
       <button id="settings-save-btn" onclick="saveSettings()" style="padding:10px 20px;border-radius:12px;border:none;background:var(--primary);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;${hasPendingChange?'box-shadow:0 0 0 3px rgba(67,97,238,.3)':''}">Sačuvaj izmjene${hasPendingChange?' ●':''}</button>
     </div>
+
+    ${budgetCfgHTML}
 
     <div class="card settings-section">
       <div class="section-title">Valuta</div>
@@ -2399,14 +2419,6 @@ function renderProfile(){
           <div class="form-group"><label class="form-label">Spol</label><select class="form-control" id="p-gender"><option value="">—</option><option value="muski"${m.gender==='muski'?' selected':''}>Muški</option><option value="zenski"${m.gender==='zenski'?' selected':''}>Ženski</option></select></div>
           <div id="p-msg" style="display:none;font-size:13px;margin-bottom:12px"></div>
           <button class="btn btn-primary btn-full" onclick="saveProfile()">Sačuvaj profil</button>
-        </div>
-        <div class="card settings-section">
-          <div class="section-title">Mjesečni budžet</div>
-          <div style="font-size:13px;color:var(--sub);margin-bottom:12px">Prati potrošnju u tekućem mjesecu</div>
-          <div style="display:flex;gap:10px">
-            <input type="number" inputmode="decimal" class="form-control" id="budget-input" value="${APP.budget||''}" placeholder="npr. 3000" style="flex:1">
-            <button class="btn btn-primary" onclick="saveBudget()">Sačuvaj</button>
-          </div>
         </div>
       </div>
     </div>`;
