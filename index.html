@@ -500,7 +500,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 12;
+const APP_VERSION = 13;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -1034,7 +1034,7 @@ function renderDashboard(){
 
   const subsHTML=subs.length?(subs.slice(0,5).map(e=>{const logo=getSubLogo(e.desc);const icon=logo?`<img src="${logo}" class="sub-logo" onerror="this.outerHTML='<span class=sub-emoji>📱</span>'">`:`<span class="sub-emoji">📱</span>`;return`<div class="sub-item">${icon}<span class="sub-name">${esc(e.desc)}</span><span class="sub-amount">${fmt(e.amount)}/mj</span></div>`;}).join('')+(subs.length>5?`<div onclick="goToExpenses(['pretplate'])" style="text-align:center;padding:10px 0;font-size:13px;color:var(--primary);cursor:pointer;font-weight:600">Vidi sve pretplate (${subs.length}) →</div>`:'')):(`<div style="color:var(--sub);font-size:14px;padding:16px 0">Nema pretplata</div>`);
 
-  const recentHTML=recent.map(e=>{const cat=CATS.find(c=>c.id===e.category)||CATS[CATS.length-1];const mc=MC[e.method]||MC['Kartica'];const{cleanNote,freq}=parseFreq(e.note||'');const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:'';const isExp=expandedRecentItems.has(e.id);const hasNote=!!(cleanNote||freqBadge);const detail=isExp?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${e.method}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
+  const recentHTML=recent.map(e=>{const cat=CATS.find(c=>c.id===e.category)||CATS[CATS.length-1];const mc=MC[e.method]||MC['Kartica'];const{cleanNote,freq}=parseFreq(e.note||'');const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:'';const isExp=expandedRecentItems.has(e.id);const hasNote=!!(cleanNote||freqBadge);const detail=isExp?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${esc(e.method)}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
 const _rItem=`<div class="expense-item${isExp?' ei-open':''}" onclick="toggleRecentItem(${e.id})">${getExpEmoji(e,cat)}<div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)}</div></div><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div>`;return isExp?`<div class="exp-wrap">${_rItem}${detail}</div>`:_rItem;}).join('');
 
   // Tekući mjesec — slide 0: chipovi, slide 1: donut
@@ -1239,7 +1239,7 @@ function renderExpenses(){
         const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:'';
         const isExpanded=expandedExpItems.has(e.id);
         const hasNote=!!(cleanNote||freqBadge);
-        const expandDetail=isExpanded?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${e.method}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
+        const expandDetail=isExpanded?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${esc(e.method)}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
         const _eItem=`<div class="expense-item${isExpanded?' ei-open':''}" id="exp-${e.id}" onclick="toggleExpItem(${e.id})">${getExpEmoji(e,cat)}<div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)}${cleanNote&&!isExpanded?' · '+esc(cleanNote):''}</div></div><div class="expense-right"><button class="dup-btn" onclick="event.stopPropagation();dupExp(${e.id})" title="Kopiraj"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="dup-btn" onclick="event.stopPropagation();openEditSheet(${e.id})" title="Uredi" style="color:var(--primary)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div></div>`;
         listHTML+=isExpanded?`<div class="exp-wrap">${_eItem}${expandDetail}</div>`:_eItem;
       });
@@ -1427,7 +1427,7 @@ function renderSettings(){
   const widgetToggles=order.map(id=>{const d=WIDGET_DEFS.find(x=>x.id===id);if(!d)return'';return`<div class="settings-row widget-row" data-wid="${d.id}"><div style="display:flex;align-items:center;gap:10px"><span class="drag-handle" onmousedown="startWidgetDrag(event,'${d.id}',this.closest('.widget-row'))" ontouchstart="startWidgetDrag(event,'${d.id}',this.closest('.widget-row'))">⠿⠿</span><div class="settings-label">${d.label}</div></div><div class="toggle${w[d.id]?' on':''}" onclick="toggleWidget('${d.id}')"></div></div>`;}).join('');
 
   // Payment methods list
-  const methodsList=METHODS_CONFIG.map((m,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="color:${m.color};display:flex;align-items:center">${METHOD_ICONS[m.icon]||METHOD_ICONS.card}</span><span style="flex:1;font-size:14px;font-weight:500">${m.name}</span><span style="font-size:12px;padding:3px 10px;border-radius:99px;background:${m.bg};color:${m.color};font-weight:600">${m.name}</span><button onclick="removeMethod(${i})" style="background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Ukloni">×</button></div>`).join('');
+  const methodsList=METHODS_CONFIG.map((m,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="color:${m.color};display:flex;align-items:center">${METHOD_ICONS[m.icon]||METHOD_ICONS.card}</span><span style="flex:1;font-size:14px;font-weight:500">${esc(m.name)}</span><span style="font-size:12px;padding:3px 10px;border-radius:99px;background:${m.bg};color:${m.color};font-weight:600">${esc(m.name)}</span><button onclick="removeMethod(${i})" style="background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" title="Ukloni">×</button></div>`).join('');
 
   // Available icon options for new method
   const iconOpts=Object.keys(METHOD_ICONS).map(k=>`<button type="button" onclick="selNewMethodIcon('${k}',this)" class="method-icon-opt" data-icon="${k}" style="background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sub)">${METHOD_ICONS[k]}</button>`).join('');
@@ -1867,7 +1867,7 @@ function openConfirmDelete(id){
   const cat=CATS.find(c=>c.id===e.category)||CATS[CATS.length-1];
   const mc=MC[e.method]||MC['Kartica'];
   closeSheet('sheet-edit');
-  document.getElementById('sheet-confirm-body').innerHTML=`<div class="expense-item" style="pointer-events:none;margin-bottom:20px"><div class="expense-emoji">${cat.emoji}</div><div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)} · ${e.method}</div></div><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div><p style="color:var(--sub);font-size:14px;margin-bottom:20px;text-align:center">Jesi li siguran da želiš obrisati ovaj trošak?</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn btn-ghost" onclick="closeAllSheets()">Odustani</button><button class="btn btn-danger" id="del-btn" onclick="confirmDelete(${id})">Obriši</button></div>`;
+  document.getElementById('sheet-confirm-body').innerHTML=`<div class="expense-item" style="pointer-events:none;margin-bottom:20px"><div class="expense-emoji">${cat.emoji}</div><div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)} · ${esc(e.method)}</div></div><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div><p style="color:var(--sub);font-size:14px;margin-bottom:20px;text-align:center">Jesi li siguran da želiš obrisati ovaj trošak?</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn btn-ghost" onclick="closeAllSheets()">Odustani</button><button class="btn btn-danger" id="del-btn" onclick="confirmDelete(${id})">Obriši</button></div>`;
   openSheet('sheet-confirm');
 }
 
@@ -2281,9 +2281,9 @@ function renderProfile(){
     <div class="profile-wrap">
       <div class="profile-col">
         <div class="card" style="text-align:center;padding:32px 24px">
-          <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;margin:0 auto 14px">${initial}</div>
-          <div style="font-size:18px;font-weight:700">${displayName||'Korisnik'}</div>
-          <div style="font-size:13px;color:var(--sub);margin-top:3px">${email}</div>
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;margin:0 auto 14px">${esc(initial)}</div>
+          <div style="font-size:18px;font-weight:700">${esc(displayName)||'Korisnik'}</div>
+          <div style="font-size:13px;color:var(--sub);margin-top:3px">${esc(email)}</div>
         </div>
         <div class="card settings-section">
           <div class="section-title">Sigurnost</div>
@@ -2298,11 +2298,11 @@ function renderProfile(){
         <div class="card settings-section">
           <div class="section-title">Lični podaci</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-            <div><label class="form-label">Ime</label><input type="text" class="form-control" id="p-firstname" value="${m.first_name||''}" placeholder="Ime"></div>
-            <div><label class="form-label">Prezime</label><input type="text" class="form-control" id="p-lastname" value="${m.last_name||''}" placeholder="Prezime"></div>
+            <div><label class="form-label">Ime</label><input type="text" class="form-control" id="p-firstname" value="${esc(m.first_name||'')}" placeholder="Ime"></div>
+            <div><label class="form-label">Prezime</label><input type="text" class="form-control" id="p-lastname" value="${esc(m.last_name||'')}" placeholder="Prezime"></div>
           </div>
-          <div class="form-group"><label class="form-label">Korisničko ime</label><input type="text" class="form-control" id="p-username" value="${m.username||''}" placeholder="@korisnicko_ime"></div>
-          <div class="form-group"><label class="form-label">Datum rođenja</label><input type="date" class="form-control" id="p-birthdate" value="${m.birth_date||''}" autocomplete="bday" style="min-height:48px;-webkit-appearance:none;appearance:none"></div>
+          <div class="form-group"><label class="form-label">Korisničko ime</label><input type="text" class="form-control" id="p-username" value="${esc(m.username||'')}" placeholder="@korisnicko_ime"></div>
+          <div class="form-group"><label class="form-label">Datum rođenja</label><input type="date" class="form-control" id="p-birthdate" value="${esc(m.birth_date||'')}" autocomplete="bday" style="min-height:48px;-webkit-appearance:none;appearance:none"></div>
           <div class="form-group"><label class="form-label">Spol</label><select class="form-control" id="p-gender"><option value="">—</option><option value="muski"${m.gender==='muski'?' selected':''}>Muški</option><option value="zenski"${m.gender==='zenski'?' selected':''}>Ženski</option></select></div>
           <div id="p-msg" style="display:none;font-size:13px;margin-bottom:12px"></div>
           <button class="btn btn-primary btn-full" onclick="saveProfile()">Sačuvaj profil</button>
@@ -2509,7 +2509,6 @@ function openAddIncomeSheet(){
   const t=document.getElementById('sheet-income-title');if(t)t.textContent='Dodaj primanje';
   document.getElementById('sheet-income-body').innerHTML=buildIncomeForm(null)+`<button class="btn btn-primary btn-full" style="margin-top:8px" onclick="submitAddIncome()">+ Dodaj primanje</button>`;
   openSheet('sheet-income');
-  initFP();
 }
 function openEditIncomeSheet(id){
   const entry=APP.income.find(e=>e.id==id);
@@ -2595,7 +2594,7 @@ function renderIncomeList(entries,totalCount){
     html+=`<div class="month-header" onclick="toggleMonth('${incKey}')" style="cursor:pointer;user-select:none"><div class="month-dot" style="background:#10b981"></div><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${mnLabel(m)}</span><span style="color:var(--sub);flex-shrink:0;display:inline-flex;align-items:center;transition:transform .2s;transform:rotate(${incOpen?'180deg':'0deg'})"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 8,11 13,6"/></svg></span><span style="flex:1"></span><span class="month-chip" style="flex-shrink:0">${items.length} primanja</span><span class="month-total-pill" style="flex-shrink:0">${fmt(tot)}</span></div>`;
     if(incOpen){items.slice().reverse().forEach(e=>{
       const mc=INC_MC[e.method]||{color:'#6366f1',bg:'#ede9fe'};
-      html+=`<div class="expense-item" id="inc-${e.id}"><div class="expense-emoji">${INC_TYPE_EMOJI[e.type]||'💰'}</div><div class="expense-info"><div class="expense-desc">${e.type}</div><div class="expense-meta">${fmtDate(e.date)} · ${e.method}</div></div><div class="expense-right"><button class="dup-btn" onclick="event.stopPropagation();openEditIncomeSheet(${e.id})" title="Uredi" style="color:var(--primary)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><span class="amount-pill">${fmt(e.amount)}</span></div></div>`;
+      html+=`<div class="expense-item" id="inc-${e.id}"><div class="expense-emoji">${INC_TYPE_EMOJI[e.type]||'💰'}</div><div class="expense-info"><div class="expense-desc">${e.type}</div><div class="expense-meta">${fmtDate(e.date)} · ${esc(e.method)}</div></div><div class="expense-right"><button class="dup-btn" onclick="event.stopPropagation();openEditIncomeSheet(${e.id})" title="Uredi" style="color:var(--primary)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><span class="amount-pill">${fmt(e.amount)}</span></div></div>`;
     });}
   });
   return html;
