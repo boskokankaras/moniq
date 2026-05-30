@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moniq — Dashboard + Filteri (interaktivno)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#F4F3EF; --surface:#FFFFFF; --ink:#15161A; --muted:#8B8E96; --faint:#B8BAC0;
+  --line:#ECEBE6; --accent:#4F46E5; --accent-soft:#EEEDFB;
+  --green:#10b981; --red:#E0795B;
+  --r:18px;
+}
+html,body{background:#0e0e10;color:#eaeaea;font-family:'Geist',system-ui,sans-serif;min-height:100vh}
+.page{max-width:920px;margin:0 auto;padding:28px 20px 70px}
+.page h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;color:#fff;letter-spacing:.01em}
+.page .sub{font-size:13px;color:#8a8a8a;margin-top:4px;line-height:1.6;max-width:620px}
+.page .hint{font-size:12px;color:#facc15;margin-top:10px}
+.stage{display:flex;justify-content:center;margin-top:30px}
+
+/* phone */
+.phone{width:392px;height:812px;border-radius:52px;border:9px solid #0a0a0a;box-shadow:0 0 0 1px #2a2a2a,0 50px 100px -20px rgba(0,0,0,.6);overflow:hidden;position:relative;background:var(--bg)}
+.phone::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:200}
+.vp{width:100%;height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;color:var(--ink)}
+.vp::-webkit-scrollbar{display:none}
+.sb{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 9px;font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+
+.screen{display:none}
+.screen.on{display:block}
+
+/* ─── DASHBOARD ─── */
+.dh{padding:14px 22px 6px;display:flex;align-items:flex-start;justify-content:space-between}
+.dh-month{font-family:'Instrument Serif',serif;font-size:40px;line-height:.9;color:var(--ink)}
+.dh-month span{color:var(--muted)}
+.dh-greet{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.02em}
+.dh-icons{display:flex;gap:8px}
+.dh-ic{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
+.dh-ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.dh-ic:active{transform:scale(.94)}
+
+.bal{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 22px 0}
+.bal-c{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+.bal-l{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.bal-d{width:7px;height:7px;border-radius:50%}
+.bal-a{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:600;margin-top:7px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.bal-x{font-size:11px;margin-top:3px;font-variant-numeric:tabular-nums}
+.bal-x.up{color:var(--green)} .bal-x.dn{color:var(--red)}
+
+.hero{margin:14px 22px 0;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 20px 8px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.hero-l{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hero-a{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;letter-spacing:-.03em;margin-top:8px;font-variant-numeric:tabular-nums}
+.hero-m{font-size:12px;color:var(--muted);margin-top:6px}
+.hero-m b{color:var(--ink);font-weight:600}
+.hero-m .safe{color:var(--green);font-weight:600}
+.chart{margin-top:14px;position:relative}
+.chart svg{display:block;width:100%;height:96px;overflow:visible}
+.chart-legend{display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--muted)}
+.chart-legend i{display:inline-block;width:16px;height:0;vertical-align:middle;margin-right:5px}
+.lg-spend i{border-top:2.5px solid var(--accent)}
+.lg-pace i{border-top:2px dashed var(--faint)}
+
+.sec{padding:22px 22px 0}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-t{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sec-link{font-size:12px;color:var(--accent);font-weight:500;cursor:pointer}
+
+.catbar{display:flex;align-items:center;gap:12px;padding:9px 0;cursor:pointer}
+.catbar:active{opacity:.6}
+.catbar-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.catbar-mid{flex:1;min-width:0}
+.catbar-top{display:flex;justify-content:space-between;align-items:baseline}
+.catbar-name{font-size:14px;font-weight:500;color:var(--ink)}
+.catbar-amt{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.catbar-track{height:6px;background:var(--line);border-radius:99px;margin-top:7px;overflow:hidden}
+.catbar-fill{height:100%;border-radius:99px;width:0;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+
+.subs{margin:6px 22px 0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.subs-top{display:flex;align-items:baseline;justify-content:space-between}
+.subs-big{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;letter-spacing:-.02em}
+.subs-big span{font-size:14px;color:var(--muted)}
+.subs-cnt{font-size:12px;color:var(--muted)}
+.subs-logos{display:flex;gap:7px;margin-top:13px}
+.subs-logo{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+
+/* ─── LIST + FILTERS ─── */
+.lh{padding:16px 22px 12px;display:flex;align-items:center;justify-content:space-between}
+.lh-t{font-family:'Instrument Serif',serif;font-size:32px;color:var(--ink)}
+.searchbar{display:flex;gap:10px;padding:0 22px 12px}
+.search{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:11px 14px;display:flex;align-items:center;gap:9px}
+.search svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+.search input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;color:var(--ink);width:100%}
+.search input::placeholder{color:var(--faint)}
+.filter-btn{position:relative;width:46px;border:1px solid var(--line);background:var(--surface);border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer;flex-shrink:0}
+.filter-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.filter-btn:active{transform:scale(.95)}
+.filter-btn.has::after{content:attr(data-n);position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;background:var(--accent);color:#fff;border-radius:99px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.mpills{display:flex;gap:8px;padding:0 22px 12px;overflow-x:auto;scrollbar-width:none}
+.mpills::-webkit-scrollbar{display:none}
+.mpill{flex-shrink:0;padding:8px 15px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.12s}
+.mpill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mpill:active{transform:scale(.96)}
+
+.chips{display:flex;gap:7px;padding:0 22px;overflow-x:auto;scrollbar-width:none;min-height:0;transition:padding .2s}
+.chips::-webkit-scrollbar{display:none}
+.chips.show{padding-bottom:12px}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 8px 6px 11px;background:var(--accent-soft);color:var(--accent);border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;animation:pop .18s cubic-bezier(.2,1.4,.4,1)}
+.chip x{cursor:pointer;width:16px;height:16px;border-radius:50%;background:rgba(79,70,229,.18);display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+.summary{padding:2px 22px 10px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.summary b{color:var(--ink);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+
+.day{display:flex;justify-content:space-between;padding:14px 22px 7px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.day .t{font-family:'JetBrains Mono',monospace;color:var(--ink)}
+.row{display:flex;align-items:center;gap:13px;padding:11px 22px;border-bottom:1px solid var(--line)}
+.row-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.row-mid{flex:1;min-width:0}
+.row-name{font-size:14px;font-weight:500;color:var(--ink)}
+.row-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.row-amt{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:50px 30px;color:var(--muted)}
+.empty .ico{font-size:34px;margin-bottom:12px}
+.empty .big{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px}
+
+/* ─── FILTER SHEET ─── */
+.sheet-bg{position:absolute;inset:0;background:rgba(21,22,26,.4);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:90}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:26px 26px 0 0;z-index:91;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;max-height:90%;box-shadow:0 -12px 40px rgba(0,0,0,.2)}
+.sheet.on{transform:translateY(0)}
+.sheet-handle{width:38px;height:4px;background:#D5D3CC;border-radius:99px;margin:10px auto 6px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 22px 14px}
+.sheet-head h3{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.sheet-reset{font-size:13px;color:var(--accent);font-weight:600;cursor:pointer}
+.sheet-body{overflow-y:auto;padding:0 22px}
+.sheet-body::-webkit-scrollbar{display:none}
+.fgroup{padding:16px 0;border-top:1px solid var(--line)}
+.fgroup-t{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{padding:9px 13px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:7px;transition:.12s;user-select:none}
+.fchip:active{transform:scale(.95)}
+.fchip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.fchip .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px}
+.seg button{flex:1;padding:9px 6px;background:none;border:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);border-radius:10px;cursor:pointer;transition:.12s}
+.seg button.on{background:var(--ink);color:#fff}
+.sheet-foot{padding:14px 22px 26px;display:flex;gap:12px;border-top:1px solid var(--line);background:var(--bg)}
+.btn-reset{padding:16px 22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
+.btn-apply{flex:1;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:.12s}
+.btn-apply:active{transform:scale(.99)}
+
+/* FAB + nav */
+.fab{position:absolute;right:22px;bottom:96px;width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:300;box-shadow:0 8px 26px rgba(79,70,229,.4);z-index:30;cursor:pointer}
+.fab:active{transform:scale(.94)}
+.nav{position:absolute;left:0;right:0;bottom:0;height:80px;background:rgba(255,255,255,.86);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;padding-bottom:20px;z-index:25}
+.nav-i{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;font-weight:500;color:var(--faint);cursor:pointer}
+.nav-i svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+.nav-i.on{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Moniq — ljepši dashboard + novo filtriranje</h1>
+  <p class="sub">Ovo je <b style="color:#fff">interaktivno</b> — klikni dolje. Tapni <b style="color:#fff">Lista</b> u nav baru, pa <b style="color:#fff">dugme za filter</b> (gore desno) da otvoriš novi filter panel. Biraj kategorije/metode/iznos → vidi čipove i kako se lista filtrira uživo. Na dashboardu klikni kategoriju da skočiš u filtriranu listu.</p>
+  <p class="hint">★ Sve radi na pravim podacima — broj rezultata i total se računaju uživo.</p>
+
+  <div class="stage">
+    <div class="phone"><div class="vp">
+      <div class="sb"><span>9:41</span><span>●●● 5G ▮</span></div>
+
+      <!-- ══════ DASHBOARD ══════ -->
+      <div class="screen on" id="scr-dash">
+        <div class="dh">
+          <div>
+            <div class="dh-month">Maj <span>’26</span></div>
+            <div class="dh-greet">Dobro jutro 👋</div>
+          </div>
+          <div class="dh-icons">
+            <div class="dh-ic"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="dh-ic"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+          </div>
+        </div>
+
+        <div class="bal">
+          <div class="bal-c"><div class="bal-l"><span class="bal-d" style="background:#5B8BD0"></span>Kartica</div><div class="bal-a">€4.218,50</div><div class="bal-x up">↑ €42,30 ovog tjedna</div></div>
+          <div class="bal-c"><div class="bal-l"><span class="bal-d" style="background:#10b981"></span>Keš</div><div class="bal-a">€243,00</div><div class="bal-x dn">↓ €18,50 ovog tjedna</div></div>
+        </div>
+
+        <div class="hero">
+          <div class="hero-l">Potrošeno u maju</div>
+          <div class="hero-a">€1.247,43</div>
+          <div class="hero-m">od <b>€3.000</b> budžeta · <span class="safe">€58/dan</span> ti ostaje do kraja</div>
+          <div class="chart">
+            <svg viewBox="0 0 340 96" preserveAspectRatio="none">
+              <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4F46E5" stop-opacity=".22"/><stop offset="1" stop-color="#4F46E5" stop-opacity="0"/></linearGradient></defs>
+              <line x1="0" y1="90" x2="340" y2="26" stroke="#B8BAC0" stroke-width="2" stroke-dasharray="4 4"/>
+              <path d="M0,93 L46,86 L92,77 L140,69 L190,57 L240,50 L290,45 L340,43 L340,96 L0,96 Z" fill="url(#g)"/>
+              <path d="M0,93 L46,86 L92,77 L140,69 L190,57 L240,50 L290,45 L340,43" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="340" cy="43" r="4" fill="#4F46E5" stroke="#fff" stroke-width="2"/>
+            </svg>
+            <div class="chart-legend"><span class="lg-spend"><i></i>Tvoja potrošnja</span><span class="lg-pace"><i></i>Tempo budžeta</span></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-h"><div class="sec-t">Po kategoriji</div><div class="sec-link" onclick="goList()">Vidi sve →</div></div>
+          <div id="dash-cats"></div>
+        </div>
+
+        <div class="sec" style="padding-bottom:0"><div class="sec-h"><div class="sec-t">Pretplate</div><div class="sec-link" onclick="filterCat('pretplate')">16 aktivnih →</div></div></div>
+        <div class="subs">
+          <div class="subs-top"><div class="subs-big">€198,42<span>/mj</span></div><div class="subs-cnt">€2.381 godišnje</div></div>
+          <div class="subs-logos">
+            <div class="subs-logo" style="background:#000">N</div>
+            <div class="subs-logo" style="background:#1DB954">S</div>
+            <div class="subs-logo" style="background:#00C2E8;color:#003">C</div>
+            <div class="subs-logo" style="background:#8b5cf6">A</div>
+            <div class="subs-logo" style="background:#10a37f">G</div>
+            <div class="subs-logo" style="background:#E3E1DA;color:#6B6960">+11</div>
+          </div>
+        </div>
+        <div style="height:120px"></div>
+      </div>
+
+      <!-- ══════ LISTA ══════ -->
+      <div class="screen" id="scr-list">
+        <div class="lh"><div class="lh-t">Troškovi</div></div>
+        <div class="searchbar">
+          <div class="search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search" placeholder="Pretraži troškove..." oninput="render()">
+          </div>
+          <div class="filter-btn" id="fbtn" onclick="openSheet()"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+        </div>
+        <div class="mpills" id="mpills"></div>
+        <div class="chips" id="chips"></div>
+        <div class="summary"><span id="sum-count">—</span><span>Ukupno: <b id="sum-total">—</b></span></div>
+        <div id="list"></div>
+        <div style="height:120px"></div>
+      </div>
+
+      <!-- FAB + NAV -->
+      <div class="fab" onclick="goList()">+</div>
+      <div class="nav">
+        <div class="nav-i on" id="nav-dash" onclick="goDash()"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</div>
+        <div class="nav-i" id="nav-list" onclick="goList()"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</div>
+        <div class="nav-i"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Postavke</div>
+        <div class="nav-i"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</div>
+      </div>
+
+      <!-- FILTER SHEET -->
+      <div class="sheet-bg" id="sheet-bg" onclick="closeSheet()"></div>
+      <div class="sheet" id="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head"><h3>Filteri</h3><span class="sheet-reset" onclick="resetDraft()">Resetuj sve</span></div>
+        <div class="sheet-body">
+          <div class="fgroup" style="border-top:none">
+            <div class="fgroup-t">Kategorija</div>
+            <div class="cat-grid" id="f-cats"></div>
+          </div>
+          <div class="fgroup">
+            <div class="fgroup-t">Način plaćanja</div>
+            <div class="cat-grid" id="f-methods"></div>
+          </div>
+          <div class="fgroup">
+            <div class="fgroup-t">Iznos</div>
+            <div class="seg" id="f-amount">
+              <button data-band="all" class="on">Svi</button>
+              <button data-band="lo">do €20</button>
+              <button data-band="mid">€20–100</button>
+              <button data-band="hi">€100+</button>
+            </div>
+          </div>
+        </div>
+        <div class="sheet-foot">
+          <button class="btn-reset" onclick="resetDraft()">Poništi</button>
+          <button class="btn-apply" id="apply" onclick="applySheet()">Prikaži rezultate</button>
+        </div>
+      </div>
+
+    </div></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA (pravi majski troškovi) ───
+const CATS={
+  marketing:{n:'Marketing',e:'📣',c:'#E0795B'},
+  gorivo:{n:'Gorivo & Auto',e:'⛽',c:'#ef4444'},
+  dostava:{n:'Dostava hrane',e:'🛵',c:'#f59e0b'},
+  pretplate:{n:'Pretplate',e:'📱',c:'#7A6FE6'},
+  hrana:{n:'Hrana & Kafići',e:'🍽',c:'#10b981'},
+  fitness:{n:'Fitness',e:'💪',c:'#06b6d4'},
+  zdravlje:{n:'Zdravlje',e:'💊',c:'#ec4899'},
+  shopping:{n:'Shopping',e:'🛒',c:'#6366f1'},
+  ostalo:{n:'Ostalo',e:'📦',c:'#9ca3af'},
+};
+const METHODS={Kartica:'#4361ee',Keš:'#10b981',Virman:'#f59e0b',INA:'#ef4444',Biznis:'#8b5cf6'};
+const MN=['','Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+const DOW=['Ned','Pon','Uto','Sri','Čet','Pet','Sub'];
+
+const DATA=[
+  {d:'2026-05-14',desc:'Aco-Rade licenca',a:8.65,m:'Biznis',c:'pretplate'},
+  {d:'2026-05-14',desc:'Reklame',a:4.85,m:'Biznis',c:'marketing'},
+  {d:'2026-05-12',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+  {d:'2026-05-12',desc:'Temu',a:25.59,m:'Kartica',c:'shopping'},
+  {d:'2026-05-11',desc:'Sicilija City',a:2.50,m:'Kartica',c:'hrana'},
+  {d:'2026-05-10',desc:'Gorivo Raptor',a:107.76,m:'INA',c:'gorivo'},
+  {d:'2026-05-10',desc:'Apoteka Cigo',a:27.85,m:'Kartica',c:'zdravlje'},
+  {d:'2026-05-10',desc:'Apoteka presing BG',a:3.64,m:'Kartica',c:'zdravlje'},
+  {d:'2026-05-10',desc:'Wolt Sać bureci',a:10.11,m:'Biznis',c:'dostava'},
+  {d:'2026-05-09',desc:'Wolt Trpković BG',a:13.81,m:'Biznis',c:'dostava'},
+  {d:'2026-05-09',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+  {d:'2026-05-09',desc:'Marija Čobeljić ručak',a:71.06,m:'Biznis',c:'hrana'},
+  {d:'2026-05-09',desc:'Wolt Karpuzzi BG',a:34.62,m:'Biznis',c:'dostava'},
+  {d:'2026-05-08',desc:'Ducati Beograd',a:118.83,m:'Kartica',c:'gorivo'},
+  {d:'2026-05-08',desc:'Bela reka',a:61.04,m:'Biznis',c:'hrana'},
+  {d:'2026-05-07',desc:'Kazna Kolašin 68kmh',a:25.50,m:'Kartica',c:'ostalo'},
+  {d:'2026-05-07',desc:'LukOil Prijepolje',a:11.08,m:'Biznis',c:'gorivo'},
+  {d:'2026-05-07',desc:'Wolt McDonalds',a:49.75,m:'Biznis',c:'dostava'},
+  {d:'2026-05-07',desc:'Gorivo Raptor',a:114.01,m:'INA',c:'gorivo'},
+  {d:'2026-05-06',desc:'Wolt pretplata',a:1.71,m:'Biznis',c:'pretplate'},
+  {d:'2026-05-05',desc:'Sicilija City Sanjin',a:6.30,m:'Biznis',c:'hrana'},
+  {d:'2026-05-05',desc:'Holos Apoteka',a:3.82,m:'Kartica',c:'zdravlje'},
+  {d:'2026-05-04',desc:'Temu',a:78.94,m:'Kartica',c:'shopping'},
+  {d:'2026-05-04',desc:'Canva pretplata',a:23.99,m:'Biznis',c:'pretplate'},
+  {d:'2026-05-04',desc:'Claude pretplata',a:17.07,m:'Biznis',c:'pretplate'},
+  {d:'2026-05-04',desc:'Džena hrana',a:174.00,m:'Keš',c:'ostalo'},
+  {d:'2026-05-04',desc:'Vlado košenje',a:30.00,m:'Keš',c:'ostalo'},
+  {d:'2026-05-04',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+  {d:'2026-05-02',desc:'Roštiljada',a:30.00,m:'Keš',c:'hrana'},
+  {d:'2026-05-03',desc:'Glovo Burek',a:8.30,m:'Keš',c:'dostava'},
+  // April (za demo mjesečnih pilula)
+  {d:'2026-04-30',desc:'Google Workspace',a:12.24,m:'Biznis',c:'pretplate'},
+  {d:'2026-04-28',desc:'Netflix pretplata',a:9.99,m:'Kartica',c:'pretplate'},
+  {d:'2026-04-25',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+  {d:'2026-04-19',desc:'Gorivo Raptor',a:92.57,m:'INA',c:'gorivo'},
+];
+
+// ─── STATE ───
+const active={month:'2026-05',cats:new Set(),methods:new Set(),band:'all',search:''};
+let draft={cats:new Set(),methods:new Set(),band:'all'};
+
+function fmt(n){return '€'+n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function inBand(a,b){return b==='all'||(b==='lo'&&a<20)||(b==='mid'&&a>=20&&a<100)||(b==='hi'&&a>=100)}
+
+function months(){return [...new Set(DATA.map(x=>x.d.slice(0,7)))].sort().reverse()}
+
+function match(x,f){
+  if(x.d.slice(0,7)!==active.month)return false;
+  if(f.cats.size&&!f.cats.has(x.c))return false;
+  if(f.methods.size&&!f.methods.has(x.m))return false;
+  if(!inBand(x.a,f.band))return false;
+  if(active.search&&!x.desc.toLowerCase().includes(active.search.toLowerCase()))return false;
+  return true;
+}
+
+// ─── NAV ───
+function goDash(){document.getElementById('scr-dash').classList.add('on');document.getElementById('scr-list').classList.remove('on');document.getElementById('nav-dash').classList.add('on');document.getElementById('nav-list').classList.remove('on');document.querySelector('.vp').scrollTop=0}
+function goList(){document.getElementById('scr-list').classList.add('on');document.getElementById('scr-dash').classList.remove('on');document.getElementById('nav-list').classList.add('on');document.getElementById('nav-dash').classList.remove('on');document.querySelector('.vp').scrollTop=0;render()}
+function filterCat(c){active.cats=new Set([c]);active.methods=new Set();active.band='all';goList()}
+
+// ─── DASHBOARD CATS ───
+function renderDashCats(){
+  const may=DATA.filter(x=>x.d.slice(0,7)==='2026-05');
+  const tot={};may.forEach(x=>tot[x.c]=(tot[x.c]||0)+x.a);
+  const sorted=Object.entries(tot).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max=sorted[0][1];
+  document.getElementById('dash-cats').innerHTML=sorted.map(([c,v])=>{
+    const m=CATS[c];
+    return `<div class="catbar" onclick="filterCat('${c}')">
+      <div class="catbar-ic" style="background:${m.c}1f;color:${m.c}">${m.e}</div>
+      <div class="catbar-mid">
+        <div class="catbar-top"><span class="catbar-name">${m.n}</span><span class="catbar-amt">${fmt(v)}</span></div>
+        <div class="catbar-track"><div class="catbar-fill" data-w="${Math.round(v/max*100)}" style="background:${m.c}"></div></div>
+      </div></div>`;
+  }).join('');
+  setTimeout(()=>document.querySelectorAll('.catbar-fill').forEach(el=>el.style.width=el.dataset.w+'%'),60);
+}
+
+// ─── MONTH PILLS ───
+function renderMonths(){
+  document.getElementById('mpills').innerHTML=months().map(m=>{
+    const[y,mo]=m.split('-');
+    return `<div class="mpill ${m===active.month?'on':''}" onclick="setMonth('${m}')">${MN[+mo]} ${y.slice(2)}</div>`;
+  }).join('');
+}
+function setMonth(m){active.month=m;render()}
+
+// ─── FILTER SHEET ───
+function openSheet(){
+  draft={cats:new Set(active.cats),methods:new Set(active.methods),band:active.band};
+  renderSheet();
+  document.getElementById('sheet-bg').classList.add('on');
+  document.getElementById('sheet').classList.add('on');
+}
+function closeSheet(){document.getElementById('sheet-bg').classList.remove('on');document.getElementById('sheet').classList.remove('on')}
+function resetDraft(){draft={cats:new Set(),methods:new Set(),band:'all'};renderSheet()}
+function applySheet(){active.cats=new Set(draft.cats);active.methods=new Set(draft.methods);active.band=draft.band;closeSheet();render()}
+
+function renderSheet(){
+  document.getElementById('f-cats').innerHTML=Object.entries(CATS).map(([id,m])=>
+    `<div class="fchip ${draft.cats.has(id)?'on':''}" onclick="toggleD('cats','${id}')"><span class="dot" style="background:${m.c}"></span>${m.e} ${m.n}</div>`).join('');
+  document.getElementById('f-methods').innerHTML=Object.entries(METHODS).map(([n,c])=>
+    `<div class="fchip ${draft.methods.has(n)?'on':''}" onclick="toggleD('methods','${n}')"><span class="dot" style="background:${c}"></span>${n}</div>`).join('');
+  document.querySelectorAll('#f-amount button').forEach(b=>b.classList.toggle('on',b.dataset.band===draft.band));
+  updateApply();
+}
+function toggleD(kind,val){draft[kind].has(val)?draft[kind].delete(val):draft[kind].add(val);renderSheet()}
+document.getElementById('f-amount').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;draft.band=b.dataset.band;renderSheet()});
+function updateApply(){
+  const n=DATA.filter(x=>match(x,draft)).length;
+  document.getElementById('apply').textContent=n?`Prikaži ${n} ${n===1?'rezultat':n<5?'rezultata':'rezultata'}`:'Nema rezultata';
+}
+
+// ─── ACTIVE CHIPS ───
+function renderChips(){
+  const el=document.getElementById('chips');const c=[];
+  active.cats.forEach(id=>c.push(`<div class="chip">${CATS[id].e} ${CATS[id].n}<x onclick="rmChip('cats','${id}')">✕</x></div>`));
+  active.methods.forEach(m=>c.push(`<div class="chip"><span style="width:8px;height:8px;border-radius:50%;background:${METHODS[m]}"></span>${m}<x onclick="rmChip('methods','${m}')">✕</x></div>`));
+  if(active.band!=='all'){const lbl={lo:'do €20',mid:'€20–100',hi:'€100+'}[active.band];c.push(`<div class="chip">${lbl}<x onclick="rmBand()">✕</x></div>`)}
+  el.innerHTML=c.join('');el.classList.toggle('show',c.length>0);
+  const n=active.cats.size+active.methods.size+(active.band!=='all'?1:0);
+  const fb=document.getElementById('fbtn');fb.classList.toggle('has',n>0);fb.dataset.n=n;
+}
+function rmChip(kind,val){active[kind].delete(val);render()}
+function rmBand(){active.band='all';render()}
+
+// ─── LIST ───
+function render(){
+  active.search=document.getElementById('search').value;
+  renderMonths();renderChips();
+  const rows=DATA.filter(x=>match(x,active)).sort((a,b)=>b.d.localeCompare(a.d));
+  const total=rows.reduce((s,x)=>s+x.a,0);
+  document.getElementById('sum-count').textContent=`${rows.length} ${rows.length===1?'trošak':rows.length<5?'troška':'troškova'}`;
+  document.getElementById('sum-total').textContent=fmt(total);
+  const list=document.getElementById('list');
+  if(!rows.length){list.innerHTML=`<div class="empty"><div class="ico">🔍</div><div class="big">Nema rezultata</div><div>Probaj da ukloniš neki filter</div></div>`;return}
+  let html='',lastDay='';
+  rows.forEach(x=>{
+    if(x.d!==lastDay){
+      lastDay=x.d;
+      const dt=new Date(x.d+'T00:00:00');const dayTot=rows.filter(r=>r.d===x.d).reduce((s,r)=>s+r.a,0);
+      html+=`<div class="day"><span>${DOW[dt.getDay()]} · ${x.d.slice(8)}.${x.d.slice(5,7)}</span><span class="t">${fmt(dayTot)}</span></div>`;
+    }
+    const m=CATS[x.c];
+    html+=`<div class="row"><div class="row-ic" style="background:${m.c}1f;color:${m.c}">${m.e}</div><div class="row-mid"><div class="row-name">${x.desc}</div><div class="row-meta">${x.m} · ${m.n}</div></div><div class="row-amt">${fmt(x.a)}</div></div>`;
+  });
+  list.innerHTML=html;
+}
+
+renderDashCats();render();
+</script>
+</body>
+</html>
