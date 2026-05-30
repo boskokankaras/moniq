@@ -229,7 +229,37 @@ svg{stroke-linecap:round;stroke-linejoin:round}
 .fseg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px}
 .fseg button{flex:1;padding:9px 6px;background:none;border:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--mut);border-radius:10px;cursor:pointer;transition:.12s}
 .fseg button.on{background:var(--grad);color:#fff}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0!important}}
+/* ring hero */
+.ring-wrap{display:flex;align-items:center;gap:18px;margin-top:16px}
+.ring{position:relative;width:104px;height:104px;flex-shrink:0}
+.ring svg{width:104px;height:104px;transform:rotate(-90deg)}
+.ring-fg{transition:stroke-dashoffset 1.1s var(--e1)}
+.ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:#fff}
+.ring-lab{font-size:9px;color:var(--mut);letter-spacing:.1em;text-transform:uppercase}
+.ring-stats{flex:1}
+.rstat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.rstat:last-child{border-bottom:none}
+.rstat span{color:var(--mut)}.rstat b{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+/* budget config */
+.itrow{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.itrow:last-child{border-bottom:none}
+.it-n{font-size:14px;font-weight:500}.it-a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--mut);margin-left:auto;margin-right:14px;font-variant-numeric:tabular-nums}
+.bsum{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:14px;margin:12px}
+.bsum-l{font-size:12px;color:var(--mut)}.bsum-v{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+/* methods */
+.mrow{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.mrow:last-child{border-bottom:none}
+.m-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px}
+.m-full{font-size:14px;font-weight:500}.m-sub{font-size:11px;color:var(--faint);margin-top:2px}
+.m-add{color:#A78BFA;font-weight:600;font-size:14px}
+.mini-switch{width:40px;height:23px;background:#2a2b38;border-radius:99px;position:relative;flex-shrink:0;cursor:pointer;transition:background .2s;margin-left:auto}
+.mini-switch.on{background:var(--grad)}
+.mini-switch::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;background:#fff;border-radius:50%;transition:transform .2s var(--e2)}
+.mini-switch.on::after{transform:translateX(17px)}
+.tag-prev{display:inline-flex;align-items:center;padding:8px 13px;border-radius:10px;font-size:13px;font-weight:600;margin-top:8px}
+.swatch{width:30px;height:30px;border-radius:9px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0!important}.ring-fg{transition:none!important}}
 </style>
 </head>
 <body>
@@ -260,6 +290,7 @@ svg{stroke-linecap:round;stroke-linejoin:round}
       <div class="sheet-bg" id="sbg" onclick="closeSheets()"></div>
       <div class="sheet" id="sheet-add"></div>
       <div class="sheet" id="sheet-filter"></div>
+      <div class="sheet" id="sheet-method"></div>
     </div></div></div>
   </div>
 </div>
@@ -309,6 +340,26 @@ const CATS={
  rate:{n:'Rate',c:'#C084FC',i:'rate'}, ostalo:{n:'Ostalo',c:'#94A3B8',i:'other'},
 };
 const METHODS={Kartica:'#22D3EE',Keš:'#34D399',Virman:'#FBBF24',INA:'#FB7185',Biznis:'#A78BFA'};
+/* budžet se konfiguriše iz primanja; troši se samo kroz označene metode */
+const INCOME_TYPES=[{k:'plata',n:'Plata',a:2500},{k:'kirija',n:'Kirija (stan)',a:500},{k:'vanredno',n:'Vanredno / bonus',a:1200}];
+const METHOD_LIST=[
+ {short:'Kartica',full:'Lična kartica',color:'#22D3EE',icon:'card',budget:true},
+ {short:'Keš',full:'Gotovina',color:'#34D399',icon:'cash',budget:true},
+ {short:'Virman',full:'Virman / banka',color:'#FBBF24',icon:'card',budget:true},
+ {short:'INA',full:'INA gorivo kartica',color:'#FB7185',icon:'fuel',budget:true},
+ {short:'Biznis',full:'Biznis kartica',color:'#A78BFA',icon:'card',budget:false},
+];
+const budgetCfg={incomes:new Set(['plata','kirija'])};
+function dashBudget(){
+  const bm=new Set(METHOD_LIST.filter(m=>m.budget).map(m=>m.short));
+  const may=DATA.filter(x=>x.d.slice(0,7)==='2026-05');
+  const bs=may.filter(x=>bm.has(x.m));
+  const spent=bs.reduce((s,x)=>s+x.a,0);
+  const biz=may.filter(x=>!bm.has(x.m)).reduce((s,x)=>s+x.a,0);
+  const B=INCOME_TYPES.filter(t=>budgetCfg.incomes.has(t.k)).reduce((s,t)=>s+t.a,0);
+  const days=26;
+  return {B,spent,biz,ostaje:B-spent,avg:spent/days,cnt:bs.length,pct:B?Math.min(Math.round(spent/B*100),100):0};
+}
 const MN=['','Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
 const DOW=['Ned','Pon','Uto','Sri','Čet','Pet','Sub'];
 const DATA=[
@@ -377,26 +428,27 @@ function renderDash(){
   const tot={};may.forEach(x=>tot[x.c]=(tot[x.c]||0)+x.a);
   const top=Object.entries(tot).sort((a,b)=>b[1]-a[1]).slice(0,4);
   const max=top[0][1];
+  const D=dashBudget();
   document.getElementById('s-dash').innerHTML=`
    <div class="hd reveal"><div class="br"><span class="brd"></span>moniq</div>
      <div class="icrow"><div class="ic">${sv(I.eye)}</div><div class="ic">${sv(I.refresh)}</div></div></div>
    <div class="hero reveal" style="animation-delay:.05s">
-     <div class="hero-top"><div><div class="hl">Maj · potrošeno</div><div class="ha" id="hero-amt">€0,00</div>
-       <div class="hm">od <b>€3.000</b> · <span class="g">€58/dan</span> ostaje</div></div>
-       <div class="tpill">${sv(I.bolt,'')} ispod tempa</div></div>
-     <div class="chart"><svg viewBox="0 0 340 126" preserveAspectRatio="none">
-       <defs>
-        <linearGradient id="ls" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
-        <linearGradient id="lf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5CF6" stop-opacity=".34"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></linearGradient>
-        <filter id="glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-       </defs>
-       <line x1="0" y1="34" x2="340" y2="34" stroke="rgba(255,255,255,.05)"/><line x1="0" y1="72" x2="340" y2="72" stroke="rgba(255,255,255,.05)"/><line x1="0" y1="108" x2="340" y2="108" stroke="rgba(255,255,255,.05)"/>
-       <line x1="6" y1="110" x2="332" y2="20" stroke="rgba(255,255,255,.22)" stroke-width="1.5" stroke-dasharray="4 5"/>
-       <path d="M6,106 C50,98 78,84 110,78 S172,56 210,48 S294,32 332,28 L332,126 L6,126 Z" fill="url(#lf)"/>
-       <path class="draw" d="M6,106 C50,98 78,84 110,78 S172,56 210,48 S294,32 332,28" fill="none" stroke="url(#ls)" stroke-width="3" filter="url(#glow)"/>
-       <circle class="pulse" cx="332" cy="28" r="9" fill="#8B5CF6"/><circle cx="332" cy="28" r="4.5" fill="#fff"/>
-     </svg></div>
-     <div class="chart-x"><span>1.</span><span>8.</span><span>15.</span><span>22.</span><span>danas</span></div>
+     <div class="hero-top"><div><div class="hl">Maj · potrošeno iz budžeta</div><div class="ha" id="hero-amt">€0,00</div>
+       <div class="hm">+ <b>${fmt(D.biz)}</b> biznis (van budžeta)</div></div>
+       <div class="tpill">${sv(I.bolt)} ispod tempa</div></div>
+     <div class="ring-wrap">
+       <div class="ring"><svg viewBox="0 0 104 104">
+         <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+         <filter id="rgl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+         <circle cx="52" cy="52" r="44" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
+         <circle id="ring-fg" class="ring-fg" cx="52" cy="52" r="44" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" filter="url(#rgl)" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+       </svg><div class="ring-txt"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-lab">budžeta</div></div></div>
+       <div class="ring-stats">
+         <div class="rstat"><span>Ostaje</span><b>${fmt(D.ostaje)}</b></div>
+         <div class="rstat"><span>Dnevni prosjek</span><b>${fmt(D.avg)}</b></div>
+         <div class="rstat"><span>Transakcija</span><b>${D.cnt}</b></div>
+       </div>
+     </div>
    </div>
    <div class="bal">
      <div class="balc reveal" style="animation-delay:.1s"><div class="ball"><span class="bald" style="background:#22D3EE;box-shadow:0 0 8px #22D3EE"></span>Kartica</div><div class="bala">€4.218,50</div><div class="balx up">↑ €42,30 ovog tjedna</div></div>
@@ -411,7 +463,12 @@ function renderDash(){
        <div class="subs-logos"><span class="slogo" style="background:#000">N</span><span class="slogo" style="background:#1DB954">S</span><span class="slogo" style="background:#00C2E8;color:#003">C</span><span class="slogo" style="background:#8b5cf6">A</span><span class="slogo" style="background:#10a37f">G</span><span class="slogo" style="background:#22232f;color:#8A8FA3">+11</span></div></div></div>`;
 }
 function afterDash(){
-  const el=document.getElementById('hero-amt');if(el)countUp(el,1247.43);
+  const D=dashBudget();
+  const a=document.getElementById('hero-amt');if(a)countUp(a,D.spent);
+  const fg=document.getElementById('ring-fg');
+  if(fg){const C=276.5,off=C*(1-D.pct/100);if(RM)fg.style.strokeDashoffset=off;else requestAnimationFrame(()=>requestAnimationFrame(()=>{fg.style.strokeDashoffset=off;}));}
+  const p=document.getElementById('ring-pct');
+  if(p){if(RM)p.textContent=D.pct+'%';else{const t0=performance.now();(function st(t){const k=Math.min((t-t0)/1100,1);p.textContent=Math.round(D.pct*(1-Math.pow(1-k,3)))+'%';if(k<1)requestAnimationFrame(st);})(performance.now());}}
   setTimeout(()=>document.querySelectorAll('#bars .bar-fill').forEach((b,i)=>{setTimeout(()=>{b.style.height=b.dataset.h+'px';},i*60);}),250);
 }
 
@@ -516,27 +573,55 @@ function press(k){
 
 /* ───── SETTINGS ───── */
 function renderSettings(){
+  const D=dashBudget();
   document.getElementById('s-set').innerHTML=`
    <div class="hd reveal"><div class="h-title">Postavke</div></div>
-   <div class="set-sec reveal" style="animation-delay:.04s"><div class="set-t">Stanje računa</div><div class="set-card">
-     <div class="set-row"><div class="set-ic">${sv(I.card)}</div><div><div class="set-name">Početno stanje · Kartica</div><div class="set-sub">koliko ima sad</div></div><div class="set-val">€4.218,50</div></div>
-     <div class="set-row"><div class="set-ic">${sv(I.cash)}</div><div><div class="set-name">Početno stanje · Keš</div><div class="set-sub">gotovina sad</div></div><div class="set-val">€243,00</div></div>
-     <div class="set-row"><div class="set-ic">${sv(I.bolt)}</div><div><div class="set-name">Mjesečni budžet</div><div class="set-sub">cilj potrošnje</div></div><div class="set-val">€3.000</div></div>
+   <div class="set-sec reveal" style="animation-delay:.04s"><div class="set-t">Budžet — iz primanja</div><div class="set-card">
+     <div style="padding:13px 16px 4px"><div class="set-sub">Označi koja primanja čine tvoj budžet</div></div>
+     ${INCOME_TYPES.map(t=>`<div class="itrow"><div class="it-n">${t.n}</div><div class="it-a">${fmt(t.a)}/mj</div><div class="mini-switch ${budgetCfg.incomes.has(t.k)?'on':''}" onclick="toggleIncome('${t.k}')"></div></div>`).join('')}
+     <div class="bsum"><div><div class="bsum-l">Mjesečni budžet</div><div class="set-sub" style="margin-top:2px" id="bsum-sub">troši se kroz: ${METHOD_LIST.filter(m=>m.budget).map(m=>m.short).join(', ')}</div></div><div class="bsum-v" id="bsum-v">${fmt(D.B)}</div></div>
    </div></div>
-   <div class="set-sec reveal" style="animation-delay:.08s"><div class="set-t">Aplikacija</div><div class="set-card">
-     <div class="set-row"><div class="set-ic">${sv(I.globe)}</div><div><div class="set-name">Valuta</div><div class="set-sub">prikaz iznosa</div></div><div class="set-val">EUR €</div></div>
-     <div class="set-row"><div class="set-ic">${sv(I.moon)}</div><div><div class="set-name">Tamna tema</div><div class="set-sub">Aurora neon</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
-     <div class="set-row"><div class="set-ic">${sv(I.eye)}</div><div><div class="set-name">Sakrij iznose</div><div class="set-sub">privatnost</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+   <div class="set-sec reveal" style="animation-delay:.08s"><div class="set-t">Stanje računa</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.card)}</div><div><div class="set-name">Početno · Kartica</div></div><div class="set-val">€4.218,50</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.cash)}</div><div><div class="set-name">Početno · Keš</div></div><div class="set-val">€243,00</div></div>
    </div></div>
    <div class="set-sec reveal" style="animation-delay:.12s"><div class="set-t">Načini plaćanja</div><div class="set-card">
-     ${Object.entries(METHODS).map(([n,c])=>`<div class="set-row"><div class="set-ic" style="background:${c}22;color:${c}">${sv(I.card)}</div><div><div class="set-name">${n}</div></div><div class="set-chev">›</div></div>`).join('')}
+     ${METHOD_LIST.map((m,i)=>`<div class="mrow" onclick="openMethodEdit(${i})"><div class="set-ic" style="background:${m.color}22;color:${m.color}">${sv(I[m.icon])}</div>
+       <div style="flex:1"><div class="m-full">${m.full}</div><div class="m-sub">tag <span class="m-tag" style="background:${m.color}22;color:${m.color}">${m.short}</span> · ${m.budget?'u budžetu':'van budžeta'}</div></div>
+       <div class="mini-switch ${m.budget?'on':''}" onclick="event.stopPropagation();toggleMethod(${i})"></div></div>`).join('')}
+     <div class="mrow" onclick="openMethodEdit(-1)"><div class="set-ic" style="background:rgba(139,92,246,.15);color:#A78BFA">+</div><div class="m-add">Dodaj način plaćanja</div></div>
    </div></div>
-   <div class="set-sec reveal" style="animation-delay:.16s"><div class="set-t">Podaci</div><div class="set-card">
-     <div class="set-row"><div class="set-ic">${sv(I.download)}</div><div><div class="set-name">Eksport CSV</div><div class="set-sub">831 transakcija</div></div><div class="set-chev">›</div></div>
+   <div class="set-sec reveal" style="animation-delay:.16s"><div class="set-t">Aplikacija</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.globe)}</div><div><div class="set-name">Valuta</div></div><div class="set-val">EUR €</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.moon)}</div><div><div class="set-name">Tamna tema</div><div class="set-sub">Aurora neon</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.eye)}</div><div><div class="set-name">Sakrij iznose</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+   </div></div>
+   <div class="set-sec reveal" style="animation-delay:.2s"><div class="set-t">Podaci</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.download)}</div><div><div class="set-name">Eksport CSV</div></div><div class="set-chev">›</div></div>
      <div class="set-row"><div class="set-ic">${sv(I.info)}</div><div><div class="set-name">O aplikaciji</div><div class="set-sub">v13 · Aurora</div></div><div class="set-chev">›</div></div>
    </div></div>
-   <button class="btn-out reveal" style="animation-delay:.2s">Odjavi se</button>`;
+   <button class="btn-out reveal" style="animation-delay:.24s">Odjavi se</button>`;
 }
+function toggleIncome(k){const had=budgetCfg.incomes.has(k);had?budgetCfg.incomes.delete(k):budgetCfg.incomes.add(k);event.currentTarget.classList.toggle('on',!had);const v=document.getElementById('bsum-v');if(v)v.textContent=fmt(dashBudget().B);renderDash();}
+function toggleMethod(i){METHOD_LIST[i].budget=!METHOD_LIST[i].budget;event.currentTarget.classList.toggle('on',METHOD_LIST[i].budget);const sub=document.getElementById('bsum-sub');if(sub)sub.textContent='troši se kroz: '+METHOD_LIST.filter(m=>m.budget).map(m=>m.short).join(', ');const ms=event.currentTarget.closest('.mrow').querySelector('.m-sub');if(ms)ms.innerHTML='tag <span class="m-tag" style="background:'+METHOD_LIST[i].color+'22;color:'+METHOD_LIST[i].color+'">'+METHOD_LIST[i].short+'</span> · '+(METHOD_LIST[i].budget?'u budžetu':'van budžeta');renderDash();}
+let _mc='#22D3EE';
+function openMethodEdit(i){
+  const m=i>=0?METHOD_LIST[i]:{full:'',short:'',color:'#22D3EE',icon:'card',budget:true};_mc=m.color;
+  const sh=document.getElementById('sheet-method');
+  sh.innerHTML=`<div class="sheet-grip"></div>
+   <div class="sheet-hd"><h3>${i>=0?'Uredi način':'Novi način plaćanja'}</h3><span class="sclose" onclick="closeSheets()">✕</span></div>
+   <div class="sheet-body">
+     <div class="frow"><div class="flabel">Pun naziv</div><input class="finput" id="m-full" value="${m.full}" placeholder="npr. Biznis kartica"></div>
+     <div class="frow"><div class="flabel">Kratki naziv (tag)</div><input class="finput" id="m-short" value="${m.short}" maxlength="10" placeholder="npr. Biznis" oninput="document.getElementById('tprev').textContent=this.value||'tag'">
+       <div class="set-sub" style="margin-top:8px">Prikazuje se na ikonicama i tagovima:</div>
+       <span class="tag-prev" id="tprevwrap" style="background:${m.color}22;color:${m.color}"><span id="tprev">${m.short||'tag'}</span></span></div>
+     <div class="frow"><div class="flabel">Boja</div><div style="display:flex;gap:10px;margin-top:6px">${['#22D3EE','#34D399','#A78BFA','#FB7185','#FBBF24','#60A5FA','#A3E635'].map(c=>`<span class="swatch" onclick="setMC('${c}')" style="background:${c};outline:2px solid ${c===m.color?'#fff':'transparent'};outline-offset:1px"></span>`).join('')}</div></div>
+     <div class="frow" style="display:flex;align-items:center;justify-content:space-between"><div><div class="m-full">Računa se u budžet</div><div class="m-sub">troškovi ovom metodom umanjuju budžet</div></div><div class="mini-switch ${m.budget?'on':''}" onclick="this.classList.toggle('on')"></div></div>
+   </div>
+   <div class="sheet-foot"><button class="save" onclick="closeSheets()">Sačuvaj</button></div>`;
+  openSheet('sheet-method');
+}
+function setMC(c){_mc=c;const w=document.getElementById('tprevwrap');if(w){w.style.background=c+'22';w.style.color=c;}document.querySelectorAll('#sheet-method .swatch').forEach(s=>s.style.outline='2px solid transparent');event.currentTarget.style.outline='2px solid #fff';}
 
 /* ───── PROFILE ───── */
 function renderProfile(){
