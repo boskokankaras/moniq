@@ -1034,7 +1034,7 @@ function renderDashboard(){
 
   const subsHTML=subs.length?(subs.slice(0,5).map(e=>{const logo=getSubLogo(e.desc);const icon=logo?`<img src="${logo}" class="sub-logo" onerror="this.outerHTML='<span class=sub-emoji>📱</span>'">`:`<span class="sub-emoji">📱</span>`;return`<div class="sub-item">${icon}<span class="sub-name">${esc(e.desc)}</span><span class="sub-amount">${fmt(e.amount)}/mj</span></div>`;}).join('')+(subs.length>5?`<div onclick="goToExpenses(['pretplate'])" style="text-align:center;padding:10px 0;font-size:13px;color:var(--primary);cursor:pointer;font-weight:600">Vidi sve pretplate (${subs.length}) →</div>`:'')):(`<div style="color:var(--sub);font-size:14px;padding:16px 0">Nema pretplata</div>`);
 
-  const recentHTML=recent.map(e=>{const cat=CATS.find(c=>c.id===e.category)||CATS[CATS.length-1];const mc=MC[e.method]||MC['Kartica'];const{cleanNote,freq}=parseFreq(e.note||'');const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:'';const isExp=expandedRecentItems.has(e.id);const hasNote=!!(cleanNote||freqBadge);const detail=isExp?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${esc(e.method)}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
+  const recentHTML=recent.map(e=>{const cat=CATS.find(c=>c.id===e.category)||CATS[CATS.length-1];const mc=MC[e.method]||MC['Kartica'];const{cleanNote,freq}=parseFreq(e.note||'');const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:e.note&&e.note.startsWith('[Jednokratna]')?`<span style="font-size:10px;background:#f59e0b20;color:#f59e0b;border-radius:4px;padding:1px 5px;margin-right:4px">Jednokratna</span>`:'';const isExp=expandedRecentItems.has(e.id);const hasNote=!!(cleanNote||freqBadge);const detail=isExp?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${esc(e.method)}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
 const _rItem=`<div class="expense-item${isExp?' ei-open':''}" onclick="toggleRecentItem(${e.id})">${getExpEmoji(e,cat)}<div class="expense-info"><div class="expense-desc">${esc(e.desc)}</div><div class="expense-meta">${fmtDate(e.date)}</div></div><span class="amount-pill" style="background:${mc.bg};color:${mc.color}">${fmt(e.amount)}</span></div>`;return isExp?`<div class="exp-wrap">${_rItem}${detail}</div>`:_rItem;}).join('');
 
   // Tekući mjesec — slide 0: chipovi, slide 1: donut
@@ -1236,7 +1236,7 @@ function renderExpenses(){
         const cat=CATS.find(c=>c.id===e.category)||CATS[CATS.length-1];
         const mc=MC[e.method]||MC['Kartica'];
         const{cleanNote}=parseFreq(e.note||'');
-        const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:'';
+        const freqBadge=e.note&&e.note.startsWith('[Godišnja]')?`<span style="font-size:10px;background:#8b5cf620;color:#8b5cf6;border-radius:4px;padding:1px 5px;margin-right:4px">Godišnja</span>`:e.note&&e.note.startsWith('[Jednokratna]')?`<span style="font-size:10px;background:#f59e0b20;color:#f59e0b;border-radius:4px;padding:1px 5px;margin-right:4px">Jednokratna</span>`:'';
         const isExpanded=expandedExpItems.has(e.id);
         const hasNote=!!(cleanNote||freqBadge);
         const expandDetail=isExpanded?`<div class="exp-detail"><div class="exp-detail-grid" style="grid-template-columns:${hasNote?'1fr 1fr 1fr 1fr':'1fr 1fr 1fr'}"><div class="exp-detail-item"><span class="exp-detail-label">Kategorija</span><span class="exp-detail-value">${cat.name}</span></div><div class="exp-detail-item" style="text-align:center"><span class="exp-detail-label">Datum</span><span class="exp-detail-value">${fmtDate(e.date)}</span></div><div class="exp-detail-item" style="text-align:${hasNote?'center':'right'}"><span class="exp-detail-label">Metoda</span><span class="exp-detail-value">${esc(e.method)}</span></div>${hasNote?`<div class="exp-detail-item" style="text-align:right"><span class="exp-detail-label">Napomena</span><span class="exp-detail-value">${freqBadge}${cleanNote?esc(cleanNote):''}</span></div>`:''}</div></div>`:''
@@ -1767,7 +1767,7 @@ function goToExpenses(cats){
 }
 
 // FORM
-function parseFreq(note){const m=(note||'').match(/^\[(Godišnja|Mjesečna)\]\s*/);if(m)return{freq:m[1]==='Godišnja'?'godisnja':'mjescna',cleanNote:note.slice(m[0].length)};return{freq:'mjescna',cleanNote:note||''};}
+function parseFreq(note){const m=(note||'').match(/^\[(Godišnja|Mjesečna|Jednokratna)\]\s*/);if(m){const f=m[1]==='Godišnja'?'godisnja':m[1]==='Jednokratna'?'jednokratna':'mjescna';return{freq:f,cleanNote:note.slice(m[0].length)};}return{freq:'mjescna',cleanNote:note||''};}
 function buildForm(e,isEdit){
   const dm=e?e.method:'Kartica';
   const dc=e?e.category:'ostalo';
@@ -1797,7 +1797,7 @@ function buildForm(e,isEdit){
       <div class="form-group" style="min-width:0"><label class="form-label" id="f-date-label">${isRate?'Datum prve rate':'Datum'}</label><input type="date" class="form-control" id="f-date" value="${e?e.date:today}" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>
     </div>
     <div class="form-group"><label class="form-label">Metoda plaćanja</label><div class="method-grid">${mGrid}</div><input type="hidden" id="f-method" value="${dm}"></div>
-    <div class="form-group" id="freq-group" style="display:${freqVisible?'block':'none'}"><label class="form-label">Učestalost pretplate</label><select class="form-control" id="f-freq"><option value="mjescna"${initFreq==='mjescna'?' selected':''}>📅 Mjesečna</option><option value="godisnja"${initFreq==='godisnja'?' selected':''}>📆 Godišnja</option></select></div>
+    <div class="form-group" id="freq-group" style="display:${freqVisible?'block':'none'}"><label class="form-label">Učestalost pretplate</label><select class="form-control" id="f-freq"><option value="mjescna"${initFreq==='mjescna'?' selected':''}>📅 Mjesečna</option><option value="godisnja"${initFreq==='godisnja'?' selected':''}>📆 Godišnja</option><option value="jednokratna"${initFreq==='jednokratna'?' selected':''}>⚡ Jednokratna</option></select></div>
     <div class="form-group"><label class="form-label">Napomena (opciono)</label><textarea class="form-control" id="f-note" placeholder="Dodaj napomenu...">${esc(initNote)}</textarea></div>
   `;
 }
@@ -1851,6 +1851,7 @@ function getFormData(){
   const freq=document.getElementById('f-freq')?.value||'mjescna';
   let note=(document.getElementById('f-note')?.value||'').trim();
   if(category==='pretplate'&&freq==='godisnja')note='[Godišnja] '+note;
+  else if(category==='pretplate'&&freq==='jednokratna')note='[Jednokratna] '+note;
   if(!desc){alert('Upiši opis');return null}
   if(!amount||amount<=0){alert('Unesi ispravan iznos');return null}
   if(!date){alert('Izaberi datum');return null}
