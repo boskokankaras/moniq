@@ -7,18 +7,21 @@
 
 **Ukupno: ~50 jedinstvenih problema** — 3 KRITIČNA · 13 VISOKIH · 20 SREDNJIH · 14 NISKIH.
 
+> **✅ 30.05.2026 — sva 3 KRITIČNA riješena** (P1 RLS, P2 XSS, P3 initFP). Detalji ispod.
+
 ---
 
 ## 🔴 A. KRITIČNO (bezbjednost / app puca)
 
-**P1 — [KRITIČNO] Supabase RLS nije potvrđen** · L516, 721, 841, 1898–1922, 2529–2550, 828
+**P1 — [KRITIČNO] ✅ RIJEŠENO** — Supabase RLS · L516, 721, 841, 1898–1922, 2529–2550, 828
+> Potvrđeno: `expenses` je imao `Public access` politiku (`USING/WITH CHECK true`) koja je poništavala per-user politike. **Obrisana migracijom** `drop_public_access_policy_on_expenses`. Sad važe `select_own/insert_own/update_own/delete_own`. `income_entries` i `user_settings` su već bili ispravni. Svih 359 redova ima `user_id` (1 korisnik) → ništa se ne lomi. Advisor čist.
 Svi upiti (`select('*')`, `update().eq('id')`, `delete().eq('id')`) idu **bez `user_id` filtera** — oslanjaju se isključivo na Row-Level Security. Ako RLS nije uključen i ispravno podešen na Supabase projektu, **svaki ulogovan korisnik može da čita/mijenja/briše tuđe troškove, primanja i postavke**. `seedIfEmpty` broji *globalne* redove. → **Hitno provjeriti RLS na `expenses`, `income_entries`, `user_settings`.**
 
-**P2 — [KRITIČNO] Stored XSS preko naziva načina plaćanja** · L1037, 1242, 1430, 1870, 2598
-`e.method` se ubacuje **neescapovano** u `innerHTML` na 5+ mjesta (lista, dashboard, brisanje, primanja, postavke) — dok je `e.desc` tu odmah pored escapovan. `addMethod()` (L2440) nema filter karaktera. Naziv metode `<img src=x onerror=...>` izvršava skriptu na svaki render. Isto važi za **profil polja** (`first_name`, `last_name`, `username`) u `renderProfile` (L2284–2304).
+**P2 — [KRITIČNO] ✅ RIJEŠENO** — Stored XSS · L1037, 1242, 1430, 1870, 2598
+~~`e.method` se ubacuje neescapovano...~~ **Escapovano preko `esc()`:** `e.method` (4 mjesta), `m.name` (postavke ×2), te profil polja `first_name/last_name/username/email/initial/birth_date`. Vrijednosti se i dalje čuvaju sirove, ali se renderuju escapovano → XSS zatvoren.
 
-**P3 — [KRITIČNO] Dodavanje primanja puca — pozvana nepostojeća funkcija** · L2512, 2564, 2571
-`openAddIncomeSheet()` na kraju zove `initFP()` koja **nigdje nije definisana** → `ReferenceError`, prekida inicijalizaciju sheeta. Stari put (`addIncome`/`removeIncome`) zove `saveIncomeEntries()` koja takođe ne postoji. Žive polomljene reference.
+**P3 — [KRITIČNO] ✅ RIJEŠENO** — Dodavanje primanja pucalo · L2512
+`openAddIncomeSheet()` zvao `initFP()` (nedefinisano) → `ReferenceError`. **Poziv uklonjen** (sheet koristi native `<input type=date>`, flatpickr ne treba). Napomena: `addIncome`/`removeIncome` (sa `saveIncomeEntries`) su **mrtav kod, niko ih ne zove** — ostavljeni za cleanup (Talas 5), ne izvršavaju se.
 
 ---
 
