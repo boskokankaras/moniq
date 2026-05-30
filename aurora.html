@@ -408,6 +408,14 @@ body:not(.dark){ background:var(--bg)!important; color:var(--text)!important; }
 .fab-menu-item{background:#15161F!important}
 .budtag,.budtag-on{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:1.5px solid var(--border);background:rgba(255,255,255,.04);color:var(--text)}
 .budtag-on{border-color:#8B5CF6;background:rgba(139,92,246,.15);color:#C4B5FD}
+/* kompaktne balance kartice (mockup stil) — bez diranja HTML/JS */
+.hero-scroll{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important;overflow:visible!important;scroll-snap-type:none!important;margin-bottom:14px!important;cursor:default!important}
+.hero-card{padding:15px 16px!important;border-radius:18px!important;background:var(--card-solid)!important;border:1px solid var(--border)!important;box-shadow:none!important;-webkit-mask-image:none!important;mask-image:none!important}
+.hero-card h1{font-size:21px!important;margin-top:2px!important}
+.hero-card>p:first-of-type{font-size:11px!important;font-weight:600!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:var(--sub)!important;opacity:1!important}
+.hero-card>div[style*="margin-top:16px"]{display:none!important}
+.hero-card #kes-mode-label,.hero-card #kartica-mode-label{display:none!important}
+.hero-dots{display:none!important}
 @media (prefers-reduced-motion:reduce){.view.active,#view-dashboard.active>*{animation:none!important}.aur-ringfg{transition:none!important}}
 </style>
 </head>
