@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moniq — Aurora (kompletan prototip)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#0A0B11; --card:#15161F; --card2:#10111A; --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
+  --txt:#EEF0F6; --mut:#8A8FA3; --faint:#5B6075;
+  --v:#8B5CF6; --cy:#22D3EE; --pos:#34D399; --neg:#FB7185;
+  --grad:linear-gradient(135deg,#8B5CF6,#22D3EE);
+  --e1:cubic-bezier(.2,.8,.2,1); --e2:cubic-bezier(.34,1.56,.64,1);
+}
+html,body{background:#05050A;color:var(--txt);font-family:'IBM Plex Sans',system-ui,sans-serif;min-height:100vh}
+.page{max-width:1080px;margin:0 auto;padding:28px 20px 70px}
+.page h1{font-weight:600;font-size:25px;letter-spacing:-.02em;color:#fff}
+.page .sub{font-size:13px;color:#8a8a8a;margin-top:6px;max-width:760px;line-height:1.6}
+.page .sub b{color:#cfcfe0}
+.stage{display:flex;justify-content:center;margin-top:30px}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#9a9a9a;text-align:center;margin-bottom:14px}
+svg{stroke-linecap:round;stroke-linejoin:round}
+
+/* phone */
+.phone{width:400px;height:840px;border-radius:54px;border:8px solid #0a0a0a;box-shadow:0 0 0 1px #242424,0 50px 110px -25px rgba(124,92,255,.22),0 40px 90px -30px rgba(0,0,0,.85);overflow:hidden;position:relative;background:var(--bg)}
+.phone::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:300}
+.vp{width:100%;height:100%;overflow:hidden;position:relative;color:var(--txt)}
+.aura{position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(80% 42% at 12% 0%, rgba(139,92,246,.20), transparent 60%),
+            radial-gradient(72% 40% at 100% 6%, rgba(34,211,238,.13), transparent 55%)}
+.sb{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 9px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;position:relative;z-index:5}
+
+/* scroll area per screen */
+.screen{position:absolute;inset:52px 0 0 0;overflow-y:auto;overflow-x:hidden;display:none;z-index:2;padding-bottom:120px}
+.screen::-webkit-scrollbar{display:none}
+.screen.on{display:block}
+.screen.on .reveal{opacity:0;transform:translateY(12px);animation:reveal .55s var(--e1) forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+
+/* header */
+.hd{padding:14px 22px 8px;display:flex;align-items:center;justify-content:space-between}
+.br{font-size:18px;font-weight:600;display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
+.brd{width:9px;height:9px;border-radius:50%;background:var(--grad);box-shadow:0 0 12px rgba(124,92,255,.9)}
+.h-title{font-size:23px;font-weight:600;letter-spacing:-.02em}
+.icrow{display:flex;gap:8px}
+.ic{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;transition:transform .12s,background .15s}
+.ic:active{transform:scale(.9);background:rgba(255,255,255,.1)}
+.ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+
+/* hero + chart */
+.hero{margin:8px 18px 0;background:linear-gradient(165deg,#171826,#0E0F18);border:1px solid var(--line);border-radius:26px;padding:20px 20px 6px;overflow:hidden;position:relative}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between}
+.hl{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.ha{font-family:'IBM Plex Mono',monospace;font-size:40px;font-weight:600;letter-spacing:-.03em;margin-top:8px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 30px rgba(124,92,255,.25)}
+.hm{font-size:12px;color:var(--mut);margin-top:6px}.hm .g{color:var(--pos);font-weight:600}.hm b{color:#fff;font-weight:600}
+.tpill{display:flex;align-items:center;gap:5px;background:rgba(52,211,153,.12);color:var(--pos);font-size:12px;font-weight:600;padding:6px 10px;border-radius:99px}
+.tpill svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4}
+.chart{margin:14px -20px -6px;position:relative}
+.chart svg{display:block;width:100%;height:126px}
+.chart-x{display:flex;justify-content:space-between;padding:6px 22px 14px;font-size:10px;color:var(--faint);font-variant-numeric:tabular-nums}
+.draw{stroke-dasharray:1000;stroke-dashoffset:1000}
+.screen.on .draw{animation:draw 1.5s .25s var(--e1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.12}}
+
+/* balance */
+.bal{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:16px 18px 0}
+.balc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;transition:transform .14s}
+.balc:active{transform:scale(.98)}
+.ball{font-size:11px;font-weight:600;color:var(--mut);display:flex;align-items:center;gap:7px}
+.bald{width:8px;height:8px;border-radius:50%}
+.bala{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:#fff}
+.balx{font-size:11px;margin-top:3px;font-variant-numeric:tabular-nums}
+.up{color:var(--pos)}.dn{color:var(--neg)}
+
+/* weekly bars */
+.week{margin:16px 18px 0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.week-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.week-t{font-size:12px;font-weight:600;color:var(--mut);letter-spacing:.04em}
+.week-v{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#fff}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;height:64px;gap:8px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;justify-content:flex-end;height:100%}
+.bar-fill{width:100%;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--cy),var(--v));box-shadow:0 0 12px rgba(124,92,255,.5);transform-origin:bottom;transition:transform .7s var(--e1)}
+.bar-fill.lo{background:linear-gradient(180deg,#2b2d40,#1d1e2c);box-shadow:none}
+.bar-d{font-size:10px;color:var(--faint)}
+
+/* sections + category + rows */
+.sec{padding:20px 18px 0}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 4px}
+.st{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.sl{font-size:12px;font-weight:500;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
+.cat{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 15px;margin-bottom:9px;cursor:pointer;transition:transform .14s,border-color .15s}
+.cat:active{transform:scale(.98);border-color:var(--line2)}
+.cic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cic svg{width:18px;height:18px;fill:none;stroke-width:2}
+.cn{font-size:14px;font-weight:600;color:var(--txt)}
+.cm{font-size:11px;color:var(--faint);margin-top:1px}
+.cv{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-left:auto}
+
+/* subs strip */
+.subs{margin:0 18px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.subs-top{display:flex;align-items:baseline;justify-content:space-between}
+.subs-big{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:#fff;letter-spacing:-.02em}
+.subs-big span{font-size:13px;color:var(--mut)}
+.subs-cnt{font-size:11px;color:var(--faint)}
+.subs-logos{display:flex;gap:7px;margin-top:13px}
+.slogo{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+
+/* LIST screen */
+.searchbar{display:flex;gap:10px;padding:4px 18px 12px}
+.search{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:9px}
+.search svg{width:15px;height:15px;stroke:var(--mut);fill:none;stroke-width:2;flex-shrink:0}
+.search input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;color:var(--txt);width:100%}
+.search input::placeholder{color:var(--faint)}
+.fbtn{position:relative;width:46px;border:1px solid var(--line);background:var(--card);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--txt);cursor:pointer;flex-shrink:0;transition:transform .12s}
+.fbtn:active{transform:scale(.93)}
+.fbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.fbtn.has::after{content:attr(data-n);position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;background:var(--grad);color:#fff;border-radius:99px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mpills{display:flex;gap:8px;padding:0 18px 12px;overflow-x:auto;scrollbar-width:none}
+.mpills::-webkit-scrollbar{display:none}
+.mpill{flex-shrink:0;padding:8px 15px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--mut);cursor:pointer;transition:.14s}
+.mpill.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(124,92,255,.4)}
+.mpill:active{transform:scale(.95)}
+.chips{display:flex;gap:7px;padding:0 18px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips.show{padding-bottom:12px}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 8px 6px 11px;background:rgba(139,92,246,.15);color:#C4B5FD;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;animation:pop .2s var(--e2)}
+.chip x{cursor:pointer;width:16px;height:16px;border-radius:50%;background:rgba(139,92,246,.3);display:flex;align-items:center;justify-content:center;font-size:11px}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.summary{padding:2px 22px 10px;font-size:12px;color:var(--mut);display:flex;justify-content:space-between}
+.summary b{color:#fff;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.day{display:flex;justify-content:space-between;padding:14px 22px 7px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.day .t{font-family:'IBM Plex Mono',monospace;color:#fff}
+.row{display:flex;align-items:center;gap:13px;padding:11px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s}
+.row:active{background:rgba(255,255,255,.03)}
+.rav{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rav svg{width:18px;height:18px;fill:none;stroke-width:2}
+.rn{font-size:14px;font-weight:500}.rmeta{font-size:11px;color:var(--faint);margin-top:2px}
+.ra{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-left:auto}
+.empty{text-align:center;padding:50px 30px;color:var(--mut)}
+.empty .big{font-size:15px;font-weight:600;color:#fff;margin:10px 0 6px}
+
+/* SETTINGS / PROFILE */
+.set-sec{margin:18px 18px 0}
+.set-t{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:0 4px 10px}
+.set-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.set-row{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.set-row:last-child{border-bottom:none}
+.set-ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;color:var(--mut);flex-shrink:0}
+.set-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.set-name{font-size:14px;font-weight:500}.set-sub{font-size:11px;color:var(--faint);margin-top:1px}
+.set-val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#fff;margin-left:auto;font-variant-numeric:tabular-nums}
+.set-chev{margin-left:auto;color:var(--faint)}
+.switch{margin-left:auto;width:42px;height:24px;background:#2a2b38;border-radius:99px;position:relative;flex-shrink:0;cursor:pointer;transition:background .2s}
+.switch.on{background:var(--grad)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s var(--e2)}
+.switch.on::after{transform:translateX(18px)}
+.btn-out{display:block;width:calc(100% - 36px);margin:16px 18px 0;padding:15px;background:rgba(251,113,133,.12);color:var(--neg);border:none;border-radius:14px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.prof-top{text-align:center;padding:14px 22px 6px}
+.prof-av{width:84px;height:84px;border-radius:28px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;color:#fff;margin:0 auto 14px;box-shadow:0 12px 30px rgba(124,92,255,.4)}
+.prof-name{font-size:20px;font-weight:600}.prof-mail{font-size:13px;color:var(--mut);margin-top:3px}
+
+/* FAB + NAV */
+.fab{position:absolute;right:22px;bottom:96px;width:60px;height:60px;border-radius:20px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(124,92,255,.55),inset 0 1px 0 rgba(255,255,255,.3);z-index:40;cursor:pointer;transition:transform .14s var(--e2)}
+.fab:active{transform:scale(.9) rotate(90deg)}
+.fab svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.6}
+.nav{position:absolute;left:14px;right:14px;bottom:16px;height:64px;border-radius:24px;background:rgba(18,19,28,.72);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;z-index:35;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.ni{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:500;color:var(--faint);cursor:pointer;transition:color .2s;flex:1}
+.ni svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s var(--e2)}
+.ni.on{color:#fff}
+.ni.on svg{stroke:url(#ng);transform:translateY(-2px) scale(1.08)}
+
+/* SHEETS */
+.sheet-bg{position:absolute;inset:0;background:rgba(5,5,10,.6);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .28s;z-index:90}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#0E0F18;border:1px solid var(--line);border-bottom:none;border-radius:28px 28px 0 0;z-index:91;transform:translateY(101%);transition:transform .34s var(--e1);display:flex;flex-direction:column;max-height:94%}
+.sheet.on{transform:translateY(0)}
+.sheet-grip{width:38px;height:4px;background:#33344a;border-radius:99px;margin:10px auto 6px}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 22px 14px}
+.sheet-hd h3{font-size:18px;font-weight:600}
+.sclose{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);color:var(--mut);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px;margin:0 22px 6px}
+.seg button{flex:1;padding:10px;background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--mut);border-radius:10px;cursor:pointer;transition:.18s}
+.seg button.on{background:var(--grad);color:#fff;box-shadow:0 4px 12px rgba(124,92,255,.4)}
+.amt{text-align:center;padding:20px 0 14px}
+.amt-big{font-family:'IBM Plex Mono',monospace;font-size:54px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 36px rgba(124,92,255,.3)}
+.amt-big span{font-size:26px;color:var(--mut);margin-right:4px}
+.amt-cur{display:inline-block;width:3px;height:44px;background:var(--cy);vertical-align:-7px;margin-left:2px;box-shadow:0 0 10px var(--cy);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.amt-meta{font-size:12px;color:var(--faint);margin-top:8px}
+.methods{display:flex;gap:8px;padding:0 18px 14px;overflow-x:auto;scrollbar-width:none}
+.methods::-webkit-scrollbar{display:none}
+.method{flex-shrink:0;padding:9px 15px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;transition:.14s}
+.method .md{width:8px;height:8px;border-radius:50%}
+.method.on{border-color:var(--v);background:rgba(139,92,246,.15)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:4px 18px 0}
+.key{height:56px;border-radius:16px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:23px;font-weight:500;color:var(--txt);cursor:pointer;user-select:none;transition:transform .08s,background .12s}
+.key:active{transform:scale(.93);background:rgba(139,92,246,.2)}
+.key.fn{color:var(--mut);font-size:19px}
+.sheet-foot{padding:14px 18px 24px}
+.save{display:block;width:100%;padding:16px;background:var(--grad);color:#fff;border:none;border-radius:16px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(124,92,255,.4);transition:transform .12s}
+.save:active{transform:scale(.99)}
+.sheet-body{overflow-y:auto;padding:0 18px}
+.sheet-body::-webkit-scrollbar{display:none}
+.frow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.flabel{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.finput{width:100%;border:none;background:none;font-family:inherit;font-size:15px;color:var(--txt);outline:none}
+.finput::placeholder{color:var(--faint)}
+.cat-detect{font-size:11px;color:#A78BFA;margin-top:9px;display:flex;align-items:center;gap:5px}
+.cat-detect svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2}
+.cat-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.cchip{padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.05);font-size:12px;font-weight:600;color:var(--txt);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.cchip.sug{background:rgba(139,92,246,.18);color:#C4B5FD;outline:1.5px solid var(--v)}
+.cchip .cd{width:8px;height:8px;border-radius:50%}
+/* filter sheet groups */
+.fgroup{padding:16px 0;border-top:1px solid var(--line)}
+.fgroup:first-child{border-top:none}
+.fgroup-t{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:12px}
+.fgrid{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{padding:9px 13px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);font-size:13px;font-weight:500;color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:7px;transition:.12s;user-select:none}
+.fchip:active{transform:scale(.95)}
+.fchip.on{border-color:var(--v);background:rgba(139,92,246,.15);color:#C4B5FD}
+.fchip .d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.fseg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px}
+.fseg button{flex:1;padding:9px 6px;background:none;border:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--mut);border-radius:10px;cursor:pointer;transition:.12s}
+.fseg button.on{background:var(--grad);color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0!important}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Moniq — Aurora ✨ kompletan prototip</h1>
+  <p class="sub">Klikabilno. Dolje <b>nav</b> mijenja ekrane, <b>+</b> otvara unos (numpad), na listi <b>filter</b> otvara panel. Animacije: linija se iscrtava, brojevi se broje, kartice se pojavljuju u nizu, kolone rastu, sheet klizi. <b>Sve na pravim podacima.</b></p>
+  <div class="stage">
+    <div><div class="lbl">Aurora · radi uživo</div>
+    <div class="phone"><div class="vp">
+      <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="ng" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs></svg>
+      <div class="aura"></div>
+      <div class="sb"><span>9:41</span><span>●●● 5G ▮</span></div>
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="screen on" id="s-dash"></div>
+      <!-- ══ LISTA ══ -->
+      <div class="screen" id="s-list"></div>
+      <!-- ══ POSTAVKE ══ -->
+      <div class="screen" id="s-set"></div>
+      <!-- ══ PROFIL ══ -->
+      <div class="screen" id="s-prof"></div>
+
+      <!-- FAB + NAV -->
+      <div class="fab" id="fab" onclick="openAdd()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      <div class="nav" id="nav"></div>
+
+      <!-- SHEETS -->
+      <div class="sheet-bg" id="sbg" onclick="closeSheets()"></div>
+      <div class="sheet" id="sheet-add"></div>
+      <div class="sheet" id="sheet-filter"></div>
+    </div></div></div>
+  </div>
+</div>
+
+<script>
+/* ───── ICONS (Lucide-style) ───── */
+const I={
+ eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+ refresh:'<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>',
+ grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+ list:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+ settings:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+ user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+ card:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+ cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+ search:'<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+ filter:'<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+ bolt:'<polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+ wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M21 12v-2a2 2 0 0 0-2-2h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 2-2z"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/>',
+ moon:'<path d="M21 12.8A8 8 0 1 1 11 3a6 6 0 0 0 10 9.8z"/>',
+ download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+ info:'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/>',
+ lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ marketing:'<path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a4 4 0 0 1 0 8"/>',
+ fuel:'<line x1="3" y1="22" x2="13" y2="22"/><path d="M4 22V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v17"/><line x1="4" y1="11" x2="12" y2="11"/><path d="M16 9l3 3v6a2 2 0 0 0 4 0V9.5L18 7"/>',
+ dostava:'<circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 18 9 7h6l2 6m-8 5h6"/>',
+ sub:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+ food:'<path d="M4 3v7a3 3 0 0 0 6 0V3"/><line x1="7" y1="10" x2="7" y2="21"/><path d="M18 3c-2 0-3 2-3 5s1 4 3 4v9"/>',
+ fitness:'<path d="M6.5 6.5 17.5 17.5M4 7l3-3 3 3-3 3zM14 17l3-3 3 3-3 3z"/>',
+ health:'<path d="M19 14c1.5-1.5 3-3.3 3-5.5A4.5 4.5 0 0 0 12 5 4.5 4.5 0 0 0 2 8.5c0 2.2 1.5 4 3 5.5l7 7z"/>',
+ shopping:'<circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6"/>',
+ pet:'<circle cx="7" cy="9" r="2"/><circle cx="17" cy="9" r="2"/><circle cx="11" cy="6" r="2"/><circle cx="13" cy="14" r="3"/><path d="M9 18c0 2 2 3 3 3s3-1 3-3"/>',
+ travel:'<path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a1 1 0 0 0-1 1.6l5.2 4-2 3-3-1-1 1 3 2 2 3 1-1-1-3 3-2 4 5.2a1 1 0 0 0 1.6-1z"/>',
+ rate:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/>',
+ other:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/>',
+};
+function sv(p,extra){return '<svg viewBox="0 0 24 24" '+(extra||'')+'>'+p+'</svg>';}
+
+/* ───── DATA ───── */
+const CATS={
+ marketing:{n:'Marketing',c:'#818CF8',i:'marketing'}, gorivo:{n:'Gorivo & Auto',c:'#FB7185',i:'fuel'},
+ dostava:{n:'Dostava hrane',c:'#FBBF24',i:'dostava'}, pretplate:{n:'Pretplate',c:'#A78BFA',i:'sub'},
+ hrana:{n:'Hrana & Kafići',c:'#34D399',i:'food'}, fitness:{n:'Fitness',c:'#22D3EE',i:'fitness'},
+ zdravlje:{n:'Zdravlje',c:'#F472B6',i:'health'}, shopping:{n:'Shopping',c:'#60A5FA',i:'shopping'},
+ ljubimac:{n:'Ljubimac',c:'#A3E635',i:'pet'}, putovanja:{n:'Putovanja',c:'#38BDF8',i:'travel'},
+ rate:{n:'Rate',c:'#C084FC',i:'rate'}, ostalo:{n:'Ostalo',c:'#94A3B8',i:'other'},
+};
+const METHODS={Kartica:'#22D3EE',Keš:'#34D399',Virman:'#FBBF24',INA:'#FB7185',Biznis:'#A78BFA'};
+const MN=['','Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+const DOW=['Ned','Pon','Uto','Sri','Čet','Pet','Sub'];
+const DATA=[
+ {d:'2026-05-14',desc:'Aco-Rade licenca',a:8.65,m:'Biznis',c:'pretplate'},
+ {d:'2026-05-14',desc:'Reklame',a:4.85,m:'Biznis',c:'marketing'},
+ {d:'2026-05-12',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+ {d:'2026-05-12',desc:'Temu',a:25.59,m:'Kartica',c:'shopping'},
+ {d:'2026-05-11',desc:'Sicilija City',a:2.50,m:'Kartica',c:'hrana'},
+ {d:'2026-05-10',desc:'Gorivo Raptor',a:107.76,m:'INA',c:'gorivo'},
+ {d:'2026-05-10',desc:'Apoteka Cigo',a:27.85,m:'Kartica',c:'zdravlje'},
+ {d:'2026-05-10',desc:'Wolt Sać bureci',a:10.11,m:'Biznis',c:'dostava'},
+ {d:'2026-05-09',desc:'Wolt Trpković BG',a:13.81,m:'Biznis',c:'dostava'},
+ {d:'2026-05-09',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+ {d:'2026-05-09',desc:'Marija ručak',a:71.06,m:'Biznis',c:'hrana'},
+ {d:'2026-05-08',desc:'Ducati Beograd',a:118.83,m:'Kartica',c:'gorivo'},
+ {d:'2026-05-08',desc:'Bela reka',a:61.04,m:'Biznis',c:'hrana'},
+ {d:'2026-05-07',desc:'Kazna Kolašin',a:25.50,m:'Kartica',c:'ostalo'},
+ {d:'2026-05-07',desc:'Wolt McDonalds',a:49.75,m:'Biznis',c:'dostava'},
+ {d:'2026-05-07',desc:'Gorivo Raptor',a:114.01,m:'INA',c:'gorivo'},
+ {d:'2026-05-05',desc:'Holos Apoteka',a:3.82,m:'Kartica',c:'zdravlje'},
+ {d:'2026-05-04',desc:'Temu',a:78.94,m:'Kartica',c:'shopping'},
+ {d:'2026-05-04',desc:'Canva pretplata',a:23.99,m:'Biznis',c:'pretplate'},
+ {d:'2026-05-04',desc:'Claude pretplata',a:17.07,m:'Biznis',c:'pretplate'},
+ {d:'2026-05-04',desc:'Džena hrana',a:174.00,m:'Keš',c:'ljubimac'},
+ {d:'2026-05-04',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+ {d:'2026-05-02',desc:'Roštiljada',a:30.00,m:'Keš',c:'hrana'},
+ {d:'2026-05-03',desc:'Glovo Burek',a:8.30,m:'Keš',c:'dostava'},
+ {d:'2026-04-30',desc:'Google Workspace',a:12.24,m:'Biznis',c:'pretplate'},
+ {d:'2026-04-28',desc:'Netflix',a:9.99,m:'Kartica',c:'pretplate'},
+ {d:'2026-04-25',desc:'Reklame',a:55.00,m:'Biznis',c:'marketing'},
+ {d:'2026-04-19',desc:'Gorivo Raptor',a:92.57,m:'INA',c:'gorivo'},
+];
+const fmt=n=>'€'+n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ───── COUNT-UP ───── */
+function countUp(el,target){
+  if(RM){el.textContent=fmt(target);return;}
+  const dur=900,t0=performance.now();
+  function step(t){const p=Math.min((t-t0)/dur,1);const e=1-Math.pow(1-p,3);el.textContent=fmt(target*e);if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+}
+
+/* ───── NAV ───── */
+const SCREENS=[['dash','Dashboard',I.grid],['list','Lista',I.list],['set','Postavke',I.settings],['prof','Profil',I.user]];
+let cur='dash';
+function buildNav(){
+  document.getElementById('nav').innerHTML=SCREENS.map(s=>`<div class="ni ${s[0]===cur?'on':''}" data-s="${s[0]}" onclick="go('${s[0]}')">${sv(s[2])}${s[1]}</div>`).join('');
+}
+function go(s){
+  cur=s;
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('on'));
+  const sc=document.getElementById('s-'+s);
+  // re-trigger reveal animations
+  sc.classList.add('on');
+  document.getElementById('fab').style.display=(s==='set'||s==='prof')?'none':'flex';
+  buildNav();
+  if(s==='dash')afterDash();
+  if(s==='list')renderList();
+}
+
+/* ───── DASHBOARD ───── */
+function renderDash(){
+  const may=DATA.filter(x=>x.d.slice(0,7)==='2026-05');
+  const spent=may.reduce((s,x)=>s+x.a,0);
+  const tot={};may.forEach(x=>tot[x.c]=(tot[x.c]||0)+x.a);
+  const top=Object.entries(tot).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const max=top[0][1];
+  document.getElementById('s-dash').innerHTML=`
+   <div class="hd reveal"><div class="br"><span class="brd"></span>moniq</div>
+     <div class="icrow"><div class="ic">${sv(I.eye)}</div><div class="ic">${sv(I.refresh)}</div></div></div>
+   <div class="hero reveal" style="animation-delay:.05s">
+     <div class="hero-top"><div><div class="hl">Maj · potrošeno</div><div class="ha" id="hero-amt">€0,00</div>
+       <div class="hm">od <b>€3.000</b> · <span class="g">€58/dan</span> ostaje</div></div>
+       <div class="tpill">${sv(I.bolt,'')} ispod tempa</div></div>
+     <div class="chart"><svg viewBox="0 0 340 126" preserveAspectRatio="none">
+       <defs>
+        <linearGradient id="ls" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+        <linearGradient id="lf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5CF6" stop-opacity=".34"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></linearGradient>
+        <filter id="glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+       </defs>
+       <line x1="0" y1="34" x2="340" y2="34" stroke="rgba(255,255,255,.05)"/><line x1="0" y1="72" x2="340" y2="72" stroke="rgba(255,255,255,.05)"/><line x1="0" y1="108" x2="340" y2="108" stroke="rgba(255,255,255,.05)"/>
+       <line x1="6" y1="110" x2="332" y2="20" stroke="rgba(255,255,255,.22)" stroke-width="1.5" stroke-dasharray="4 5"/>
+       <path d="M6,106 C50,98 78,84 110,78 S172,56 210,48 S294,32 332,28 L332,126 L6,126 Z" fill="url(#lf)"/>
+       <path class="draw" d="M6,106 C50,98 78,84 110,78 S172,56 210,48 S294,32 332,28" fill="none" stroke="url(#ls)" stroke-width="3" filter="url(#glow)"/>
+       <circle class="pulse" cx="332" cy="28" r="9" fill="#8B5CF6"/><circle cx="332" cy="28" r="4.5" fill="#fff"/>
+     </svg></div>
+     <div class="chart-x"><span>1.</span><span>8.</span><span>15.</span><span>22.</span><span>danas</span></div>
+   </div>
+   <div class="bal">
+     <div class="balc reveal" style="animation-delay:.1s"><div class="ball"><span class="bald" style="background:#22D3EE;box-shadow:0 0 8px #22D3EE"></span>Kartica</div><div class="bala">€4.218,50</div><div class="balx up">↑ €42,30 ovog tjedna</div></div>
+     <div class="balc reveal" style="animation-delay:.15s"><div class="ball"><span class="bald" style="background:#34D399;box-shadow:0 0 8px #34D399"></span>Keš</div><div class="bala">€243,00</div><div class="balx dn">↓ €18,50 ovog tjedna</div></div>
+   </div>
+   <div class="week reveal" style="animation-delay:.2s"><div class="week-h"><div class="week-t">Ova sedmica</div><div class="week-v">€387,20</div></div>
+     <div class="bars" id="bars">${[17,31,9,47,26,58,12].map((h,i)=>`<div class="bar"><div class="bar-fill ${h<15?'lo':''}" data-h="${h}" style="height:0"></div><span class="bar-d">${'PUSČPSN'[i]}</span></div>`).join('')}</div></div>
+   <div class="sec reveal" style="animation-delay:.25s"><div class="sh"><div class="st">Po kategoriji</div><div class="sl" onclick="go('list')">Vidi sve →</div></div>
+     ${top.map(([k,v])=>{const m=CATS[k];return `<div class="cat" onclick="filterCat('${k}')"><div class="cic" style="background:${m.c}26">${sv(I[m.i],'stroke="'+m.c+'"')}</div><div><div class="cn">${m.n}</div><div class="cm">${Math.round(v/max*100)}% mjeseca</div></div><div class="cv">${fmt(v)}</div></div>`;}).join('')}</div>
+   <div class="sec reveal" style="animation-delay:.3s"><div class="sh"><div class="st">Pretplate</div><div class="sl">16 aktivnih →</div></div>
+     <div class="subs"><div class="subs-top"><div class="subs-big">€198,42<span>/mj</span></div><div class="subs-cnt">€2.381 godišnje</div></div>
+       <div class="subs-logos"><span class="slogo" style="background:#000">N</span><span class="slogo" style="background:#1DB954">S</span><span class="slogo" style="background:#00C2E8;color:#003">C</span><span class="slogo" style="background:#8b5cf6">A</span><span class="slogo" style="background:#10a37f">G</span><span class="slogo" style="background:#22232f;color:#8A8FA3">+11</span></div></div></div>`;
+}
+function afterDash(){
+  const el=document.getElementById('hero-amt');if(el)countUp(el,1247.43);
+  setTimeout(()=>document.querySelectorAll('#bars .bar-fill').forEach((b,i)=>{setTimeout(()=>{b.style.height=b.dataset.h+'px';},i*60);}),250);
+}
+
+/* ───── LIST + FILTER ───── */
+const active={month:'2026-05',cats:new Set(),methods:new Set(),band:'all',search:''};
+let draft={cats:new Set(),methods:new Set(),band:'all'};
+const months=()=>[...new Set(DATA.map(x=>x.d.slice(0,7)))].sort().reverse();
+const inBand=(a,b)=>b==='all'||(b==='lo'&&a<20)||(b==='mid'&&a>=20&&a<100)||(b==='hi'&&a>=100);
+function match(x,f){
+  if(x.d.slice(0,7)!==active.month)return false;
+  if(f.cats.size&&!f.cats.has(x.c))return false;
+  if(f.methods.size&&!f.methods.has(x.m))return false;
+  if(!inBand(x.a,f.band))return false;
+  if(active.search&&!x.desc.toLowerCase().includes(active.search.toLowerCase()))return false;
+  return true;
+}
+function filterCat(c){active.cats=new Set([c]);active.methods=new Set();active.band='all';go('list');}
+function renderList(){
+  document.getElementById('s-list').innerHTML=`
+   <div class="hd reveal"><div class="h-title">Troškovi</div></div>
+   <div class="searchbar reveal" style="animation-delay:.04s">
+     <div class="search">${sv(I.search)}<input id="search" placeholder="Pretraži..." oninput="active.search=this.value;drawList()"></div>
+     <div class="fbtn" id="fbtn" onclick="openFilter()">${sv(I.filter)}</div></div>
+   <div class="mpills reveal" id="mpills" style="animation-delay:.08s"></div>
+   <div class="chips" id="chips"></div>
+   <div class="summary"><span id="sum-c">—</span><span>Ukupno: <b id="sum-t">—</b></span></div>
+   <div id="rows"></div>`;
+  drawList();
+}
+function drawList(){
+  const el=document.getElementById('search');if(el&&document.activeElement!==el)el.value=active.search;
+  document.getElementById('mpills').innerHTML=months().map(m=>{const[y,mo]=m.split('-');return `<div class="mpill ${m===active.month?'on':''}" onclick="active.month='${m}';drawList()">${MN[+mo]} ${y.slice(2)}</div>`;}).join('');
+  // chips
+  const c=[];active.cats.forEach(k=>c.push(`<div class="chip">${CATS[k].n}<x onclick="active.cats.delete('${k}');drawList()">✕</x></div>`));
+  active.methods.forEach(m=>c.push(`<div class="chip"><span style="width:7px;height:7px;border-radius:50%;background:${METHODS[m]}"></span>${m}<x onclick="active.methods.delete('${m}');drawList()">✕</x></div>`));
+  if(active.band!=='all'){const l={lo:'do €20',mid:'€20–100',hi:'€100+'}[active.band];c.push(`<div class="chip">${l}<x onclick="active.band='all';drawList()">✕</x></div>`);}
+  const ch=document.getElementById('chips');ch.innerHTML=c.join('');ch.classList.toggle('show',c.length>0);
+  const n=active.cats.size+active.methods.size+(active.band!=='all'?1:0);
+  const fb=document.getElementById('fbtn');fb.classList.toggle('has',n>0);fb.dataset.n=n;
+  // rows
+  const rows=DATA.filter(x=>match(x,active)).sort((a,b)=>b.d.localeCompare(a.d));
+  const total=rows.reduce((s,x)=>s+x.a,0);
+  document.getElementById('sum-c').textContent=`${rows.length} ${rows.length===1?'trošak':rows.length<5?'troška':'troškova'}`;
+  document.getElementById('sum-t').textContent=fmt(total);
+  const box=document.getElementById('rows');
+  if(!rows.length){box.innerHTML=`<div class="empty"><div style="font-size:30px">🔍</div><div class="big">Nema rezultata</div><div>Ukloni neki filter</div></div>`;return;}
+  let h='',last='';
+  rows.forEach(x=>{
+    if(x.d!==last){last=x.d;const dt=new Date(x.d+'T00:00:00');const dtot=rows.filter(r=>r.d===x.d).reduce((s,r)=>s+r.a,0);h+=`<div class="day"><span>${DOW[dt.getDay()]} · ${x.d.slice(8)}.${x.d.slice(5,7)}</span><span class="t">${fmt(dtot)}</span></div>`;}
+    const m=CATS[x.c];h+=`<div class="row"><div class="rav" style="background:${m.c}26">${sv(I[m.i],'stroke="'+m.c+'"')}</div><div><div class="rn">${x.desc}</div><div class="rmeta">${x.m} · ${m.n}</div></div><div class="ra">${fmt(x.a)}</div></div>`;
+  });
+  box.innerHTML=h;
+}
+
+/* ───── FILTER SHEET ───── */
+function openFilter(){
+  draft={cats:new Set(active.cats),methods:new Set(active.methods),band:active.band};
+  const sh=document.getElementById('sheet-filter');
+  sh.innerHTML=`<div class="sheet-grip"></div>
+   <div class="sheet-hd"><h3>Filteri</h3><span class="sl" onclick="draft={cats:new Set(),methods:new Set(),band:'all'};renderFilter()">Resetuj</span></div>
+   <div class="sheet-body" id="fbody"></div>
+   <div class="sheet-foot"><button class="save" id="fapply" onclick="applyFilter()">Prikaži</button></div>`;
+  renderFilter();openSheet('sheet-filter');
+}
+function renderFilter(){
+  document.getElementById('fbody').innerHTML=`
+   <div class="fgroup"><div class="fgroup-t">Kategorija</div><div class="fgrid">${Object.entries(CATS).map(([k,m])=>`<div class="fchip ${draft.cats.has(k)?'on':''}" onclick="tg('cats','${k}')"><span class="d" style="background:${m.c}"></span>${m.n}</div>`).join('')}</div></div>
+   <div class="fgroup"><div class="fgroup-t">Način plaćanja</div><div class="fgrid">${Object.entries(METHODS).map(([n,c])=>`<div class="fchip ${draft.methods.has(n)?'on':''}" onclick="tg('methods','${n}')"><span class="d" style="background:${c}"></span>${n}</div>`).join('')}</div></div>
+   <div class="fgroup"><div class="fgroup-t">Iznos</div><div class="fseg">${[['all','Svi'],['lo','do €20'],['mid','€20–100'],['hi','€100+']].map(b=>`<button class="${draft.band===b[0]?'on':''}" onclick="draft.band='${b[0]}';renderFilter()">${b[1]}</button>`).join('')}</div></div>`;
+  const n=DATA.filter(x=>match(x,draft)).length;
+  document.getElementById('fapply').textContent=n?`Prikaži ${n} ${n<5?'rezultata':'rezultata'}`:'Nema rezultata';
+}
+function tg(k,v){draft[k].has(v)?draft[k].delete(v):draft[k].add(v);renderFilter();}
+function applyFilter(){active.cats=new Set(draft.cats);active.methods=new Set(draft.methods);active.band=draft.band;closeSheets();drawList();}
+
+/* ───── ADD SHEET (numpad) ───── */
+let addAmt='0',addMethod='Kartica',addKind='exp';
+function openAdd(){
+  addAmt='0';addMethod='Kartica';addKind='exp';
+  renderAdd();openSheet('sheet-add');
+}
+function renderAdd(){
+  const sh=document.getElementById('sheet-add');
+  const disp=addAmt==='0'?'0':addAmt.replace('.',',');
+  const meths=addKind==='exp'?Object.keys(METHODS):['Kartica','Keš'];
+  sh.innerHTML=`<div class="sheet-grip"></div>
+   <div class="sheet-hd"><h3>${addKind==='exp'?'Novi trošak':'Novo primanje'}</h3><span class="sclose" onclick="closeSheets()">✕</span></div>
+   <div class="seg"><button class="${addKind==='exp'?'on':''}" onclick="addKind='exp';addMethod='Kartica';renderAdd()">Trošak</button><button class="${addKind==='inc'?'on':''}" onclick="addKind='inc';addMethod='Kartica';renderAdd()">Primanje</button></div>
+   <div class="amt"><div class="amt-big"><span>€</span>${disp}<span class="amt-cur"></span></div><div class="amt-meta">${addKind==='exp'?'Iznos troška':'Iznos primanja'} u EUR</div></div>
+   <div class="methods">${meths.map(m=>`<div class="method ${m===addMethod?'on':''}" onclick="addMethod='${m}';renderAdd()"><span class="md" style="background:${METHODS[m]}"></span>${m}</div>`).join('')}</div>
+   <div class="numpad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k=>`<div class="key ${k===','||k==='⌫'?'fn':''}" onclick="press('${k}')">${k}</div>`).join('')}</div>
+   <div class="sheet-foot"><button class="save" onclick="closeSheets()">${addKind==='exp'?'Dalje →':'Sačuvaj primanje'}</button></div>`;
+}
+function press(k){
+  if(k==='⌫'){addAmt=addAmt.length>1?addAmt.slice(0,-1):'0';}
+  else if(k===','){if(!addAmt.includes('.'))addAmt+='.';}
+  else{
+    if(addAmt==='0')addAmt=k; else {const dec=addAmt.split('.')[1];if(dec&&dec.length>=2)return;addAmt+=k;}
+  }
+  renderAdd();
+}
+
+/* ───── SETTINGS ───── */
+function renderSettings(){
+  document.getElementById('s-set').innerHTML=`
+   <div class="hd reveal"><div class="h-title">Postavke</div></div>
+   <div class="set-sec reveal" style="animation-delay:.04s"><div class="set-t">Stanje računa</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.card)}</div><div><div class="set-name">Početno stanje · Kartica</div><div class="set-sub">koliko ima sad</div></div><div class="set-val">€4.218,50</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.cash)}</div><div><div class="set-name">Početno stanje · Keš</div><div class="set-sub">gotovina sad</div></div><div class="set-val">€243,00</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.bolt)}</div><div><div class="set-name">Mjesečni budžet</div><div class="set-sub">cilj potrošnje</div></div><div class="set-val">€3.000</div></div>
+   </div></div>
+   <div class="set-sec reveal" style="animation-delay:.08s"><div class="set-t">Aplikacija</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.globe)}</div><div><div class="set-name">Valuta</div><div class="set-sub">prikaz iznosa</div></div><div class="set-val">EUR €</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.moon)}</div><div><div class="set-name">Tamna tema</div><div class="set-sub">Aurora neon</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.eye)}</div><div><div class="set-name">Sakrij iznose</div><div class="set-sub">privatnost</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+   </div></div>
+   <div class="set-sec reveal" style="animation-delay:.12s"><div class="set-t">Načini plaćanja</div><div class="set-card">
+     ${Object.entries(METHODS).map(([n,c])=>`<div class="set-row"><div class="set-ic" style="background:${c}22;color:${c}">${sv(I.card)}</div><div><div class="set-name">${n}</div></div><div class="set-chev">›</div></div>`).join('')}
+   </div></div>
+   <div class="set-sec reveal" style="animation-delay:.16s"><div class="set-t">Podaci</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.download)}</div><div><div class="set-name">Eksport CSV</div><div class="set-sub">831 transakcija</div></div><div class="set-chev">›</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.info)}</div><div><div class="set-name">O aplikaciji</div><div class="set-sub">v13 · Aurora</div></div><div class="set-chev">›</div></div>
+   </div></div>
+   <button class="btn-out reveal" style="animation-delay:.2s">Odjavi se</button>`;
+}
+
+/* ───── PROFILE ───── */
+function renderProfile(){
+  document.getElementById('s-prof').innerHTML=`
+   <div class="prof-top reveal"><div class="prof-av">B</div><div class="prof-name">Boško Kankaraš</div><div class="prof-mail">bosko.kankaras@gmail.com</div></div>
+   <div class="set-sec reveal" style="animation-delay:.06s"><div class="set-t">Lični podaci</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.user)}</div><div><div class="set-name">Ime i prezime</div></div><div class="set-val">Boško K.</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.user)}</div><div><div class="set-name">Korisničko ime</div></div><div class="set-val">@bosko</div></div>
+   </div></div>
+   <div class="set-sec reveal" style="animation-delay:.1s"><div class="set-t">Sigurnost</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.lock)}</div><div><div class="set-name">Promijeni lozinku</div><div class="set-sub">zadnja izmjena: maj</div></div><div class="set-chev">›</div></div>
+   </div></div>
+   <div class="set-sec reveal" style="animation-delay:.14s"><div class="set-t">Statistika</div><div class="set-card">
+     <div class="set-row"><div class="set-ic">${sv(I.grid)}</div><div><div class="set-name">Ukupno transakcija</div></div><div class="set-val">831</div></div>
+     <div class="set-row"><div class="set-ic">${sv(I.bolt)}</div><div><div class="set-name">Aktivan od</div></div><div class="set-val">Jan 2026</div></div>
+   </div></div>
+   <button class="btn-out reveal" style="animation-delay:.18s">Odjavi se</button>`;
+}
+
+/* ───── SHEET HELPERS ───── */
+function openSheet(id){document.getElementById('sbg').classList.add('on');document.getElementById(id).classList.add('on');}
+function closeSheets(){document.getElementById('sbg').classList.remove('on');document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('on'));}
+
+/* ───── INIT ───── */
+renderDash();renderList();renderSettings();renderProfile();buildNav();afterDash();
+</script>
+</body>
+</html>
