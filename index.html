@@ -404,14 +404,25 @@ body:not(.dark) #ctx-menu{background:rgba(255,255,255,0.85);box-shadow:0 8px 40p
 .vset-wal-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;background:var(--bg)}
 .vlab{display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px}
 .vinput{width:100%;max-width:100%;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:15px;box-sizing:border-box;outline:none;min-width:0}
-.vinput[type="date"]{-webkit-appearance:none;appearance:none}
+.vinput[type="date"],.vinput[type="month"]{-webkit-appearance:none;appearance:none}
 .btn-lime-sm{width:100%;margin-top:14px;background:var(--primary);color:#0a0c0b;border:none;border-radius:12px;padding:13px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.vseg2{position:relative;display:flex;background:var(--card-solid);border:1px solid var(--border);border-radius:99px;padding:5px}
+.vseg2-btn{flex:1;position:relative;z-index:1;border:none;background:transparent;color:var(--sub);font-family:inherit;font-weight:600;font-size:13px;padding:11px 4px;border-radius:99px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:color .25s;white-space:nowrap}
+.vseg2-btn.on{color:#0a0c0b}
+.vseg2-thumb{position:absolute;top:5px;left:5px;bottom:5px;border-radius:99px;background:linear-gradient(90deg,#a9e62e,#c8fb46);box-shadow:0 0 14px rgba(200,251,70,.45);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:0;pointer-events:none}
+.wf-lock-wrap{transition:opacity .25s,filter .25s}
+.wf-locked{opacity:.42;pointer-events:none;filter:grayscale(.35)}
+.vwal-act{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--border);color:var(--sub);cursor:pointer;flex-shrink:0;margin-left:6px;padding:0;transition:transform .12s,color .15s,border-color .15s,background .15s}
+.vwal-act:active{transform:scale(.88)}
+.vwal-act.del{color:#ef4444;border-color:rgba(239,68,68,.32)}
+.vwal-act.del:active{color:#fff;background:#ef4444;border-color:#ef4444}
+.vw-bank{font-size:11px;font-weight:600;letter-spacing:.3px;opacity:.8;margin-top:2px}
 .lrow-set{display:flex;justify-content:space-between;align-items:center;padding:13px 0;font-size:14.5px;font-weight:500;cursor:pointer}.lrow-set+.lrow-set{border-top:1px solid var(--border)}
 .vadd-amt-wrap{text-align:center;padding:6px 0 14px}
 .vadd-amt-lab{font-size:12px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
 .vadd-amt{font-weight:800;font-size:44px;letter-spacing:-2px;margin-top:6px;line-height:1}
 .vnumpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 12px}
-.vnpk,.btn,.btn-lime-sm,.btn-primary,.btn-ghost,.method-btn,.cat-btn,.vset-wal-head,.vltabs button,.bn-item,.vh-bell,.vh-av,.rate-toggle{touch-action:manipulation}
+.vnpk,.btn,.btn-lime-sm,.btn-primary,.btn-ghost,.method-btn,.cat-btn,.vset-wal-head,.vltabs button,.bn-item,.vh-bell,.vh-av,.rate-toggle,.vseg2-btn,.vwal-act{touch-action:manipulation}
 .rate-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;background:var(--card-solid);border:1px solid var(--border);border-radius:14px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:14px}
 .rate-toggle>span:first-child{display:flex;align-items:center;gap:8px}
 .rate-toggle-sw{width:42px;height:24px;border-radius:99px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0}
@@ -558,6 +569,15 @@ setTimeout(function(){
   <div class="sheet-body" id="sheet-filter-body"></div>
 </div>
 
+<div class="bottom-sheet" id="sheet-wallet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title" id="sheet-wallet-title">Novi novčanik</span>
+    <button class="sheet-close" onclick="closeAllSheets()">✕</button>
+  </div>
+  <div class="sheet-body" id="sheet-wallet-body"></div>
+</div>
+
 <div class="bottom-sheet" id="sheet-income">
   <div class="sheet-handle"></div>
   <div class="sheet-header">
@@ -582,7 +602,7 @@ const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
 // ── Settings Sync ─────────────────────────────────────────────────────────
-const SYNCED_KEYS=['savings_offset_kes','savings_offset_kartica','savings_offset_biznis','savings_start_kes','savings_start_kartica','savings_start_biznis','savings_mode','rate_entries','widgets','widget_order','dark','budget','budget_sources'];
+const SYNCED_KEYS=['savings_offset_kes','savings_offset_kartica','savings_offset_biznis','savings_start_kes','savings_start_kartica','savings_start_biznis','savings_mode','rate_entries','widgets','widget_order','dark','budget','budget_sources','methods_config','wallets'];
 const _lsSet=localStorage.setItem.bind(localStorage);
 let _pushTimer=null;
 function _schedPush(){if(_pushTimer)clearTimeout(_pushTimer);_pushTimer=setTimeout(pushUserSettings,600);}
@@ -642,6 +662,45 @@ function rebuildMC(){
 
 let METHODS_CONFIG=loadMethodsConfig();
 let METHODS=[];let MC={};rebuildMC();
+
+// ── Novčanici (konfigurabilni) ─────────────────────────────────────────────
+const CG_BANKS=['CKB – Crnogorska komercijalna banka','NLB Banka','Erste Bank','Hipotekarna banka','Prva banka Crne Gore','Universal Capital Bank','Lovćen banka','Addiko Bank','Ziraat Bank Montenegro','Adriatic Bank','Zapad banka'];
+const CARD_NETWORKS=[{id:'visa',label:'Visa'},{id:'mastercard',label:'Mastercard'},{id:'maestro',label:'Maestro'},{id:'dina',label:'DinaCard'}];
+const WALLET_STYLES=['lime','green','dark'];
+function _legacyWalletSeed(){
+  const g=(k,d)=>localStorage.getItem(k)||d;
+  const today=new Date().toISOString().split('T')[0];
+  return [
+    {key:'kartica',name:'Lična kartica',kind:'card',cardType:'debit',network:'visa',bank:'',method:'Kartica',icon:'card',style:'lime',budget:true,offset:parseFloat(g('savings_offset_kartica','0'))||0,startDate:g('savings_start_kartica','2026-05-18')},
+    {key:'kes',name:'Keš',kind:'cash',cardType:'',network:'',bank:'',method:'Keš',icon:'cash',style:'green',budget:true,offset:parseFloat(g('savings_offset_kes','0'))||0,startDate:g('savings_start_kes',today)},
+    {key:'biznis',name:'Biznis',kind:'card',cardType:'debit',network:'mastercard',bank:'',method:'Biznis',icon:'briefcase',style:'dark',budget:false,offset:parseFloat(g('savings_offset_biznis','0'))||0,startDate:g('savings_start_biznis','2026-05-18')}
+  ];
+}
+function getWallets(){
+  try{const s=localStorage.getItem('wallets');if(s){const a=JSON.parse(s);if(Array.isArray(a)&&a.length)return a;}}catch(e){}
+  const seed=_legacyWalletSeed();try{localStorage.setItem('wallets',JSON.stringify(seed));}catch(e){}return seed;
+}
+function saveWallets(arr){localStorage.setItem('wallets',JSON.stringify(arr));if(typeof pushUserSettings==='function'){try{pushUserSettings();}catch(e){}}}
+function walletBalance(w){
+  const ie=(typeof getIncomeEntries==='function'?getIncomeEntries():[]);
+  const inc=ie.filter(e=>e.date&&e.date>=w.startDate&&e.method===w.method).reduce((s,e)=>s+e.amount,0);
+  const exp=APP.expenses.filter(e=>e.date&&e.date>=w.startDate&&e.method===w.method).reduce((s,e)=>s+e.amount,0);
+  return (parseFloat(w.offset)||0)+inc-exp;
+}
+function walletTypeLabel(w){return w.kind==='cash'?'Gotovina':(w.cardType==='credit'?'Kreditna':'Debitna');}
+function walletNetCode(w){if(w.kind!=='card')return '';return w.network==='mastercard'?'mc':(w.network||'');}
+function fmtExpiry(v){if(!v)return '';var m=String(v).match(/^(\d{4})-(\d{2})$/);return m?m[2]+'/'+m[1].slice(2):String(v);}
+function currentOwnerName(){try{var m=(APP.user&&APP.user.user_metadata)||{};return ((m.first_name?m.first_name+' '+(m.last_name||''):'')).trim();}catch(e){return '';}}
+function walletTxnCount(method){
+  const ie=(typeof getIncomeEntries==='function'?getIncomeEntries():[]);
+  return APP.expenses.filter(e=>e.method===method).length+ie.filter(e=>e.method===method).length;
+}
+function ensureWalletMethod(w){
+  if(METHODS_CONFIG.some(m=>m.name===w.method))return;
+  const color=w.kind==='cash'?'#10b981':'#C8FB46';
+  const bg=w.kind==='cash'?'#d1fae5':'rgba(200,251,70,0.13)';
+  saveMethodsConfig([...METHODS_CONFIG,{name:w.method,color,bg,icon:w.icon||(w.kind==='cash'?'cash':'card')}]);
+}
 
 const CATS = [
   {id:'marketing',name:'Marketing',emoji:'📣',color:'#f97316',test:d=>/reklam/i.test(d)},
@@ -1076,14 +1135,17 @@ function vic(n,sz){sz=sz||22;return '<svg viewBox="0 0 24 24" width="'+sz+'" hei
 function vnet(net,dark){
  if(net==='visa')return '<span class="visa" style="color:'+(dark?'#fff':'#1A1F71')+'">VISA</span>';
  if(net==='mc')return '<svg width="40" height="25" viewBox="0 0 40 25"><circle cx="16" cy="12.5" r="9.5" fill="#EB001B"/><circle cx="24" cy="12.5" r="9.5" fill="#F79E1B" fill-opacity=".88"/></svg>';
+ if(net==='maestro')return '<svg width="40" height="25" viewBox="0 0 40 25"><circle cx="16" cy="12.5" r="9.5" fill="#0099DF"/><circle cx="24" cy="12.5" r="9.5" fill="#CC0000" fill-opacity=".82"/></svg>';
+ if(net==='dina')return '<span class="visa" style="color:'+(dark?'#fff':'#0a3d91')+'">Dina</span>';
  return '';
 }
-function voltWallet(name,type,bal,num,exp,net,style,owner){
- return '<div class="vwcard '+style+'"><div class="vw-top"><span class="vw-name">'+name+'</span><span class="vw-type">'+type+'</span></div>'+
+function voltWallet(name,type,bal,num,exp,net,style,owner,bank){
+ return '<div class="vwcard '+style+'"><div class="vw-top"><span class="vw-name">'+esc(name)+'</span><span class="vw-type">'+esc(type)+'</span></div>'+
+ (bank?'<div class="vw-bank">'+esc(bank)+'</div>':'')+
  '<div class="vw-bl">Stanje</div><div class="vw-bal">'+fmtP(bal)+'</div>'+
  (num?'<div class="vw-num">•••• •••• •••• '+num+'</div>':'<div class="vw-num" style="visibility:hidden">•••• 0000</div>')+
- '<div class="vw-foot"><div class="vw-info"><div><span class="k">Vlasnik</span><span class="v">'+owner+'</span></div>'+
- (exp?'<div><span class="k">Ističe</span><span class="v">'+exp+'</span></div>':'')+'</div>'+
+ '<div class="vw-foot"><div class="vw-info"><div><span class="k">Vlasnik</span><span class="v">'+esc(owner||'')+'</span></div>'+
+ (exp?'<div><span class="k">Važi do</span><span class="v">'+esc(exp)+'</span></div>':'')+'</div>'+
  '<div class="vw-net">'+(net?vnet(net,style!=='lime'):'<span class="vw-lock">'+vic('lock',13)+' Keš</span>')+'</div></div></div>';
 }
 function voltTxn(e){var cat=CATS.find(function(c){return c.id===e.category;})||CATS[CATS.length-1];
@@ -1143,7 +1205,8 @@ function renderDashboard(){
   const _karticaIncome=_incEntries.filter(e=>e.month===curYM&&e.method==='Kartica').reduce((s,e)=>s+e.amount,0);
   const _kesExpenses=curMonth.filter(e=>e.method==='Keš').reduce((s,e)=>s+e.amount,0);
   const _karticaExpenses=curMonth.filter(e=>e.method==='Kartica').reduce((s,e)=>s+e.amount,0);
-  const _personalTotal=_kesExpenses+_karticaExpenses;
+  const _walletsDash=getWallets();
+  const _personalTotal=curMonth.filter(e=>_walletsDash.some(w=>w.budget!==false&&w.method===e.method)).reduce((s,e)=>s+e.amount,0);
   const _todayISO=new Date().toISOString().split('T')[0];
   const _kesOffset=parseFloat(localStorage.getItem('savings_offset_kes')||'0');
   const _karticaOffset=parseFloat(localStorage.getItem('savings_offset_kartica')||'0');
@@ -1263,11 +1326,9 @@ const _rItem=`<div class="expense-item${isExp?' ei-open':''}" onclick="toggleRec
     </div>
     <div class="vh-sec"><span>Novčanici</span><span class="vh-a" onclick="navigate('settings')">+ Dodaj</span></div>
     <div class="vrail" id="vrail" onscroll="vRailDots()">
-      ${voltWallet('Lična kartica','Debitna',_karticaBalance,'','','visa','lime',_owner)}
-      ${voltWallet('Keš','Gotovina',_kesBalance,'','','','green',_owner)}
-      ${voltWallet('Biznis','Biznis',_biznisBalance,'','','mc','dark',_owner)}
+      ${_walletsDash.map(w=>voltWallet(w.name,walletTypeLabel(w),walletBalance(w),'',(w.kind==='card'?fmtExpiry(w.expiry):''),walletNetCode(w),w.style||'lime',(w.owner||_owner),(w.kind==='card'?w.bank:''))).join('')}
     </div>
-    <div class="vdots" id="vdots"><i class="on"></i><i></i><i></i></div>
+    <div class="vdots" id="vdots">${_walletsDash.map((w,i)=>'<i'+(i===0?' class="on"':'')+'></i>').join('')}</div>
     ${(function(){var _bud=computeBudget();if(_bud<=0)return '';var spent=_personalTotal,rem=_bud-spent,over=rem<0;var remPct=Math.max(0,Math.min(100,rem/_bud*100));var hue=over?0:Math.max(0,Math.min(82,Math.round(remPct*0.82)));var col='hsl('+hue+',92%,53%)';var glow='0 0 10px hsla('+hue+',92%,53%,.55)';return '<div class="vh-sec"><span>Budžet</span><span class="vh-a">'+MN[now.getMonth()]+'</span></div><div class="vcard"><div class="vbud-row"><span>'+(over?'Prekoračeno za':'Preostalo ovaj mjesec')+'</span><b style="color:'+col+'">'+(over?fmt(Math.abs(rem)):fmt(rem))+'</b></div><div class="vtrack"><div class="vfill" style="width:'+remPct+'%;background:'+col+';box-shadow:'+glow+';transition:width .5s ease,background .4s ease"></div></div><div class="vbud-sub"><span>Potrošeno '+fmt(spent)+'</span><span>Budžet '+fmt(_bud)+'</span></div></div>';})()}
     ${(function(){var rs=getRateEntries().filter(function(e){return (e.placene_rate||0)<e.broj_rata;});if(!rs.length)return '';return '<div class="vh-sec"><span>Rate u toku</span><span class="vh-a">'+fmt(rs.reduce(function(s,e){return s+(e.iznos_rate||0);},0))+'/mj</span></div><div class="vcard">'+rs.map(function(e){var pd=e.placene_rate||0;var pct=Math.round(pd/e.broj_rata*100);return '<div class="vrate"><div class="vrate-top"><div class="vrate-name">'+esc(e.desc)+'</div><div class="vrate-amt">'+fmt(e.iznos_rate)+'/mj</div></div><div class="vtrack"><div class="vfill" style="width:'+pct+'%"></div></div><div class="vrate-sub"><span>Rata '+pd+' / '+e.broj_rata+'</span><span>'+pct+'%</span></div></div>';}).join('')+'</div>';})()}
     <div class="vh-sec"><span>Transakcije</span><span class="vh-a" onclick="goToExpenses()">Sve →</span></div>
@@ -1544,15 +1605,133 @@ async function confirmWalletInit(k,a,d){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
   try{await pushUserSettings();}catch(e){console.warn('wallet init push failed',e);}
 }
+
+// ── Editor novčanika ───────────────────────────────────────────────────────
+let _walletEditKey=null;
+let _walFormState={kind:'cash',cardType:'debit',network:'visa'};
+function openWalletEditor(key){
+  const wallets=getWallets();
+  const w=key?wallets.find(x=>x.key===key):null;
+  _walletEditKey=(w&&key)||null;
+  const isNew=!w;
+  const cur=w||{name:'',owner:'',kind:'cash',cardType:'debit',network:'visa',bank:'',expiry:'',offset:0,startDate:new Date().toISOString().split('T')[0]};
+  renderWalletForm(cur,isNew);
+  openSheet('sheet-wallet');
+}
+function renderWalletForm(w,isNew){
+  const t=document.getElementById('sheet-wallet-title');if(t)t.textContent=isNew?'Novi novčanik':'Uredi novčanik';
+  const kindIdx=w.kind==='card'?1:0;
+  const ctypeIdx=w.cardType==='credit'?1:0;
+  let netIdx=CARD_NETWORKS.findIndex(n=>n.id===w.network);if(netIdx<0)netIdx=0;
+  const kindSeg=_segHTML('wf-kind',[{val:'cash',label:'💵 Gotovina'},{val:'card',label:'💳 Bankovna kartica'}],kindIdx,'walSetKind');
+  const ctypeSeg=_segHTML('wf-ctype',[{val:'debit',label:'Debitna'},{val:'credit',label:'Kreditna'}],ctypeIdx,'walSetCtype');
+  const netSeg=_segHTML('wf-net',CARD_NETWORKS.map(n=>({val:n.id,label:n.label})),netIdx,'walSetNet');
+  const isOtherBank=!!(w.bank&&CG_BANKS.indexOf(w.bank)<0);
+  const bankOpts='<option value="">Izaberi banku…</option>'+CG_BANKS.map(b=>`<option value="${esc(b)}"${w.bank===b?' selected':''}>${esc(b)}</option>`).join('')+`<option value="__other"${isOtherBank?' selected':''}>Druga banka</option>`;
+  document.getElementById('sheet-wallet-body').innerHTML=`
+    <label class="vlab">Naziv novčanika</label>
+    <input class="vinput" id="wf-name" placeholder="npr. Lična kartica" value="${esc(w.name||'')}">
+    <label class="vlab">Vlasnik novčanika</label>
+    <input class="vinput" id="wf-owner" placeholder="Ime i prezime" value="${esc(w.owner||currentOwnerName())}">
+    <label class="vlab">Vrsta novčanika</label>
+    ${kindSeg}
+    <div id="wf-card" class="wf-lock-wrap${w.kind==='cash'?' wf-locked':''}">
+      <label class="vlab">Tip kartice</label>
+      ${ctypeSeg}
+      <label class="vlab">Kartična mreža</label>
+      ${netSeg}
+      <label class="vlab">Banka</label>
+      <select class="vinput" id="wf-bank">${bankOpts}</select>
+      <input class="vinput" id="wf-bank-other" placeholder="Naziv banke" style="margin-top:8px;display:${isOtherBank?'block':'none'}" value="${isOtherBank?esc(w.bank):''}">
+      <label class="vlab">Važi do</label>
+      <input class="vinput" type="month" id="wf-exp" value="${esc(w.expiry||'')}">
+    </div>
+    <label class="vlab">Početno stanje (€)</label>
+    <input class="vinput" id="wf-amt" inputmode="decimal" value="${(parseFloat(w.offset)||0).toFixed(2)}">
+    <label class="vlab">Datum od kad se računa</label>
+    <input class="vinput" type="date" id="wf-date" value="${w.startDate||new Date().toISOString().split('T')[0]}">
+    <div style="font-size:11.5px;color:var(--sub);margin:8px 2px 0;line-height:1.5">Saldo = početno stanje + primanja − troškovi, računato <b>od ovog datuma</b>.</div>
+    <button class="btn-lime-sm" onclick="saveWalletForm()">${isNew?'Dodaj novčanik':'Sačuvaj'}</button>`;
+  const bsel=document.getElementById('wf-bank');
+  if(bsel)bsel.onchange=function(){var o=document.getElementById('wf-bank-other');if(o)o.style.display=this.value==='__other'?'block':'none';};
+  _walFormState={kind:w.kind||'cash',cardType:w.cardType||'debit',network:w.network||'visa'};
+}
+function _segHTML(id,opts,selIdx,handler){
+  var n=opts.length;
+  var thumb='<span class="vseg2-thumb" style="width:calc((100% - 10px)/'+n+');transform:translateX('+(selIdx*100)+'%)"></span>';
+  var btns=opts.map(function(o,i){return '<button type="button" class="vseg2-btn'+(i===selIdx?' on':'')+'" onclick="'+handler+'(\''+o.val+'\')">'+o.label+'</button>';}).join('');
+  return '<div class="vseg2" id="'+id+'">'+thumb+btns+'</div>';
+}
+function _segMove(id,idx){var c=document.getElementById(id);if(!c)return;var th=c.querySelector('.vseg2-thumb');if(th)th.style.transform='translateX('+(idx*100)+'%)';c.querySelectorAll('.vseg2-btn').forEach(function(b,i){b.classList.toggle('on',i===idx);});}
+function walSetKind(k){_walFormState.kind=k;_segMove('wf-kind',k==='cash'?0:1);var c=document.getElementById('wf-card');if(c)c.classList.toggle('wf-locked',k==='cash');}
+function walSetCtype(t){_walFormState.cardType=t;_segMove('wf-ctype',t==='credit'?1:0);}
+function walSetNet(n){_walFormState.network=n;var i=CARD_NETWORKS.findIndex(function(x){return x.id===n;});_segMove('wf-net',i<0?0:i);}
+function saveWalletForm(){
+  const name=(document.getElementById('wf-name').value||'').trim();
+  if(!name){alert('Upiši naziv novčanika');return;}
+  const owner=(document.getElementById('wf-owner').value||'').trim();
+  const amt=parseAmt(document.getElementById('wf-amt').value);
+  if(!isFinite(amt)){alert('Unesi ispravno početno stanje');return;}
+  const date=document.getElementById('wf-date').value||new Date().toISOString().split('T')[0];
+  const kind=_walFormState.kind;
+  let bank='',expiry='';
+  if(kind==='card'){
+    const bsel=document.getElementById('wf-bank');bank=bsel?bsel.value:'';if(bank==='__other'){bank=(document.getElementById('wf-bank-other').value||'').trim();}
+    expiry=document.getElementById('wf-exp').value||'';
+    if(!expiry){alert('Unesi datum isteka kartice (Važi do)');return;}
+  }
+  const wallets=getWallets();
+  if(_walletEditKey){
+    const w=wallets.find(x=>x.key===_walletEditKey);if(!w){closeAllSheets();return;}
+    w.name=name;w.owner=owner;w.kind=kind;w.offset=amt;w.startDate=date;
+    if(kind==='card'){w.cardType=_walFormState.cardType;w.network=_walFormState.network;w.bank=bank;w.expiry=expiry;w.icon='card';}
+    else{w.cardType='';w.network='';w.bank='';w.expiry='';w.icon='cash';}
+  }else{
+    const method=name;
+    const w={key:'w_'+wallets.length+'_'+name.replace(/\W+/g,'').slice(0,8).toLowerCase(),name,owner,kind,cardType:kind==='card'?_walFormState.cardType:'',network:kind==='card'?_walFormState.network:'',bank:kind==='card'?bank:'',expiry:kind==='card'?expiry:'',method,icon:kind==='cash'?'cash':'card',style:WALLET_STYLES[wallets.length%WALLET_STYLES.length],budget:true,offset:amt,startDate:date};
+    wallets.push(w);
+    ensureWalletMethod(w);
+  }
+  saveWallets(wallets);
+  closeAllSheets();
+  renderSettings();
+  if(typeof renderDashboard==='function')renderDashboard();
+  try{showSuccessToast(_walletEditKey?'Novčanik sačuvan':'Novčanik dodat',name);}catch(e){}
+  _walletEditKey=null;
+}
+function deleteWallet(key){
+  const w=getWallets().find(x=>x.key===key);if(!w)return;
+  const n=walletTxnCount(w.method);
+  const nTxt=n===1?'transakciju':(n%10>=2&&n%10<=4&&(n<10||n>20)?'transakcije':'transakcija');
+  document.getElementById('sheet-confirm-body').innerHTML=`
+    <div style="text-align:center;margin-bottom:6px"><div style="font-size:34px;margin-bottom:8px">🗑️</div>
+      <div style="font-size:17px;font-weight:800;margin-bottom:6px">Obrisati novčanik?</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.5">Novčanik <b style="color:var(--text)">${esc(w.name)}</b>${n>0?` ima <b style="color:var(--text)">${n}</b> ${nTxt}. Brisanjem se uklanja novčanik, ali transakcije ostaju sačuvane.`:' će biti uklonjen.'}</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn btn-ghost" onclick="closeAllSheets()">Odustani</button><button class="btn btn-primary" style="background:#ef4444;color:#fff" onclick="confirmDeleteWallet('${key}')">Da, obriši</button></div>`;
+  var _t=document.getElementById('sheet-confirm-title');if(_t)_t.textContent='';
+  openSheet('sheet-confirm');
+}
+function confirmDeleteWallet(key){
+  let wallets=getWallets();const w=wallets.find(x=>x.key===key);
+  wallets=wallets.filter(x=>x.key!==key);
+  saveWallets(wallets);
+  if(w){const stillUsed=wallets.some(x=>x.method===w.method);if(!stillUsed&&walletTxnCount(w.method)===0&&METHODS_CONFIG.length>1){saveMethodsConfig(METHODS_CONFIG.filter(m=>m.name!==w.method));}}
+  closeAllSheets();
+  renderSettings();
+  if(typeof renderDashboard==='function')renderDashboard();
+  try{showSuccessToast('Novčanik obrisan',w?w.name:'');}catch(e){}
+}
 function saveBudgetVolt(){var v=parseInt(document.getElementById('budget-input').value||'0')||0;APP.budget=v;localStorage.setItem('budget',String(v));try{showSuccessToast('Budžet sačuvan',fmt(v));}catch(e){}renderSettings();}
 function renderSettings(){
   const meta=(APP.user&&APP.user.user_metadata)||{};
   const _nm=((meta.first_name?meta.first_name+' '+(meta.last_name||''):'')).trim();
   const _em=(APP.user&&APP.user.email)||'';
   const _inc=(typeof getIncomeEntries==='function')?getIncomeEntries():[];
-  const WAL=[{key:'kartica',nm:'Lična kartica',m:'Kartica',tp:'Debitna',net:'VISA',def:'0',dd:'2026-05-18'},{key:'kes',nm:'Keš',m:'Keš',tp:'Gotovina',net:'',def:'0',dd:new Date().toISOString().split('T')[0]},{key:'biznis',nm:'Biznis',m:'Biznis',tp:'Biznis',net:'Mastercard',def:'0',dd:'2026-05-18'}];
-  const walBal=w=>{const off=parseFloat(localStorage.getItem('savings_offset_'+w.key)||w.def);const sd=localStorage.getItem('savings_start_'+w.key)||w.dd;const i=_inc.filter(e=>e.date&&e.date>=sd&&e.method===w.m).reduce((s,e)=>s+e.amount,0);const x=APP.expenses.filter(e=>e.date>=sd&&e.method===w.m).reduce((s,e)=>s+e.amount,0);return off+i-x;};
-  const walletsHTML=WAL.map(w=>{const off=parseFloat(localStorage.getItem('savings_offset_'+w.key)||w.def);const sd=localStorage.getItem('savings_start_'+w.key)||w.dd;const mc=MC[w.m]||{color:'var(--primary)',icon:vic('rate',20)};const opn=_openWallet===w.key;return `<div class="vset-wal${opn?' open':''}" id="vset-wal-${w.key}"><div class="vset-wal-head" role="button" tabindex="0" onclick="toggleWalEdit('${w.key}')"><div class="vset-wal-ic" style="color:${mc.color}">${mc.icon}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15px">${w.nm}</div><div style="font-size:12px;color:var(--sub)">${w.tp}${w.net?' · '+w.net:''}</div></div><div style="font-weight:800;font-size:15px">${fmt(walBal(w))}</div><span id="wal-ch-${w.key}" style="margin-left:10px;display:inline-flex;color:var(--sub);transition:transform .2s;transform:rotate(${opn?'180deg':'0deg'})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div><div id="wal-edit-${w.key}" style="display:${opn?'block':'none'};padding:0 16px 16px"><label class="vlab">Početno stanje (€)</label><input class="vinput" id="wi-amt-${w.key}" inputmode="decimal" value="${off.toFixed(2)}"><label class="vlab">Datum od kad se računa</label><input class="vinput" type="date" id="wi-date-${w.key}" value="${sd}"><div style="font-size:11.5px;color:var(--sub);margin:8px 2px 12px;line-height:1.5">Saldo = početno stanje + primanja − troškovi, računato <b>od ovog datuma</b>.</div><button class="btn-lime-sm" onclick="saveWalletInit('${w.key}')">Sačuvaj stanje</button></div></div>`;}).join('');
+  const _setWallets=getWallets();
+  const _walIc=w=>{const mc=MC[w.method]||{color:w.kind==='cash'?'#10b981':'var(--primary)'};const ic=METHOD_ICONS[w.icon]||(w.kind==='cash'?METHOD_ICONS.cash:METHOD_ICONS.card);return {color:mc.color,icon:ic};};
+  const _PEN='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const _TRASH='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  const walletsHTML=_setWallets.map(w=>{const ic=_walIc(w);const sub=[walletTypeLabel(w),w.kind==='card'?((CARD_NETWORKS.find(n=>n.id===w.network)||{}).label||''):'',w.kind==='card'?w.bank:''].filter(Boolean).join(' · ');return `<div class="vset-wal" id="vset-wal-${w.key}"><div class="vset-wal-head" role="button" tabindex="0" onclick="openWalletEditor('${w.key}')"><div class="vset-wal-ic" style="color:${ic.color}">${ic.icon}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15px">${esc(w.name)}</div><div style="font-size:12px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub||'—')}</div></div><button class="vwal-act" title="Uredi" onclick="event.stopPropagation();openWalletEditor('${w.key}')">${_PEN}</button><button class="vwal-act del" title="Obriši" onclick="event.stopPropagation();deleteWallet('${w.key}')">${_TRASH}</button><span style="margin-left:2px;display:inline-flex;color:var(--sub)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div></div>`;}).join('');
   const hasPendingChange=_pendingCurrency!==curCurrency;
   const currOpts=CURRENCIES.map(c=>`<button type="button" onclick="stageCurrency('${c.code}')" style="padding:8px 14px;border-radius:10px;border:2px solid ${_pendingCurrency===c.code?'var(--primary)':'var(--border)'};background:${_pendingCurrency===c.code?'rgba(200,251,70,0.13)':'var(--bg)'};color:${_pendingCurrency===c.code?'var(--primary)':'var(--sub)'};font-size:13px;font-weight:${_pendingCurrency===c.code?'700':'500'};cursor:pointer;font-family:inherit">${c.sym} ${c.code}</button>`).join('');
   const rateInfo=curCurrency==='EUR'?'Osnovna valuta — kurs 1:1':_fetchingRate?'Učitavam kurs...':`1 EUR = ${curRate.toFixed(4)} ${curCurrency}`;
@@ -1566,8 +1745,7 @@ function renderSettings(){
       <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:17px">${esc(_nm)}</div><div style="font-size:13px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(_em)}</div></div>
       <button onclick="navigate('profile')" style="background:rgba(200,251,70,.13);color:var(--primary);border:none;border-radius:10px;padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit">Uredi</button>
     </div>
-    <div class="vh-sec"><span>Novčanici</span></div>
-    <div style="font-size:12.5px;color:var(--sub);margin:-6px 2px 12px">Tapni novčanik da podesiš početno stanje i datum.</div>
+    <div class="vh-sec"><span>Novčanici</span><span class="vh-a" onclick="openWalletEditor(null)" style="cursor:pointer">+ Novi</span></div>
     ${walletsHTML}
     <div class="vh-sec"><span>Budžet</span></div>
     <div class="vcard"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:15px">Budžet ovog mjeseca</div><div style="font-size:12px;color:var(--sub);margin-top:2px">Zbir označenih primanja</div></div><div id="budget-total-disp" style="font-weight:800;font-size:18px;color:var(--primary)">${fmt(computeBudget())}</div></div><div style="font-size:12px;color:var(--sub);margin:10px 2px 4px;line-height:1.5">Označi koja primanja ulaze u budžet. Troškovi (Keš + Kartica) se oduzimaju od tog iznosa.</div>${['Plata','Kirija','Vanredno'].map(function(t){var on=getBudgetSources().indexOf(t)>=0;return '<div onclick="toggleBudgetSource(\''+t+'\',this)" role="button" tabindex="0" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;border-top:1px solid var(--border)"><span style="font-size:14px;font-weight:500">'+t+'</span><span class="toggle'+(on?' on':'')+'"></span></div>';}).join('')}</div>
@@ -2097,7 +2275,7 @@ async function dupExp(id){
 
 function openSheet(id){const el=document.getElementById(id);el.scrollTop=0;document.getElementById('overlay').classList.add('visible');el.classList.add('open');document.body.style.overflow='hidden';initSheetSwipe(el)}
 function closeSheet(id){document.getElementById(id).classList.remove('open')}
-function closeAllSheets(){['sheet-add','sheet-edit','sheet-confirm','sheet-filter','sheet-income','sheet-rate'].forEach(id=>{document.getElementById(id).classList.remove('open')});document.getElementById('overlay').classList.remove('visible');document.body.style.overflow='';acOptions=[];var _t=document.getElementById('sheet-confirm-title');if(_t)_t.textContent='Potvrdi brisanje';}
+function closeAllSheets(){['sheet-add','sheet-edit','sheet-confirm','sheet-filter','sheet-income','sheet-rate','sheet-wallet'].forEach(id=>{const _e=document.getElementById(id);if(_e)_e.classList.remove('open')});document.getElementById('overlay').classList.remove('visible');document.body.style.overflow='';acOptions=[];var _t=document.getElementById('sheet-confirm-title');if(_t)_t.textContent='Potvrdi brisanje';}
 
 function initSheetSwipe(el){
   if(!el||el._swipeInit)return;
