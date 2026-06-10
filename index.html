@@ -302,8 +302,10 @@ body:not(.dark) .ac-list{background:rgba(255,255,255,0.85);box-shadow:0 8px 24px
 .settings-sub{font-size:13px;color:var(--sub);margin-top:2px}
 .toggle{width:44px;height:24px;background:var(--border);border-radius:99px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
 .toggle.on{background:var(--primary)}
-.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .28s cubic-bezier(.34,1.56,.64,1),width .15s ease}
 .toggle.on::after{transform:translateX(20px)}
+.toggle:active::after{width:21px}
+.toggle.on:active::after{transform:translateX(17px)}
 .btn{padding:12px 24px;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s,transform .1s;font-family:inherit}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,#C8FB46,#A9E62E);color:#0a0c0b;box-shadow:0 4px 20px rgba(200,251,70,.4),0 0 30px rgba(200,251,70,.2)}
@@ -1568,7 +1570,7 @@ function renderSettings(){
     <div style="font-size:12.5px;color:var(--sub);margin:-6px 2px 12px">Tapni novčanik da podesiš početno stanje i datum.</div>
     ${walletsHTML}
     <div class="vh-sec"><span>Budžet</span></div>
-    <div class="vcard"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:15px">Budžet ovog mjeseca</div><div style="font-size:12px;color:var(--sub);margin-top:2px">Zbir označenih primanja</div></div><div style="font-weight:800;font-size:18px;color:var(--primary)">${fmt(computeBudget())}</div></div><div style="font-size:12px;color:var(--sub);margin:10px 2px 4px;line-height:1.5">Označi koja primanja ulaze u budžet. Troškovi (Keš + Kartica) se oduzimaju od tog iznosa.</div>${['Plata','Kirija','Vanredno'].map(function(t){var on=getBudgetSources().indexOf(t)>=0;return '<div onclick="toggleBudgetSource(\''+t+'\')" role="button" tabindex="0" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;border-top:1px solid var(--border)"><span style="font-size:14px;font-weight:500">'+t+'</span><span class="toggle'+(on?' on':'')+'"></span></div>';}).join('')}</div>
+    <div class="vcard"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:15px">Budžet ovog mjeseca</div><div style="font-size:12px;color:var(--sub);margin-top:2px">Zbir označenih primanja</div></div><div id="budget-total-disp" style="font-weight:800;font-size:18px;color:var(--primary)">${fmt(computeBudget())}</div></div><div style="font-size:12px;color:var(--sub);margin:10px 2px 4px;line-height:1.5">Označi koja primanja ulaze u budžet. Troškovi (Keš + Kartica) se oduzimaju od tog iznosa.</div>${['Plata','Kirija','Vanredno'].map(function(t){var on=getBudgetSources().indexOf(t)>=0;return '<div onclick="toggleBudgetSource(\''+t+'\',this)" role="button" tabindex="0" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;border-top:1px solid var(--border)"><span style="font-size:14px;font-weight:500">'+t+'</span><span class="toggle'+(on?' on':'')+'"></span></div>';}).join('')}</div>
     <div class="vh-sec"><span>Valuta</span></div>
     <div class="vcard"><div style="display:flex;flex-wrap:wrap;gap:8px">${currOpts}</div><div style="font-size:12px;color:var(--sub);margin-top:10px">${rateInfo}</div>${hasPendingChange?`<button class="btn-lime-sm" id="settings-save-btn" onclick="saveSettings()">Primijeni valutu</button>`:''}</div>
     <div class="vh-sec"><span>Načini plaćanja</span></div>
@@ -2658,7 +2660,7 @@ function restoreUiState(){
 function getIncomeEntries(){return APP.income||[];}
 function getBudgetSources(){try{var s=JSON.parse(localStorage.getItem('budget_sources')||'null');return Array.isArray(s)?s:['Plata','Kirija','Vanredno'];}catch(e){return ['Plata','Kirija','Vanredno'];}}
 function computeBudget(){var m=ym();var src=getBudgetSources();return getIncomeEntries().filter(function(e){return (e.month===m||(e.date&&String(e.date).indexOf(m)===0))&&src.indexOf(e.type||'Plata')>=0;}).reduce(function(s,e){return s+(e.amount||0);},0);}
-function toggleBudgetSource(t){var src=getBudgetSources();var i=src.indexOf(t);if(i>=0)src.splice(i,1);else src.push(t);localStorage.setItem('budget_sources',JSON.stringify(src));renderSettings();}
+function toggleBudgetSource(t,el){var src=getBudgetSources();var i=src.indexOf(t);if(i>=0)src.splice(i,1);else src.push(t);localStorage.setItem('budget_sources',JSON.stringify(src));var on=src.indexOf(t)>=0;if(el&&el.querySelector){var sw=el.querySelector('.toggle');if(sw)sw.classList.toggle('on',on);var d=document.getElementById('budget-total-disp');if(d)d.textContent=fmt(computeBudget());if(typeof renderDashboard==='function')renderDashboard();}else{renderSettings();}}
 let _incMethod='Keš';
 function selectIncMethod(m){
   _incMethod=m;
