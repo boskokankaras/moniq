@@ -597,7 +597,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 39;
+const APP_VERSION = 40;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -1764,6 +1764,7 @@ function renderSettings(){
     <div class="vh-sec"><span>Podaci</span></div>
     <div class="vcard"><div class="lrow-set" onclick="exportCSV()"><span>Izvoz (CSV)</span><span style="color:var(--primary)">Preuzmi</span></div><div class="lrow-set" onclick="window.print()"><span>Print / PDF</span><span style="color:var(--primary)">Štampaj</span></div><div class="lrow-set"><span>Troškova ukupno</span><span style="color:var(--sub)">${APP.expenses.length}</span></div></div>
     <button class="btn-lime-sm" style="background:rgba(255,126,126,.13);color:#ff7e7e" onclick="signOut()">Odjavi se</button>
+    <div style="text-align:center;color:var(--sub);font-size:12px;margin:18px 0 6px;opacity:.7">Moniq v${APP_VERSION}</div>
   `;
   const fi=document.querySelector('.method-icon-opt[data-icon="card"]');if(fi)fi.style.borderColor='var(--primary)';
   const fc=document.querySelector('.method-color-opt[data-color="#C8FB46"]');if(fc)fc.style.borderColor='#fff';
