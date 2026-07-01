@@ -597,7 +597,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 37;
+const APP_VERSION = 39;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -734,7 +734,15 @@ const APP={
 let sb,barChart,acOptions=[];
 
 function getCat(d){return CATS.find(c=>c.test(d))||CATS[CATS.length-1]}
-function parseAmt(v){const n=parseFloat(String(v==null?'':v).replace(',','.').replace(/[^\d.\-]/g,''));return isFinite(n)?n:NaN;}
+function parseAmt(v){
+  let s=String(v==null?'':v).trim().replace(/[^\d.,\-]/g,'');
+  if(!s)return NaN;
+  const lc=s.lastIndexOf(','),ld=s.lastIndexOf('.');
+  if(lc>=0&&ld>=0){s=lc>ld?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');}
+  else if(lc>=0){s=s.split(',').length===2?s.replace(',','.'):s.replace(/,/g,'');}
+  else if(ld>=0){const p=s.split('.');if(p.length>2||(p.length===2&&p[1].length===3&&p[0].replace('-','').length>0))s=p.join('');}
+  const n=parseFloat(s);return isFinite(n)?n:NaN;
+}
 function toRow(e){return{id:e.id,description:e.desc,expense_date:e.date,amount:e.amount,method:e.method,category:e.category||getCat(e.desc).id,note:e.note||''}}
 function fromRow(r){return{id:r.id,desc:r.description,date:r.expense_date,amount:parseFloat(r.amount),method:r.method,category:r.category||getCat(r.description).id,note:r.note||''}}
 const CURRENCIES=[
@@ -1810,6 +1818,8 @@ function saveRateEntries(entries){localStorage.setItem('rate_entries',JSON.strin
 function buildRateWidget(){
   const entries=getRateEntries();
   if(!entries.length){return`<div style="text-align:center;padding:16px 0 8px;color:var(--sub)"><div style="font-size:32px;margin-bottom:8px">📦</div><div style="font-size:14px">Nemaš aktivnih rata</div></div>`;}
+  // aktivne gore, otplaćene na dno
+  entries.sort((a,b)=>((a.placene_rate||0)>=a.broj_rata?1:0)-((b.placene_rate||0)>=b.broj_rata?1:0));
   const active=entries.filter(e=>(e.placene_rate||0)<e.broj_rata);
   const totalMonthly=active.reduce((s,e)=>s+(e.iznos_rate||0),0);
   const totalRemaining=active.reduce((s,e)=>s+Math.max(0,(e.broj_rata-(e.placene_rate||0))*(e.iznos_rate||0)),0);
@@ -1824,12 +1834,29 @@ function buildRateWidget(){
     const pct=Math.round((paid/total)*100);
     const amtRemaining=remaining*(e.iznos_rate||0);
     const done=paid>=total;
+    let dueHTML='';
+    if(!done){
+      const curYM=new Date().toISOString().substring(0,7);
+      const placenaOvajMjesec=e.zadnja_uplata&&String(e.zadnja_uplata).startsWith(curYM);
+      const due=rateNextDue(e);
+      if(placenaOvajMjesec){
+        const d=String(e.zadnja_uplata).split('-');
+        dueHTML=`<div style="font-size:12px;margin-top:7px;color:#10b981">✓ Ovaj mjesec upisana (${+d[2]}.${+d[1]}.)</div>`;
+      }else if(due){
+        const now=new Date();const nowIdx=now.getFullYear()*12+now.getMonth();const dueIdx=due.y*12+due.m;
+        const lbl=_MJESECI[due.m]+' '+due.y;
+        if(dueIdx<nowIdx)dueHTML=`<div style="font-size:12px;margin-top:7px;color:#ef4444;font-weight:600">⚠️ Kasni - rata za ${lbl} nije upisana</div>`;
+        else if(dueIdx===nowIdx)dueHTML=`<div style="font-size:12px;margin-top:7px;color:var(--sub)">📅 Sljedeća rata: <b style="color:var(--text)">ovaj mjesec</b></div>`;
+        else dueHTML=`<div style="font-size:12px;margin-top:7px;color:var(--sub)">✓ Sljedeća rata: ${lbl}</div>`;
+      }
+    }
     return`<div style="background:var(--bg);border-radius:16px;padding:14px 14px 12px;margin-bottom:10px;${done?'opacity:0.65':''}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${e.povjerioc?'4px':'8px'}">
         <div style="font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px">${esc(e.desc)}</div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          ${!done?`<button onclick="incRatePaid(${e.id})" style="background:rgba(99,102,241,0.15);border:none;border-radius:8px;padding:4px 10px;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+1</button>`:`<span style="font-size:11px;color:#10b981;font-weight:700">✓ Plaćeno</span>`}
-          <button onclick="deleteRate(${e.id})" style="background:rgba(239,68,68,0.1);border:none;border-radius:8px;padding:4px 8px;color:#ef4444;font-size:13px;cursor:pointer;font-family:inherit">🗑️</button>
+          ${!done?`<button onclick="openPayRateSheet(${e.id})" style="background:rgba(99,102,241,0.15);border:none;border-radius:8px;padding:4px 10px;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+1</button>`:`<span style="font-size:11px;color:#10b981;font-weight:700">✓ Plaćeno</span>`}
+          <button onclick="openAddRateSheet(${e.id})" style="background:var(--border);border:none;border-radius:8px;padding:4px 8px;color:var(--sub);font-size:13px;cursor:pointer;font-family:inherit">✏️</button>
+          <button onclick="askDeleteRate(${e.id})" style="background:rgba(239,68,68,0.1);border:none;border-radius:8px;padding:4px 8px;color:#ef4444;font-size:13px;cursor:pointer;font-family:inherit">🗑️</button>
         </div>
       </div>
       ${e.povjerioc?`<div style="margin-bottom:8px"><span style="font-size:11px;color:var(--sub);background:var(--border);border-radius:6px;padding:2px 8px;font-weight:500">🏦 ${esc(e.povjerioc)}</span></div>`:''}
@@ -1842,32 +1869,45 @@ function buildRateWidget(){
       <div style="display:flex;gap:14px;font-size:12px;color:var(--sub)">
         <span>💰 <b style="color:var(--text)">${fmt(e.iznos_rate)}</b>/rata</span>
         ${!done?`<span>⏳ Ostalo: <b style="color:var(--text)">${fmt(amtRemaining)}</b></span>`:`<span>✅ Ukupno: <b style="color:var(--text)">${fmt(e.ukupno||e.iznos_rate*e.broj_rata)}</b></span>`}
-      </div>
+      </div>${dueHTML}
     </div>`;
   }).join('');
   return summaryHTML+itemsHTML;
 }
+const _MJESECI=['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'];
+// Sljedeće dospijeće: mjesec prve rate + broj plaćenih (rata k dospijeva k-1 mjeseci poslije prve)
+function rateNextDue(e){
+  if((e.placene_rate||0)>=e.broj_rata)return null;
+  if(!e.datum_pocetka)return null;
+  const m=/^(\d{4})-(\d{2})/.exec(e.datum_pocetka);if(!m)return null;
+  const idx=(+m[1])*12+(+m[2]-1)+(e.placene_rate||0);
+  return{y:Math.floor(idx/12),m:idx%12};
+}
 
-function openAddRateSheet(){
+function openAddRateSheet(editId){
+  const entry=editId?getRateEntries().find(e=>e.id===editId):null;
   const today=new Date().toISOString().split('T')[0];
-  const methods=['Kartica','Virman','Keš','Biznis','INA'];
-  const methodOpts=methods.map(m=>`<option value="${m}"${m==='Kartica'?' selected':''}>${m}</option>`).join('');
+  const mlist=(typeof METHODS!=='undefined'&&METHODS.length)?METHODS:['Kartica','Keš'];
+  const selMeth=entry&&mlist.includes(entry.method)?entry.method:mlist[0];
+  const methodOpts=mlist.map(m=>`<option value="${esc(m)}"${m===selMeth?' selected':''}>${esc(m)}</option>`).join('');
+  const numVal=v=>{const n=parseFloat(v);return isFinite(n)?String(Math.round(n*100)/100).replace('.',','):'';};
+  const t=document.querySelector('#sheet-rate .sheet-title');if(t)t.textContent=entry?'Uredi kupovinu na rate':'Nova kupovina na rate';
   document.getElementById('sheet-rate-body').innerHTML=`
-    <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica, banka...</span></label><input type="text" class="form-control" id="rate-povjerioc" placeholder="npr. Telemach, ProCredit, m:tel..."></div>
-    <div class="form-group"><label class="form-label">Opis (šta si kupio)</label><input type="text" class="form-control" id="rate-desc" placeholder="npr. Laptop, TV, Bijela tehnika..."></div>
+    <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">- prodavnica, banka...</span></label><input type="text" class="form-control" id="rate-povjerioc" placeholder="npr. Telemach, ProCredit, m:tel..." value="${entry?esc(entry.povjerioc||''):''}"></div>
+    <div class="form-group"><label class="form-label">Opis (šta si kupio)</label><input type="text" class="form-control" id="rate-desc" placeholder="npr. Laptop, TV, Bijela tehnika..." value="${entry?esc(entry.desc||''):''}"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="rate-iznos" placeholder="50,00" oninput="autoCalcRateUkupno()"></div>
-      <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="rate-broj" placeholder="12" min="1" step="1" oninput="autoCalcRateUkupno()"></div>
+      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="rate-iznos" placeholder="50,00" value="${entry?numVal(entry.iznos_rate):''}" oninput="autoCalcRateUkupno()"></div>
+      <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="rate-broj" placeholder="12" min="1" step="1" value="${entry?(entry.broj_rata||''):''}" oninput="autoCalcRateUkupno()"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Ukupna cijena (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="rate-ukupno" placeholder="600,00"></div>
+      <div class="form-group"><label class="form-label">Ukupna cijena (€) <span style="color:var(--sub);font-size:11px">- auto</span></label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="rate-ukupno" placeholder="600,00" value="${entry?numVal(entry.ukupno):''}"></div>
       <div class="form-group"><label class="form-label">Metoda plaćanja</label><select class="form-control" id="rate-method">${methodOpts}</select></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="rate-vec-placeno" placeholder="0" min="0" step="1" value="0"></div>
-      <div class="form-group"><label class="form-label">Datum prve rate</label><input type="date" class="form-control" id="rate-datum" value="${today}"></div>
+      <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="rate-vec-placeno" placeholder="0" min="0" step="1" value="${entry?(entry.placene_rate||0):0}"></div>
+      <div class="form-group"><label class="form-label">Datum prve rate</label><input type="date" class="form-control" id="rate-datum" value="${entry?(entry.datum_pocetka||today):today}"></div>
     </div>
-    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="submitAddRate()">Dodaj ratu</button>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="submitAddRate(${entry?entry.id:0})">${entry?'Sačuvaj izmjene':'Dodaj kupovinu'}</button>
   `;
   openSheet('sheet-rate');
 }
@@ -1875,10 +1915,10 @@ function openAddRateSheet(){
 function autoCalcRateUkupno(){
   const iznos=parseAmt(document.getElementById('rate-iznos')?.value||'0');
   const broj=parseInt(document.getElementById('rate-broj')?.value||'0');
-  if(iznos>0&&broj>0){document.getElementById('rate-ukupno').value=(iznos*broj).toFixed(2);}
+  if(iznos>0&&broj>0){document.getElementById('rate-ukupno').value=(Math.round(iznos*broj*100)/100).toFixed(2);}
 }
 
-function submitAddRate(){
+function submitAddRate(editId){
   const desc=(document.getElementById('rate-desc')?.value||'').trim();
   const povjerioc=(document.getElementById('rate-povjerioc')?.value||'').trim();
   const iznos=parseAmt(document.getElementById('rate-iznos')?.value||'0');
@@ -1891,44 +1931,96 @@ function submitAddRate(){
   if(!iznos||iznos<=0){alert('Upiši iznos rate');return;}
   if(!broj||broj<1){alert('Upiši broj rata');return;}
   if(vecPlaceno>broj){alert('Već plaćene rate ne mogu biti veće od ukupnog broja rata');return;}
-  const ukupno=ukupnoRaw&&parseAmt(ukupnoRaw)>0?parseAmt(ukupnoRaw):iznos*broj;
+  const ukupno=ukupnoRaw&&parseAmt(ukupnoRaw)>0?parseAmt(ukupnoRaw):Math.round(iznos*broj*100)/100;
   const entries=getRateEntries();
-  entries.push({id:Date.now(),desc,povjerioc,method,iznos_rate:iznos,broj_rata:broj,ukupno,datum_pocetka:datum,placene_rate:vecPlaceno});
+  const existing=editId?entries.find(e=>e.id===editId):null;
+  if(!existing){
+    const dupl=entries.find(e=>_normk(e.desc)===_normk(desc)&&_normk(e.povjerioc||'')===_normk(povjerioc)&&(e.placene_rate||0)<e.broj_rata);
+    if(dupl&&!confirm(`Već imaš aktivnu kupovinu "${dupl.desc}" (${dupl.placene_rate||0}/${dupl.broj_rata}). Sigurno dodaješ još jednu istu?`))return;
+  }
+  if(existing){
+    existing.desc=desc;existing.povjerioc=povjerioc;existing.method=method;
+    existing.iznos_rate=iznos;existing.broj_rata=broj;existing.ukupno=ukupno;
+    existing.datum_pocetka=datum;existing.placene_rate=vecPlaceno;
+  }else{
+    entries.push({id:Date.now(),desc,povjerioc,method,iznos_rate:iznos,broj_rata:broj,ukupno,datum_pocetka:datum,placene_rate:vecPlaceno});
+  }
   saveRateEntries(entries);
   closeAllSheets();
   renderDashboard();
+  showSuccessToast(existing?'Kupovina izmijenjena':'Kupovina dodana',desc);
 }
 
-function deleteRate(id){
+function askDeleteRate(id){
+  const e=getRateEntries().find(x=>x.id===id);if(!e)return;
+  const t=document.getElementById('sheet-confirm-title');if(t)t.textContent='Obriši kupovinu na rate';
+  document.getElementById('sheet-confirm-body').innerHTML=`<div style="text-align:center;margin-bottom:6px;font-weight:700;font-size:15px">${esc(e.desc)}${e.povjerioc?' <span style="color:var(--sub);font-weight:500">('+esc(e.povjerioc)+')</span>':''}</div><p style="color:var(--sub);font-size:14px;margin-bottom:20px;text-align:center">Brišeš praćenje ove kupovine (${e.placene_rate||0}/${e.broj_rata} rata). Već upisani troškovi ostaju u listi.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn btn-ghost" onclick="closeAllSheets()">Odustani</button><button class="btn btn-danger" onclick="confirmDeleteRatePlan(${e.id})">Obriši</button></div>`;
+  openSheet('sheet-confirm');
+}
+function confirmDeleteRatePlan(id){
   saveRateEntries(getRateEntries().filter(e=>e.id!==id));
+  closeAllSheets();
   renderDashboard();
+  showSuccessToast('Kupovina obrisana');
 }
 
-async function incRatePaid(id){
+// "+1" otvara prozor: biraš datum plaćanja i stvarni iznos rate prije bilježenja
+function openPayRateSheet(id){
+  const e=getRateEntries().find(x=>x.id===id);
+  if(!e||(e.placene_rate||0)>=e.broj_rata)return;
+  const today=new Date().toISOString().split('T')[0];
+  const nextNum=(e.placene_rate||0)+1;
+  const vecOvajMjesec=e.zadnja_uplata&&String(e.zadnja_uplata).startsWith(today.substring(0,7));
+  const zu=vecOvajMjesec?String(e.zadnja_uplata).split('-'):null;
+  const t=document.querySelector('#sheet-rate .sheet-title');if(t)t.textContent='Plati ratu';
+  document.getElementById('sheet-rate-body').innerHTML=
+    `<div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.18);border-radius:14px;padding:12px 14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.desc)}</div>
+      <div style="font-size:12px;color:var(--sub)">${e.povjerioc?'🏦 '+esc(e.povjerioc)+' · ':''}Sljedeća rata <b style="color:var(--text)">${nextNum}/${e.broj_rata}</b></div>
+      ${vecOvajMjesec?`<div style="font-size:12px;color:#f59e0b;margin-top:5px">⚠️ Rata je već upisana ovog mjeseca (${+zu[2]}.${+zu[1]}.)</div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label class="form-label">Iznos rate (€)</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="payrate-iznos" value="${(e.iznos_rate||0).toFixed(2).replace('.',',')}"></div>
+      <div class="form-group"><label class="form-label">Datum plaćanja</label><input type="date" class="form-control" id="payrate-datum" value="${today}" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="confirmPayRate(${id})">Zabilježi ratu ${nextNum}/${e.broj_rata}</button>`;
+  openSheet('sheet-rate');
+}
+
+let _rateBusy=false;
+async function confirmPayRate(id){
+  if(_rateBusy)return;
   const entries=getRateEntries();
   const e=entries.find(x=>x.id===id);
   if(!e||(e.placene_rate||0)>=e.broj_rata)return;
+  const iznos=parseAmt(document.getElementById('payrate-iznos')?.value||'')||e.iznos_rate;
+  const datum=document.getElementById('payrate-datum')?.value||new Date().toISOString().split('T')[0];
+  if(!iznos||iznos<=0){alert('Unesi ispravan iznos rate');return;}
+  const btn=document.querySelector('#sheet-rate .btn-primary');if(btn)btn.disabled=true;
+  _rateBusy=true;
+  const prevUplata=e.zadnja_uplata||null;
   e.placene_rate=(e.placene_rate||0)+1;
+  e.zadnja_uplata=datum;
   saveRateEntries(entries);
-  // Kreiraj trošak u Supabase
-  const today=new Date().toISOString().split('T')[0];
   const expDesc=`Rata ${e.placene_rate}/${e.broj_rata}: ${e.desc}${e.povjerioc?' ('+e.povjerioc+')':''}`;
   const expMethod=e.method||'Kartica';
   try{
     const{data:ins,error}=await sb.from('expenses').insert({
       description:expDesc,
-      expense_date:today,
-      amount:e.iznos_rate,
+      expense_date:datum,
+      amount:iznos,
       method:expMethod,
-      category:getCat(expDesc).id,
-      note:'',
+      category:'rate',
+      note:e.povjerioc?`Povjerioc: ${e.povjerioc}`:'',
       user_id:APP.user?.id
     }).select().single();
     if(error)throw error;
     APP.expenses.unshift(fromRow(ins));
     APP.expenses.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
-    showSuccessToast('Rata zabilježena',fmt(e.iznos_rate));
-  }catch(err){console.error('Rate expense insert failed',err);e.placene_rate=Math.max(0,(e.placene_rate||0)-1);saveRateEntries(entries);alert('Greška pri upisu rate — pokušaj ponovo.');}
+    closeAllSheets();
+    showSuccessToast(`Rata ${e.placene_rate}/${e.broj_rata} zabilježena`,fmt(iznos));
+  }catch(err){console.error('Pay rate failed',err);e.placene_rate=Math.max(0,(e.placene_rate||0)-1);e.zadnja_uplata=prevUplata;saveRateEntries(entries);if(btn)btn.disabled=false;_rateBusy=false;alert('Greška pri upisu rate - pokušaj ponovo.');return;}
+  finally{_rateBusy=false;}
   renderDashboard();
 }
 // ── End Rate Widget ──────────────────────────────────────────────────────
@@ -2035,21 +2127,22 @@ function buildForm(e,isEdit){
   const today=new Date().toISOString().split('T')[0];
   const{freq:initFreq,cleanNote:initNote}=parseFreq(e?e.note||'':'');
   const freqVisible=dc==='pretplate';
-  // Extract povjerioc from note if editing a rate expense
-  const initPovjerioc=isRate&&e?.note?e.note.replace('Povjerioc: ',''):'';
+  // Rata-trošak: raspakuj "Rata N/B: Opis (Povjerioc)" da polja budu popunjena i opis čist
+  const rp=isRate&&e?parseRataDesc(e.desc):null;
+  const initPovjerioc=isRate&&e?((e.note&&e.note.indexOf('Povjerioc: ')===0)?e.note.replace('Povjerioc: ',''):(rp?rp.povjerioc:'')):'';
+  const initDesc=e?(rp?rp.desc:e.desc):'';
   return`
     <div class="form-group"><label class="form-label">Kategorija</label><div class="cat-grid">${cGrid}</div><input type="hidden" id="f-cat" value="${dc}"></div>
     <div class="rate-extra-box${isRate?' open':''}" id="rate-extra">
       <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.18);border-radius:16px;padding:14px 14px 4px;margin-bottom:16px">
-        <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica ili banka</span></label><input type="text" class="form-control" id="f-rate-povjerioc" placeholder="npr. prodavnica ili banka..." value="${esc(initPovjerioc)}"></div>
+        <div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">- prodavnica ili banka</span></label><input type="text" class="form-control" id="f-rate-povjerioc" placeholder="npr. prodavnica ili banka..." value="${esc(initPovjerioc)}"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" oninput="autoCalcFormRateUkupno()"></div>
-          <div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="f-rate-ukupno" placeholder="1.200,00"></div>
+          <div class="form-group"><label class="form-label">Koja rata po redu</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-num" placeholder="1" min="1" step="1" value="${rp?rp.num:''}"></div>
+          <div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" value="${rp?rp.broj:''}"></div>
         </div>
-        <div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-vec" placeholder="0" min="0" step="1" value="0"></div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label" id="f-desc-label">${isRate?'Opis kupovine':'Opis'}</label><div class="autocomplete-wrap"><input type="text" class="form-control" id="f-desc" placeholder="${isRate?'npr. TV, telefon, namještaj...':'Upiši opis...'}" value="${esc(e?e.desc:'')}" oninput="onDesc(this)"><div class="ac-list" id="ac-list"></div></div></div>
+    <div class="form-group"><label class="form-label" id="f-desc-label">${isRate?'Opis kupovine':'Opis'}</label><div class="autocomplete-wrap"><input type="text" class="form-control" id="f-desc" placeholder="${isRate?'npr. TV, telefon, namještaj...':'Upiši opis...'}" value="${esc(initDesc)}" oninput="onDesc(this)"><div class="ac-list" id="ac-list"></div></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group" style="min-width:0"><label class="form-label" id="f-amount-label">${isRate?'Iznos rate (€)':'Iznos (€)'}</label><input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]*[.,]?[0-9]{0,2}" class="form-control" id="f-amount" value="${e?e.amount:''}" placeholder="0,00" oninput="autoCalcFormRateUkupno()"></div>
       <div class="form-group" style="min-width:0"><label class="form-label" id="f-date-label">${isRate?'Datum prve rate':'Datum'}</label><input type="date" class="form-control" id="f-date" value="${e?e.date:today}" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>
@@ -2083,7 +2176,9 @@ function selC(id,el){
 
 function onDesc(inp){
   const v=inp.value;
-  const cat=getCat(v);if(!_addRate){const cb=document.getElementById('cbtn-'+cat.id);if(cb)selC(cat.id,cb);else{const sel=document.getElementById('f-cat-select');if(sel){sel.value=cat.id;onCatSelect(cat.id);}}}
+  // Auto-kategorija samo pri DODAVANJU (ne u editu - tamo je kategorija već izabrana) i nikad automatski u/iz 'rate'
+  const inEdit=document.getElementById('sheet-edit')?.classList.contains('open');
+  const cat=getCat(v);if(!_addRate&&!inEdit&&cat.id!=='rate'&&(_fld('f-cat')?.value)!=='rate'){const cb=document.getElementById('cbtn-'+cat.id);if(cb)selC(cat.id,cb);else{const sel=document.getElementById('f-cat-select');if(sel){sel.value=cat.id;onCatSelect(cat.id);}}}
   const l=document.getElementById('ac-list');if(!l)return;
   if(!v.trim()||v.length<2){l.style.display='none';return}
   acOptions=[...new Set(APP.expenses.map(e=>e.desc))].filter(d=>d.toLowerCase().includes(v.toLowerCase())).slice(0,6);
@@ -2101,19 +2196,34 @@ function autoCalcFormRateUkupno(){
   if(iznos>0&&broj>0&&u)u.value=(iznos*broj).toFixed(2);
 }
 function getFormData(){
-  const desc=(document.getElementById('f-desc')?.value||'').trim();
-  const amount=parseAmt(document.getElementById('f-amount')?.value||'');
-  const date=document.getElementById('f-date')?.value||'';
-  const method=document.getElementById('f-method')?.value||'Kartica';
-  const category=document.getElementById('f-cat')?.value||'ostalo';
-  const freq=document.getElementById('f-freq')?.value||'mjescna';
-  let note=(document.getElementById('f-note')?.value||'').trim();
+  const desc=(_fld('f-desc')?.value||'').trim();
+  const amount=parseAmt(_fld('f-amount')?.value||'');
+  const date=_fld('f-date')?.value||'';
+  const method=_fld('f-method')?.value||'Kartica';
+  const category=_fld('f-cat')?.value||'ostalo';
+  const freq=_fld('f-freq')?.value||'mjescna';
+  let note=(_fld('f-note')?.value||'').trim();
   if(category==='pretplate'&&freq==='godisnja')note='[Godišnja] '+note;
   else if(category==='pretplate'&&freq==='jednokratna')note='[Jednokratna] '+note;
   if(!desc){alert('Upiši opis');return null}
   if(!amount||amount<=0){alert('Unesi ispravan iznos');return null}
   if(!date){alert('Izaberi datum');return null}
-  if(category==='rate'){const broj=parseInt(document.getElementById('f-rate-broj')?.value||'0');if(!broj||broj<1){alert('Upiši broj rata');return null;}}
+  if(category==='rate'){
+    const planSel=_fld('f-rate-plan');
+    const usingPlan=planSel&&planSel.value&&planSel.value!=='new';
+    const numEl=_fld('f-rate-num'); // postoji samo u edit formi - tamo broj rata nije obavezan
+    if(!usingPlan&&!numEl){
+      const broj=parseInt(_fld('f-rate-broj')?.value||'0');
+      if(!broj||broj<1){alert('Upiši broj rata');return null;}
+      const vec=Math.max(0,parseInt(_fld('f-rate-vec')?.value||'0')||0);
+      if(vec>=broj){alert('Ako sad upisuješ ratu, "Već plaćene" mora biti manje od broja rata');return null;}
+    }
+    if(numEl){
+      const broj=parseInt(_fld('f-rate-broj')?.value||'0');
+      const num=parseInt(numEl.value||'0');
+      if(broj>=1&&num>=1&&num>broj){alert('Redni broj rate ne može biti veći od broja rata');return null;}
+    }
+  }
   return{desc,amount,date,method,category,note}
 }
 
@@ -2139,7 +2249,32 @@ function padDraw(){
   if(_padCb){try{_padCb();}catch(e){}}
 }
 var _addRate=false;
-function rateFieldsHTML(){return '<div><div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">— prodavnica ili banka</span></label><input type="text" class="form-control" id="f-rate-povjerioc" placeholder="npr. prodavnica ili banka..."></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" oninput="autoCalcFormRateUkupno()"></div><div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">— auto</span></label><input type="text" inputmode="decimal" class="form-control" id="f-rate-ukupno" placeholder="1.200,00"></div></div><div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-vec" placeholder="0" min="0" step="1" value="0"></div></div>';}
+function rateFieldsHTML(){return '<div>'
+ +'<div class="form-group" id="rate-plan-group" style="display:none"><label class="form-label">Kupovina</label><select class="form-control" id="f-rate-plan" onchange="onRatePlanSelect(this.value)"><option value="new">➕ Nova kupovina na rate</option></select></div>'
+ +'<div id="rate-plan-recap" style="display:none;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.18);border-radius:16px;padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.5"></div>'
+ +'<div id="rate-new-fields">'
+ +'<div class="form-group"><label class="form-label">Povjerioc <span style="color:var(--sub);font-size:11px">- prodavnica ili banka</span></label><input type="text" class="form-control" id="f-rate-povjerioc" placeholder="npr. prodavnica ili banka..."></div>'
+ +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">Broj rata</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-broj" placeholder="24" min="1" step="1" oninput="autoCalcFormRateUkupno()"></div><div class="form-group"><label class="form-label">Ukupno (€) <span style="color:var(--sub);font-size:11px">- auto</span></label><input type="text" inputmode="decimal" class="form-control" id="f-rate-ukupno" placeholder="1200,00"></div></div>'
+ +'<div class="form-group"><label class="form-label">Već plaćene rate</label><input type="number" inputmode="numeric" class="form-control" id="f-rate-vec" placeholder="0" min="0" step="1" value="0"></div>'
+ +'</div></div>';}
+function onRatePlanSelect(v){
+  const isNew=!v||v==='new';
+  const nf=document.getElementById('rate-new-fields');if(nf)nf.style.display=isNew?'block':'none';
+  const dg=document.getElementById('desc-group');if(dg)dg.style.display=isNew?'block':'none';
+  const recap=document.getElementById('rate-plan-recap');
+  const btn=document.getElementById('add-main-btn');
+  const dl=document.getElementById('f-date-label');
+  if(isNew){if(recap)recap.style.display='none';if(btn)btn.textContent='Dodaj ratu';if(dl)dl.textContent='Datum prve rate';return;}
+  const p=getRateEntries().find(x=>String(x.id)===String(v));
+  if(!p)return;
+  const next=(p.placene_rate||0)+1;
+  const curYM=new Date().toISOString().substring(0,7);
+  const vecOvajMjesec=p.zadnja_uplata&&String(p.zadnja_uplata).startsWith(curYM);
+  if(recap){recap.style.display='block';recap.innerHTML='<b>'+esc(p.desc)+'</b>'+(p.povjerioc?' <span style="color:var(--sub)">('+esc(p.povjerioc)+')</span>':'')+'<br><span style="color:var(--sub)">Sljedeća rata: <b style="color:var(--text)">'+next+'/'+p.broj_rata+'</b> · '+fmt(p.iznos_rate)+'/mj</span>'+(vecOvajMjesec?'<br><span style="color:#10b981">✓ Ovaj mjesec već upisana</span>':'');}
+  const di=document.getElementById('f-desc');if(di)di.value=p.desc;
+  if(btn)btn.textContent='Dodaj ratu '+next+'/'+p.broj_rata;
+  if(dl)dl.textContent='Datum plaćanja';
+}
 function openAddSheet(){
   _addRate=false;
   var dm='Kartica';
@@ -2159,7 +2294,7 @@ function openAddSheet(){
    +'<div class="form-group" id="cat-group"><label class="form-label">Kategorija</label><select class="form-control" id="f-cat-select" onchange="onCatSelect(this.value)">'+catOpts+'</select></div>'
    +'<div class="form-group" id="freq-group" style="display:none"><label class="form-label">Učestalost pretplate</label><select class="form-control" id="f-freq"><option value="mjescna">📅 Mjesečna</option><option value="godisnja">📆 Godišnja</option><option value="jednokratna">⚡ Jednokratna</option></select></div>'
    +'<div id="rate-extra" style="display:none">'+rateFieldsHTML()+'</div>'
-   +'<div class="form-group"><label class="form-label" id="f-desc-label">Opis</label><div class="autocomplete-wrap"><input type="text" class="form-control" id="f-desc" placeholder="Upiši opis..." oninput="onDesc(this)"><div class="ac-list" id="ac-list"></div></div></div>'
+   +'<div class="form-group" id="desc-group"><label class="form-label" id="f-desc-label">Opis</label><div class="autocomplete-wrap"><input type="text" class="form-control" id="f-desc" placeholder="Upiši opis..." oninput="onDesc(this)"><div class="ac-list" id="ac-list"></div></div></div>'
    +'<div class="form-group"><label class="form-label" id="f-date-label">Datum</label><input type="date" class="form-control" id="f-date" value="'+today+'" style="min-height:48px;-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box"></div>'
    +'<div class="form-group"><label class="form-label">Napomena (opciono)</label><textarea class="form-control" id="f-note" placeholder="Dodaj napomenu..."></textarea></div>'
    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px"><button type="button" class="btn btn-ghost" onclick="addGoStep1()">‹ Nazad</button><button type="button" class="btn btn-primary" id="add-main-btn" onclick="submitAdd()">Dodaj trošak</button></div>'
@@ -2185,8 +2320,20 @@ function addGoStep2(){
   document.getElementById('rate-extra').style.display=_addRate?'block':'none';
   document.getElementById('f-desc-label').textContent=_addRate?'Opis kupovine':'Opis';
   document.getElementById('f-date-label').textContent=_addRate?'Datum prve rate':'Datum';
-  if(_addRate){document.getElementById('f-cat').value='rate';var fg=document.getElementById('freq-group');if(fg)fg.style.display='none';}
-  else{onCatSelect(document.getElementById('f-cat-select').value);}
+  if(_addRate){
+    document.getElementById('f-cat').value='rate';var fg=document.getElementById('freq-group');if(fg)fg.style.display='none';
+    var pg=document.getElementById('rate-plan-group'),ps=document.getElementById('f-rate-plan');
+    if(pg&&ps){
+      var plans=getRateEntries().filter(function(e){return (e.placene_rate||0)<e.broj_rata;});
+      if(plans.length){
+        ps.innerHTML='<option value="new">➕ Nova kupovina na rate</option>'+plans.map(function(p){return '<option value="'+p.id+'">'+esc(p.desc)+(p.povjerioc?' ('+esc(p.povjerioc)+')':'')+' · rata '+((p.placene_rate||0)+1)+'/'+p.broj_rata+'</option>';}).join('');
+        pg.style.display='block';
+      }else{pg.style.display='none';ps.innerHTML='<option value="new">➕ Nova kupovina na rate</option>';}
+      ps.value='new';
+      onRatePlanSelect('new');
+    }
+  }
+  else{onCatSelect(document.getElementById('f-cat-select').value);var dg2=document.getElementById('desc-group');if(dg2)dg2.style.display='block';}
   document.getElementById('add-main-btn').textContent=_addRate?'Dodaj ratu':'Dodaj trošak';
   var sa=document.getElementById('sheet-add');if(sa)sa.scrollTop=0;
 }
@@ -2214,32 +2361,67 @@ async function submitAdd(){
   // Rate sinhronizacija
   let expDesc=data.desc;
   let expNote=data.note;
+  let expDate=data.date;
+  let rateToast='';
+  let rollbackRate=null;
   if(data.category==='rate'){
-    const povjerioc=(document.getElementById('f-rate-povjerioc')?.value||'').trim();
-    const broj=parseInt(document.getElementById('f-rate-broj')?.value||'1')||1;
-    const ukupnoRaw=document.getElementById('f-rate-ukupno')?.value;
-    const vecPlaceno=Math.max(0,parseInt(document.getElementById('f-rate-vec')?.value||'0')||0);
-    const ukupno=ukupnoRaw&&parseFloat(ukupnoRaw)>0?parseFloat(ukupnoRaw):data.amount*broj;
-    const rataNum=vecPlaceno+1;
-    expDesc=`Rata ${rataNum}/${broj}: ${data.desc}${povjerioc?' ('+povjerioc+')':''}`;
-    expNote=povjerioc?`Povjerioc: ${povjerioc}`:(data.note||'');
-    // Upiši/ažuriraj Rate widget entry
     const entries=getRateEntries();
-    const existing=entries.find(e=>e.desc===data.desc&&e.povjerioc===povjerioc);
-    if(existing){existing.placene_rate=Math.max(existing.placene_rate||0,rataNum);}
-    else{entries.push({id:Date.now(),desc:data.desc,povjerioc,method:data.method,iznos_rate:data.amount,broj_rata:broj,ukupno,datum_pocetka:data.date,placene_rate:rataNum});}
+    const planSel=_fld('f-rate-plan');
+    const planId=planSel&&planSel.value&&planSel.value!=='new'?Number(planSel.value):0;
+    let plan=planId?entries.find(e=>e.id===planId):null;
+    let novaKupovina=false;
+    if(planId&&!plan){alert('Kupovina nije nađena - vrati se na početnu i pokušaj ponovo');setSyncStatus('online','Sinkronizovano');if(btn)btn.disabled=false;return;}
+    if(!plan){
+      const povjerioc=(_fld('f-rate-povjerioc')?.value||'').trim();
+      const broj=parseInt(_fld('f-rate-broj')?.value||'1')||1;
+      const ukupnoRaw=_fld('f-rate-ukupno')?.value;
+      const vecPlaceno=Math.max(0,parseInt(_fld('f-rate-vec')?.value||'0')||0);
+      const ukupno=ukupnoRaw&&parseAmt(ukupnoRaw)>0?parseAmt(ukupnoRaw):data.amount*broj;
+      // Ako aktivna kupovina istog naziva već postoji, ovo je njena sljedeća rata - ne pravi duplikat
+      plan=entries.find(x=>_normk(x.desc)===_normk(data.desc)&&_normk(x.povjerioc||'')===_normk(povjerioc)&&(x.placene_rate||0)<x.broj_rata);
+      if(!plan){
+        novaKupovina=true;
+        plan={id:Date.now(),desc:data.desc,povjerioc,method:data.method,iznos_rate:data.amount,broj_rata:broj,ukupno,datum_pocetka:data.date,placene_rate:vecPlaceno};
+        // Rata koja se SAD plaća knjiži se danas; "Datum prve rate" je početak otplate
+        if(vecPlaceno>0)expDate=new Date().toISOString().split('T')[0];
+        entries.push(plan);
+      }
+    }
+    if((plan.placene_rate||0)>=plan.broj_rata){alert('Ova kupovina je već otplaćena ('+plan.placene_rate+'/'+plan.broj_rata+')');setSyncStatus('online','Sinkronizovano');if(btn)btn.disabled=false;return;}
+    if(!novaKupovina&&plan.zadnja_uplata&&String(plan.zadnja_uplata).startsWith(expDate.substring(0,7))){
+      if(!confirm(`Rata za "${plan.desc}" je već upisana ovog mjeseca (${plan.placene_rate}/${plan.broj_rata}). Sigurno dodaješ još jednu?`)){setSyncStatus('online','Sinkronizovano');if(btn)btn.disabled=false;return;}
+    }
+    const prevPaid=plan.placene_rate||0;
+    const prevUplata=plan.zadnja_uplata||null;
+    const rataNum=prevPaid+1;
+    plan.placene_rate=rataNum;
+    plan.zadnja_uplata=expDate;
     saveRateEntries(entries);
+    expDesc=`Rata ${rataNum}/${plan.broj_rata}: ${plan.desc}${plan.povjerioc?' ('+plan.povjerioc+')':''}`;
+    expNote=plan.povjerioc?`Povjerioc: ${plan.povjerioc}`:(data.note||'');
+    rateToast=`Rata ${rataNum}/${plan.broj_rata} dodana`;
+    const pid=plan.id;
+    rollbackRate=()=>{const es=getRateEntries();const p2=es.find(x=>x.id===pid);if(p2&&p2.placene_rate===rataNum){p2.placene_rate=prevPaid;p2.zadnja_uplata=prevUplata;saveRateEntries(es);}};
   }
   try{
-    const{data:ins,error}=await sb.from('expenses').insert({description:expDesc,expense_date:data.date,amount:data.amount,method:data.method,category:data.category,note:expNote,user_id:APP.user?.id}).select().single();
+    const{data:ins,error}=await sb.from('expenses').insert({description:expDesc,expense_date:expDate,amount:data.amount,method:data.method,category:data.category,note:expNote,user_id:APP.user?.id}).select().single();
     if(error)throw error;
     APP.expenses.unshift(fromRow(ins));APP.expenses.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
-    setSyncStatus('online','Sinkronizovano');closeAllSheets();showSuccessToast('Trošak dodan',fmt(data.amount));renderView(APP.view);
-  }catch(e){console.error(e);setSyncStatus('error','Greška');if(btn)btn.disabled=false}
+    setSyncStatus('online','Sinkronizovano');closeAllSheets();showSuccessToast(rateToast||'Trošak dodan',fmt(data.amount));renderView(APP.view);
+  }catch(e){console.error(e);if(rollbackRate)rollbackRate();setSyncStatus('error','Greška');alert('Trošak NIJE upisan - provjeri internet i pokušaj ponovo.');if(btn)btn.disabled=false}
 }
 
 async function submitEdit(id){
   const data=getFormData();if(!data)return;
+  if(data.category==='rate'){
+    const broj=parseInt(_fld('f-rate-broj')?.value||'0');
+    const num=parseInt(_fld('f-rate-num')?.value||'0');
+    const pov=(_fld('f-rate-povjerioc')?.value||'').trim();
+    if(broj>=1&&num>=1){
+      data.desc=`Rata ${num}/${broj}: ${data.desc}${pov?' ('+pov+')':''}`;
+      if(pov)data.note=`Povjerioc: ${pov}`;
+    }
+  }
   const btn=document.getElementById('save-btn');if(btn)btn.disabled=true;
   setSyncStatus('syncing','Ažuriram...');
   try{
@@ -2254,11 +2436,22 @@ async function submitEdit(id){
 async function confirmDelete(id){
   const btn=document.getElementById('del-btn');if(btn)btn.disabled=true;
   setSyncStatus('syncing','Brišem...');
+  const exp=APP.expenses.find(x=>x.id===id);
   try{
     const{error}=await sb.from('expenses').delete().eq('id',id);
     if(error)throw error;
     APP.expenses=APP.expenses.filter(x=>x.id!==id);
-    setSyncStatus('online','Sinkronizovano');closeAllSheets();showSuccessToast('Trošak obrisan');renderView(APP.view);
+    // Ako je obrisana zadnja upisana rata, vrati odbrojavanje na kupovini unazad
+    let toast='Trošak obrisan',toastSub;
+    if(exp&&exp.category==='rate'){
+      const p=parseRataDesc(exp.desc);
+      if(p){
+        const entries=getRateEntries();
+        const plan=entries.find(x=>_normk(x.desc)===_normk(p.desc)&&x.broj_rata===p.broj&&(x.placene_rate||0)===p.num&&(!p.povjerioc||_normk(x.povjerioc||'')===_normk(p.povjerioc)));
+        if(plan){plan.placene_rate=p.num-1;plan.zadnja_uplata=null;saveRateEntries(entries);toast='Rata poništena';toastSub=`Odbrojavanje vraćeno na ${p.num-1}/${p.broj}`;}
+      }
+    }
+    setSyncStatus('online','Sinkronizovano');closeAllSheets();showSuccessToast(toast,toastSub);renderView(APP.view);
   }catch(e){console.error(e);setSyncStatus('error','Greška');if(btn)btn.disabled=false}
 }
 
@@ -2274,8 +2467,16 @@ async function dupExp(id){
 }
 
 function openSheet(id){const el=document.getElementById(id);el.scrollTop=0;document.getElementById('overlay').classList.add('visible');el.classList.add('open');document.body.style.overflow='hidden';initSheetSwipe(el)}
-function closeSheet(id){document.getElementById(id).classList.remove('open')}
-function closeAllSheets(){['sheet-add','sheet-edit','sheet-confirm','sheet-filter','sheet-income','sheet-rate','sheet-wallet'].forEach(id=>{const _e=document.getElementById(id);if(_e)_e.classList.remove('open')});document.getElementById('overlay').classList.remove('visible');document.body.style.overflow='';acOptions=[];var _t=document.getElementById('sheet-confirm-title');if(_t)_t.textContent='Potvrdi brisanje';}
+function closeSheet(id){document.getElementById(id).classList.remove('open');_clearClosedSheetBodies()}
+// Tijela zatvorenih prozora se čiste (poslije animacije) da stara polja ne ostanu u DOM-u -
+// sheet-add i sheet-edit prave ISTA id polja (f-desc, f-amount...), pa bi getElementById čitao ustajali prozor
+function _clearClosedSheetBodies(){setTimeout(()=>{['sheet-add-body','sheet-edit-body','sheet-rate-body','sheet-confirm-body','sheet-income-body'].forEach(bid=>{const b=document.getElementById(bid);if(b){const sh=b.closest('.bottom-sheet');if(sh&&!sh.classList.contains('open'))b.innerHTML='';}});},400);}
+// Polje po id-u, ali PRVO iz otvorenog sheeta (zaštita i ako negdje ostane duplikat)
+function _fld(id){return document.querySelector('.bottom-sheet.open [id="'+id+'"]')||document.getElementById(id);}
+function _normk(s){return String(s||'').trim().toLowerCase();}
+// "Rata 4/12: TV (Telemach)" -> {num:4,broj:12,desc:'TV',povjerioc:'Telemach'}
+function parseRataDesc(d){const m=/^rata\s+(\d+)\s*\/\s*(\d+)\s*:\s*(.+)$/i.exec(String(d||'').trim());if(!m)return null;let rest=m[3].trim(),povjerioc='';const pm=/^(.*)\s\(([^()]+)\)$/.exec(rest);if(pm){rest=pm[1].trim();povjerioc=pm[2].trim();}return{num:+m[1],broj:+m[2],desc:rest,povjerioc};}
+function closeAllSheets(){['sheet-add','sheet-edit','sheet-confirm','sheet-filter','sheet-income','sheet-rate','sheet-wallet'].forEach(id=>{const _e=document.getElementById(id);if(_e)_e.classList.remove('open')});document.getElementById('overlay').classList.remove('visible');document.body.style.overflow='';acOptions=[];var _t=document.getElementById('sheet-confirm-title');if(_t)_t.textContent='Potvrdi brisanje';_clearClosedSheetBodies();}
 
 function initSheetSwipe(el){
   if(!el||el._swipeInit)return;
