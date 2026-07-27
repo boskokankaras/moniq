@@ -597,7 +597,7 @@ setTimeout(function(){
 </div>
 
 <script>
-const APP_VERSION = 40;
+const APP_VERSION = 41;
 const SURL = 'https://bonzweqisypfzhfmjxwf.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvbnp3ZXFpc3lwZnpoZm1qeHdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjY1MjQsImV4cCI6MjA5NDU0MjUyNH0.W4WZ3y4UVJ9iqoIy1_V5OiYbp12EdqIJ7P-MjU9NwAo';
 
@@ -845,6 +845,7 @@ async function connectSupabase(){
   await withTimeout(migrateIncomeFromLS(),5000);
   await withTimeout(seedIfEmpty(),12000);
   await Promise.all([withTimeout(loadAll(),10000),withTimeout(loadIncome(),8000)]);
+  reconcileRatePlans();
   setSyncStatus('online','Sinkronizovano');
   try{sb.removeAllChannels();}catch(_){}
   sb.channel('exp-rt').on('postgres_changes',{event:'*',schema:'public',table:'expenses'},handleRT).subscribe();
@@ -861,6 +862,7 @@ async function connectSupabase(){
       APP.dark=localStorage.getItem('dark')==='true';
       document.body.classList.toggle('dark',APP.dark);
       APP.budget=parseInt(localStorage.getItem('budget')||'0');
+      reconcileRatePlans();
       renderView(APP.view);
     }
   }).subscribe();
@@ -1012,6 +1014,7 @@ async function syncAndRefresh(){
   setSyncStatus('syncing','Osvježavam...');
   try{
     await Promise.all([loadAll(),loadIncome(),checkForUpdate()]);
+    reconcileRatePlans();
     setSyncStatus('online','Sinkronizovano');
     renderView(APP.view);
   }catch(e){
@@ -1051,7 +1054,7 @@ function mobRefreshCheckOnLoad(){
 }
 
 let _rtTimer=null;
-function _schedRtRender(){clearTimeout(_rtTimer);_rtTimer=setTimeout(()=>renderView(APP.view),300);}
+function _schedRtRender(){clearTimeout(_rtTimer);_rtTimer=setTimeout(()=>{reconcileRatePlans();renderView(APP.view);},300);}
 function handleRT({eventType,new:nr,old:or}){
   setSyncStatus('syncing','Sinkronizujem...');
   if(eventType==='INSERT'){const e=fromRow(nr);if(!APP.expenses.find(x=>x.id===e.id)){APP.expenses.unshift(e);APP.expenses.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id)}}
@@ -1815,6 +1818,39 @@ function getRateEntries(){
   }catch{return[];}
 }
 function saveRateEntries(entries){localStorage.setItem('rate_entries',JSON.stringify(entries));}
+
+// ── Poravnanje odbrojavanja sa stvarnim troškovima ────────────────────────
+// Brojač placene_rate živi u podešavanjima koja se sinhronizuju, pa zna zaostati
+// (sync kasne, drugi uređaj prepiše stariju vrijednost). Troškovi su u bazi i
+// mjerodavni su — odavde se brojač poravna prema njima pri svakom učitavanju.
+function _rxEsc(s){return String(s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function rateDerivedPaid(e){
+  const rx=new RegExp('^Rata\\s+(\\d+)\\/'+e.broj_rata+':\\s*'+_rxEsc(e.desc),'i');
+  let n=0,datum=null;
+  (APP.expenses||[]).forEach(x=>{
+    const m=(x.desc||'').match(rx);
+    if(!m)return;
+    const br=parseInt(m[1],10);
+    if(br>n&&br<=e.broj_rata){n=br;datum=x.date;}
+  });
+  return{n,datum};
+}
+// Poravnava samo naprijed — nikad ne smanjuje ono što je korisnik ručno postavio.
+function reconcileRatePlans(){
+  const entries=getRateEntries();
+  if(!entries.length)return false;
+  let changed=false;
+  entries.forEach(e=>{
+    const d=rateDerivedPaid(e);
+    if(d.n>(e.placene_rate||0)){
+      e.placene_rate=d.n;
+      if(d.datum&&(!e.zadnja_uplata||d.datum>e.zadnja_uplata))e.zadnja_uplata=d.datum;
+      changed=true;
+    }
+  });
+  if(changed)saveRateEntries(entries);
+  return changed;
+}
 
 function buildRateWidget(){
   const entries=getRateEntries();
